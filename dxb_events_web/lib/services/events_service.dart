@@ -226,15 +226,21 @@ class EventsService {
         for (int i = 0; i < eventsData.length; i++) {
           try {
             final eventJson = eventsData[i] as Map<String, dynamic>;
+            print('🔍 DEBUG EventsService: Attempting to parse event $i: ${eventJson['title']}');
             final event = Event.fromBackendApi(eventJson);
             events.add(event);
+            print('🔍 DEBUG EventsService: ✅ Successfully parsed event $i: ${event.title} - ${event.category}');
             if (i == 0) {
-              print('🔍 DEBUG EventsService: First parsed event: ${event.title} - ${event.category}');
+              print('🔍 DEBUG EventsService: First parsed event details: title=${event.title}, category=${event.category}, venue=${event.venue.name}, rating=${event.rating}');
             }
           } catch (e, stackTrace) {
-            print('🔍 DEBUG EventsService: Error parsing event $i: $e');
+            print('🔍 DEBUG EventsService: ❌ Error parsing event $i: $e');
             print('🔍 DEBUG EventsService: Stack trace: $stackTrace');
-            print('🔍 DEBUG EventsService: Raw event data: ${eventsData[i]}');
+            print('🔍 DEBUG EventsService: Raw event data keys: ${(eventsData[i] as Map<String, dynamic>).keys.toList()}');
+            print('🔍 DEBUG EventsService: Event title: ${eventsData[i]['title']}');
+            // Don't include the full raw data to avoid cluttering logs, but show critical fields
+            final eventData = eventsData[i] as Map<String, dynamic>;
+            print('🔍 DEBUG EventsService: Critical fields - id: ${eventData['id']}, category: ${eventData['category']}, venue: ${eventData['venue']}, price: ${eventData['price']}');
           }
         }
         

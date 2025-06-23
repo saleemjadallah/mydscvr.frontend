@@ -37,6 +37,7 @@ import '../../services/providers/auth_provider_mongodb.dart';
 // Feature imports
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
+import '../events/event_detail_screen.dart';
 import '../../services/events_service.dart';
 
 class AnimatedHomeScreen extends ConsumerStatefulWidget {
@@ -865,10 +866,18 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
 
   Widget _buildAnimatedFeaturedEvents() {
     return FadeInSlideUp(
-      child: const FeaturedEventsSection(
+      child: FeaturedEventsSection(
         showHeader: true,
         maxEventsToShow: 8,
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
+        onEventTap: (event) {
+          // Navigate to event details page
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => EventDetailScreen(event: event),
+            ),
+          );
+        },
       ),
     );
   }

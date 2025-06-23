@@ -322,6 +322,7 @@ class FeaturedEventsService {
         try {
           final event = events[i];
           print('🔄 FeaturedEventsService: Scoring event ${i + 1}/${events.length}: "${event.title}"');
+          print('🔄 FeaturedEventsService: Event details - category: ${event.category}, venue: ${event.venue.name}, rating: ${event.rating}');
           
           final score = calculateFeaturedScore(
             event,
@@ -335,6 +336,7 @@ class FeaturedEventsService {
           successfullyScored++;
         } catch (e, stackTrace) {
           print('🚨 FeaturedEventsService: Error scoring event ${i + 1}: $e');
+          print('🚨 FeaturedEventsService: Event title: ${events[i].title}');
           print('🚨 FeaturedEventsService: Stack trace: $stackTrace');
           failedToScore++;
         }
