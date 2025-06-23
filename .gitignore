@@ -1,0 +1,125 @@
+# Environment files containing secrets
+*.env
+!*.env.example
+Frontend.env
+.env.local
+.env.production
+.env.development
+.env.staging
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+web/build/
+
+# Flutter Web specific
+.flutter_build_web/
+build/web/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.history/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Authentication and API keys
+google-services.json
+GoogleService-Info.plist
+
+# Keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+
+# Firebase
+firebase_options.dart
+
+# Coverage
+coverage/
+*.lcov
+
+# Logs
+*.log
+logs/
+
+# Debug
+debug.log
+flutter_*.log
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Build artifacts
+*.dill
+*.kernel
+
+# Crash dumps and performance files
+*.heap
+*.trace
+
+# Testing
+test_driver/
+integration_test/driver/
+screenshots/
+reports/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Cache files
+.flutter-devtools/
+.dart_code_metrics/
+
+# Analytics
+.analytics/
+
+# Package manager
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archive directories
+archive_*/
+
+# Deployment artifacts
+dist/
+deploy/
+
+# Local configuration overrides
+local.properties
+secrets.yaml
+secrets.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Monitoring and metrics
+metrics/
+monitoring/
+
+# Hot reload files
+.hot_reload/
+.incremental
+
+# Runtime files
+.lock-wscript

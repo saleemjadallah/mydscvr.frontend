@@ -1,0 +1,309 @@
+# DXB Events Web App Build Configuration
+# Supports development, staging, and production environments
+
+environments:
+  development:
+    name: "DXB Events Dev"
+    api_base_url: "http://localhost:8000"
+    data_collection_url: "http://localhost:8001"
+    web_port: 8080
+    build_mode: debug
+    source_maps: true
+    tree_shake_icons: false
+    dart_defines:
+      - "ENVIRONMENT=development"
+      - "API_BASE_URL=http://localhost:8000"
+      - "DATA_COLLECTION_URL=http://localhost:8001"
+      - "ENABLE_LOGS=true"
+      - "ENABLE_PERFORMANCE_OVERLAY=true"
+    flutter_build_args:
+      - "--dart-define=ENVIRONMENT=development"
+      - "--dart-define=API_BASE_URL=http://localhost:8000"
+      - "--dart-define=DATA_COLLECTION_URL=http://localhost:8001"
+      - "--source-maps"
+      - "--no-tree-shake-icons"
+    optimization:
+      minify_js: false
+      compress_assets: false
+      strip_debug_info: false
+
+  staging:
+    name: "DXB Events Staging (Public IP)"
+    api_base_url: "http://3.29.102.4:8000"
+    data_collection_url: "http://3.29.102.4:8001"
+    web_port: 8080
+    build_mode: profile
+    source_maps: true
+    tree_shake_icons: true
+    dart_defines:
+      - "ENVIRONMENT=staging"
+      - "API_BASE_URL=http://3.29.102.4:8000"
+      - "DATA_COLLECTION_URL=http://3.29.102.4:8001"
+      - "ENABLE_LOGS=true"
+      - "ENABLE_PERFORMANCE_OVERLAY=false"
+    flutter_build_args:
+      - "--dart-define=ENVIRONMENT=staging"
+      - "--dart-define=API_BASE_URL=http://3.29.102.4:8000"
+      - "--dart-define=DATA_COLLECTION_URL=http://3.29.102.4:8001"
+      - "--source-maps"
+      - "--tree-shake-icons"
+      - "--profile"
+    optimization:
+      minify_js: true
+      compress_assets: true
+      strip_debug_info: false
+
+  production:
+    name: "DXB Events Production (MyDscvr.ai)"
+    api_base_url: "${CUSTOM_API_URL:-https://mydscvr.xyz}"
+    data_collection_url: "${CUSTOM_DATA_URL:-https://mydscvr.xyz}"
+    web_port: 80
+    build_mode: release
+    source_maps: false
+    tree_shake_icons: true
+    dart_defines:
+      - "ENVIRONMENT=production"
+      - "API_BASE_URL=${CUSTOM_API_URL:-https://mydscvr.xyz}"
+      - "DATA_COLLECTION_URL=${CUSTOM_DATA_URL:-https://mydscvr.xyz}"
+      - "FALLBACK_API_URL=http://3.29.102.4:8000"
+      - "FALLBACK_DATA_URL=http://3.29.102.4:8001"
+      - "ENABLE_LOGS=false"
+      - "ENABLE_PERFORMANCE_OVERLAY=false"
+    flutter_build_args:
+      - "--dart-define=ENVIRONMENT=production"
+      - "--dart-define=API_BASE_URL=${CUSTOM_API_URL:-https://mydscvr.xyz}"
+      - "--dart-define=DATA_COLLECTION_URL=${CUSTOM_DATA_URL:-https://mydscvr.xyz}"
+      - "--dart-define=FALLBACK_API_URL=http://3.29.102.4:8000"
+      - "--dart-define=FALLBACK_DATA_URL=http://3.29.102.4:8001"
+      - "--no-source-maps"
+      - "--tree-shake-icons"
+      - "--release"
+      - "--web-renderer=canvaskit"
+    optimization:
+      minify_js: true
+      compress_assets: true
+      strip_debug_info: true
+      enable_split_debug_info: true
+      obfuscate: true
+
+  # Additional environment for testing with IP directly
+  testing:
+    name: "DXB Events Testing (Direct IP)"
+    api_base_url: "http://3.29.102.4:8000"
+    data_collection_url: "http://3.29.102.4:8001"
+    web_port: 8080
+    build_mode: profile
+    source_maps: true
+    tree_shake_icons: true
+    dart_defines:
+      - "ENVIRONMENT=testing"
+      - "API_BASE_URL=http://3.29.102.4:8000"
+      - "DATA_COLLECTION_URL=http://3.29.102.4:8001"
+      - "ENABLE_LOGS=true"
+      - "ENABLE_PERFORMANCE_OVERLAY=false"
+    flutter_build_args:
+      - "--dart-define=ENVIRONMENT=testing"
+      - "--dart-define=API_BASE_URL=http://3.29.102.4:8000"
+      - "--dart-define=DATA_COLLECTION_URL=http://3.29.102.4:8001"
+      - "--source-maps"
+      - "--tree-shake-icons"
+      - "--profile"
+    optimization:
+      minify_js: true
+      compress_assets: true
+      strip_debug_info: false
+
+# Build targets
+targets:
+  web:
+    platforms:
+      - chrome
+      - firefox
+      - safari
+      - edge
+    output_directory: "build/web"
+    index_template: "web/index.html"
+    
+  mobile_web:
+    platforms:
+      - chrome_mobile
+      - safari_mobile
+    output_directory: "build/mobile_web"
+    responsive_breakpoints:
+      mobile: 768
+      tablet: 1024
+      desktop: 1200
+
+# Asset configuration
+assets:
+  images:
+    compression: true
+    formats: ["webp", "png", "jpg"]
+    sizes: [1x, 2x, 3x]
+  fonts:
+    include_google_fonts: true
+    preload_fonts: ["Inter", "Roboto"]
+  icons:
+    tree_shake: true
+    include_all_platforms: false
+
+# Performance configuration
+performance:
+  bundle_splitting:
+    enabled: true
+    chunk_size_warning_limit: 512000 # 512KB
+  lazy_loading:
+    enabled: true
+    route_based: true
+  caching:
+    service_worker: true
+    cache_duration: 86400 # 24 hours
+  compression:
+    gzip: true
+    brotli: true
+
+# Security configuration
+security:
+  content_security_policy:
+    enabled: true
+    directives:
+      default_src: "'self'"
+      script_src: "'self' 'unsafe-inline' https://apis.google.com"
+      style_src: "'self' 'unsafe-inline' https://fonts.googleapis.com"
+      img_src: "'self' data: https: blob:"
+      font_src: "'self' https://fonts.gstatic.com"
+      connect_src: "'self' https://api.dxbevents.com wss:"
+  headers:
+    x_frame_options: "DENY"
+    x_content_type_options: "nosniff"
+    referrer_policy: "strict-origin-when-cross-origin"
+
+# Testing configuration
+testing:
+  unit_tests: "test/"
+  widget_tests: "test/widgets/"
+  integration_tests: "test/integration/"
+  performance_tests: "test/performance/"
+  coverage_threshold: 80
+  parallel_testing: true
+
+# Deployment configuration
+deployment:
+  # Firebase Hosting
+  firebase:
+    project_id: "${FIREBASE_PROJECT_ID}"
+    hosting:
+      site: "${FIREBASE_SITE_ID}"
+      public: "build/web"
+      ignore: ["firebase.json", "**/.*", "**/node_modules/**"]
+      rewrites:
+        - source: "**"
+          destination: "/index.html"
+      headers:
+        - source: "**/*.@(eot|otf|ttf|ttc|woff|font.css)"
+          headers:
+            - key: "Access-Control-Allow-Origin"
+              value: "*"
+        - source: "**/*.@(js|css)"
+          headers:
+            - key: "Cache-Control"
+              value: "max-age=604800"
+
+  # Netlify
+  netlify:
+    build:
+      publish: "build/web"
+      command: "echo 'Build already completed'"
+    redirects:
+      - from: "/*"
+        to: "/index.html"
+        status: 200
+    headers:
+      "/*":
+        - "X-Frame-Options: DENY"
+        - "X-Content-Type-Options: nosniff"
+        - "Referrer-Policy: strict-origin-when-cross-origin"
+
+  # GitHub Pages
+  github_pages:
+    branch: "gh-pages"
+    folder: "build/web"
+    cname: "${CUSTOM_DOMAIN}"
+
+  # AWS EC2 Deployment
+  ec2:
+    # Server configuration
+    server:
+      type: "nginx"
+      port: 80
+      ssl_port: 443
+      document_root: "/var/www/dxb-events"
+    
+    # Build artifacts
+    build:
+      source: "build/web"
+      destination: "/var/www/dxb-events"
+      owner: "www-data"
+      group: "www-data"
+      permissions: "755"
+    
+    # Nginx configuration
+    nginx:
+      server_name: "${EC2_DOMAIN}"
+      ssl_certificate: "/etc/ssl/certs/dxb-events.crt"
+      ssl_certificate_key: "/etc/ssl/private/dxb-events.key"
+      access_log: "/var/log/nginx/dxb-events-access.log"
+      error_log: "/var/log/nginx/dxb-events-error.log"
+    
+    # PM2 configuration (for Node.js processes if needed)
+    pm2:
+      app_name: "dxb-events-web"
+      instances: "max"
+      exec_mode: "cluster"
+      max_memory_restart: "500M"
+    
+    # Environment variables for EC2
+    environment:
+      NODE_ENV: "${ENVIRONMENT}"
+      API_BASE_URL: "${API_BASE_URL}"
+      CDN_URL: "${CDN_URL}"
+      
+    # Security headers
+    security_headers:
+      - "X-Frame-Options: DENY"
+      - "X-Content-Type-Options: nosniff"
+      - "X-XSS-Protection: 1; mode=block"
+      - "Strict-Transport-Security: max-age=31536000; includeSubDomains"
+      - "Referrer-Policy: strict-origin-when-cross-origin"
+      - "Content-Security-Policy: ${CSP_POLICY}"
+    
+    # Monitoring and health checks
+    monitoring:
+      health_check_path: "/health"
+      metrics_port: 9090
+      log_level: "info"
+
+# Analytics and monitoring
+analytics:
+  google_analytics:
+    tracking_id: "GA_TRACKING_ID"
+    enhanced_ecommerce: false
+  firebase_analytics:
+    enabled: true
+    debug_mode: false
+  performance_monitoring:
+    enabled: true
+    sample_rate: 1.0
+
+# Error handling and logging
+error_handling:
+  sentry:
+    enabled: true
+    dsn: "SENTRY_DSN"
+    environment: "{{ENVIRONMENT}}"
+    sample_rate: 1.0
+  crashlytics:
+    enabled: true
+  logging:
+    level: "{{LOG_LEVEL}}"
+    remote_logging: true 

@@ -1,0 +1,35 @@
+{
+    "name": "mydscvr.ai - Dubai Events Discovery",
+    "short_name": "mydscvr.ai",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#17A2B8",
+    "theme_color": "#17A2B8",
+    "description": "Discover amazing family-friendly events in Dubai! Find perfect activities for children of all ages.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

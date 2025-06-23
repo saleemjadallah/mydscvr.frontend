@@ -1,0 +1,1930 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/constants/app_colors.dart';
+import '../../core/widgets/dubai_app_bar.dart';
+import '../../models/event.dart';
+import '../../services/events_service.dart';
+import '../../services/enhanced_events_service.dart';
+import '../../widgets/events/event_card_enhanced.dart';
+import '../../widgets/events/enhanced_event_card.dart';
+import '../../widgets/events/search_bar_glassmorphic.dart';
+// import '../../widgets/events/event_list_item.dart';
+import '../../widgets/events/events_filter_sidebar.dart';
+import '../../widgets/events/events_filter_sidebar_glassmorphic.dart';
+import '../../widgets/filters/advanced_filter_panel.dart';
+import '../../widgets/events/events_sort_controls.dart';
+import '../../widgets/common/breadcrumb_navigation.dart';
+import '../../widgets/common/glassmorphic_background.dart';
+import '../../widgets/common/footer.dart';
+
+class EventsListScreen extends ConsumerStatefulWidget {
+  final String? initialCategory;
+  final String? categoryDisplayName;
+  final String? initialLocation;
+  final String? initialSearchQuery;
+
+  const EventsListScreen({
+    super.key,
+    this.initialCategory,
+    this.categoryDisplayName,
+    this.initialLocation,
+    this.initialSearchQuery,
+  });
+
+  @override
+  ConsumerState<EventsListScreen> createState() => _EventsListScreenState();
+}
+
+class _EventsListScreenState extends ConsumerState<EventsListScreen>
+    with TickerProviderStateMixin {
+  
+  late ScrollController _scrollController;
+  late AnimationController _animationController;
+  late AnimationController _filterController;
+  
+  // View and sort state
+  ViewMode _currentViewMode = ViewMode.grid;
+  SortOption _currentSortOption = SortOption.date;
+  
+  // Filter state
+  EventFilterData _currentFilters = const EventFilterData();
+  bool _isFilterExpanded = false;
+  
+  // Search state
+  final TextEditingController _searchController = TextEditingController();
+  bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
+
+  List<Event> events = [];
+  String? errorMessage;
+  late final EventsService _eventsService;
+  
+  // Add total count from database
+  int _totalEventsInDb = 0;
+  
+  String? selectedCategory;
+  String? selectedLocation;
+  String? searchQuery;
+  
+  // Enhanced filtering state
+  Map<String, dynamic> _activeFilters = {};
+  bool _useEnhancedCard = true;
+  bool _showQualityMetrics = true;
+
+  @override
+  void initState() {
+    super.initState();
+    print('🚀🚀🚀 DEBUG: EventsListScreen initState called!');
+    _eventsService = EventsService();
+    _scrollController = ScrollController();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _filterController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    // Add scroll listener for infinite scroll
+    _scrollController.addListener(_onScroll);
+    
+    // Initialize with provided filters
+    selectedCategory = widget.initialCategory;
+    selectedLocation = widget.initialLocation;
+    searchQuery = widget.initialSearchQuery;
+    
+    print('🚀🚀🚀 DEBUG: Initial filter values:');
+    print('🚀🚀🚀 DEBUG: - initialCategory: ${widget.initialCategory}');
+    print('🚀🚀🚀 DEBUG: - initialLocation: ${widget.initialLocation}');
+    print('🚀🚀🚀 DEBUG: - initialSearchQuery: ${widget.initialSearchQuery}');
+    print('🚀🚀🚀 DEBUG: - selectedCategory: $selectedCategory');
+    print('🚀🚀🚀 DEBUG: - selectedLocation: $selectedLocation');
+    print('🚀🚀🚀 DEBUG: - searchQuery: $searchQuery');
+    
+    print('🚀🚀🚀 DEBUG: About to call _loadEvents()');
+    _loadEvents();
+  }
+
+  void _onScroll() {
+    // Improved scroll detection for footer compatibility
+    final double triggerPoint = _scrollController.position.maxScrollExtent - 400;
+    if (_scrollController.position.pixels >= triggerPoint) {
+      if (!_isLoadingMore && _hasMore) {
+        _loadMoreEvents();
+      }
+    }
+  }
+
+  Future<void> _loadEvents() async {
+    setState(() {
+      _isLoading = true;
+      errorMessage = null;
+      events.clear();
+      _currentPage = 1;
+      _hasMore = true;
+    });
+
+    try {
+      print('🔍 DEBUG: Loading initial events...');
+      final response = await _eventsService.getEventsWithTotal(
+        category: selectedCategory,
+        location: selectedLocation,
+        page: _currentPage,
+        perPage: 20,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        final eventsWithTotal = response.data!;
+        print('🔍 DEBUG: Loaded ${eventsWithTotal.events.length} events, total in DB: ${eventsWithTotal.total}');
+        
+        setState(() {
+          events = eventsWithTotal.events;
+          _totalEventsInDb = eventsWithTotal.total; // Store total count from DB
+          _isLoading = false;
+          _hasMore = eventsWithTotal.events.length >= 20;
+          _currentPage++;
+          print('🔍 DEBUG: Total events in DB: $_totalEventsInDb');
+        });
+        
+        _animationController.forward();
+      } else {
+        print('🔍 DEBUG: API Error: ${response.error}');
+        setState(() {
+          errorMessage = response.error ?? 'Failed to load events';
+          _isLoading = false;
+        });
+      }
+    } catch (e, stackTrace) {
+      print('🔍 DEBUG: Exception in _loadEvents: $e');
+      print('🔍 DEBUG: Stack trace: $stackTrace');
+      setState(() {
+        errorMessage = 'An unexpected error occurred: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMoreEvents() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      print('🔍 DEBUG: Loading more events, page $_currentPage...');
+      final response = await _eventsService.getEvents(
+        category: selectedCategory,
+        location: selectedLocation,
+        page: _currentPage,
+        perPage: 20,
+      );
+
+      if (response.isSuccess) {
+        final newEvents = response.data ?? [];
+        print('🔍 DEBUG: Loaded ${newEvents.length} more events');
+        
+        setState(() {
+          events.addAll(newEvents);
+          _isLoadingMore = false;
+          _hasMore = newEvents.length >= 20;
+          _currentPage++;
+          print('🔍 DEBUG: Total events now: ${events.length}');
+        });
+      } else {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      print('🔍 DEBUG: Exception in _loadMoreEvents: $e');
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _animationController.dispose();
+    _filterController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 1200;
+
+    return Scaffold(
+      body: Column(
+        children: [
+          // Header with navigation and controls
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.topRight,
+                colors: [
+                  Color(0xFF0D7377), // Dark teal - matches homepage
+                  Color(0xFF14A085), // Medium teal - matches homepage
+                  Color(0xFF329D9C), // Light teal - matches homepage
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFF0D7377).withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+
+                
+                // Main header
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      // Back button
+                      Material(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              // Use GoRouter for consistent navigation
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/');
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(width: 16),
+                      
+                      // Logo/Title
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0xFF0D7377).withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.event_note,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _getPageTitle(),
+                                style: GoogleFonts.comfortaa(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                _getPageSubtitle(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      
+                      Spacer(),
+                      
+                      // View toggle between list and grid
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFF0D7377).withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        padding: EdgeInsets.all(3),
+                        child: Row(
+                          children: [
+                            Material(
+                              color: _currentViewMode == ViewMode.list ? Colors.transparent : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                              child: Container(
+                                decoration: _currentViewMode == ViewMode.list 
+                                    ? BoxDecoration(
+                                        color: Colors.white.withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(9),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Color(0xFF0D7377).withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      )
+                                    : null,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(9),
+                                  onTap: () {
+                                    setState(() {
+                                      _currentViewMode = ViewMode.list;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    child: Icon(
+                                      Icons.view_list,
+                                      color: _currentViewMode == ViewMode.list 
+                                          ? Colors.white 
+                                          : Colors.white.withOpacity(0.7),
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Material(
+                              color: _currentViewMode == ViewMode.grid ? Colors.transparent : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                              child: Container(
+                                decoration: _currentViewMode == ViewMode.grid 
+                                    ? BoxDecoration(
+                                        color: Colors.white.withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(9),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Color(0xFF0D7377).withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      )
+                                    : null,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(9),
+                                  onTap: () {
+                                    setState(() {
+                                      _currentViewMode = ViewMode.grid;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    child: Icon(
+                                      Icons.grid_view,
+                                      color: _currentViewMode == ViewMode.grid 
+                                          ? Colors.white 
+                                          : Colors.white.withOpacity(0.7),
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      SizedBox(width: 12),
+                      
+                      // Advanced Filter button
+                      Material(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _activeFilters.isNotEmpty 
+                                ? AppColors.dubaiGold.withOpacity(0.3)
+                                : Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => _showAdvancedFilterPanel(),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              child: Stack(
+                                children: [
+                                  Icon(
+                                    LucideIcons.filter,
+                                    color: Colors.white.withOpacity(0.9),
+                                    size: 20,
+                                  ),
+                                  if (_activeFilters.isNotEmpty)
+                                    Positioned(
+                                      right: -2,
+                                      top: -2,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.dubaiGold,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(width: 12),
+                      
+                      // Enhanced View Toggle
+                      Material(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _useEnhancedCard 
+                                ? AppColors.dubaiTeal.withOpacity(0.3)
+                                : Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => _toggleEnhancedView(),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                _useEnhancedCard ? LucideIcons.star : LucideIcons.starOff,
+                                color: Colors.white.withOpacity(0.9),
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(width: 12),
+                      
+                      // Refresh button with better styling
+                      Material(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              print('Reload button clicked!');
+                              _loadEvents();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.refresh,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Main content with responsive layout and footer
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController, // Connect scroll controller here
+              child: Column(
+                children: [
+                  Container(
+                    child: isLargeScreen ? _buildDesktopLayout() : _buildMobileLayout(),
+                  ),
+                  // Footer as part of scrollable content
+                  const Footer(),
+                  // Add bottom padding to ensure proper scroll detection
+                  SizedBox(height: 50),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFF6B6B), // Coral
+            Color(0xFFFFB347), // Orange
+          ],
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Filter sidebar
+          Container(
+            width: 320,
+            margin: EdgeInsets.all(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFFFF6B6B).withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: EventsFilterSidebarGlassmorphic(
+                filters: _currentFilters,
+                onFiltersChanged: (filters) {
+                  setState(() {
+                    _currentFilters = filters;
+                  });
+                },
+                isExpanded: true,
+                onToggle: () {}, // Always expanded on desktop
+              ),
+            ),
+          ),
+          
+          // Main content area
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(top: 16, right: 16, bottom: 16),
+              child: _buildMainContent(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFF6B6B), // Coral
+            Color(0xFFFFB347), // Orange
+          ],
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Mobile filter toggle
+          Container(
+            margin: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFFF6B6B).withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: EventsFilterSidebarGlassmorphic(
+              filters: _currentFilters,
+              onFiltersChanged: (filters) {
+                setState(() {
+                  _currentFilters = filters;
+                });
+              },
+              isExpanded: _isFilterExpanded,
+              onToggle: () {
+                setState(() {
+                  _isFilterExpanded = !_isFilterExpanded;
+                });
+              },
+            ),
+          ),
+          
+          // Main content - no Expanded here since we're inside SingleChildScrollView
+          _buildMainContent(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    final filteredEvents = _getFilteredEvents();
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xFFFF6B6B).withOpacity(0.1),
+            blurRadius: 20,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Search bar and event count
+          Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Search bar
+                SearchBarGlassmorphic(
+                  controller: _searchController,
+                  hintText: 'Search events, categories, locations...',
+                  onChanged: (value) {
+                    setState(() {}); // Trigger rebuild to filter events
+                  },
+                  onClear: () {
+                    setState(() {});
+                  },
+                ),
+                
+                SizedBox(height: 16),
+                
+                // Event count and filters
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFFF6B6B).withOpacity(0.1), Color(0xFFFFB347).withOpacity(0.1)],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Color(0xFFFF6B6B).withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFFFF6B6B), Color(0xFFFFB347)],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.event_available,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        '${_getDisplayCount()}',
+                        style: GoogleFonts.comfortaa(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFF6B6B),
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        _getCountLabel(),
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                      if (_hasActiveFilters() && _totalEventsInDb > 0) ...[
+                        SizedBox(width: 8),
+                        Text(
+                          'of $_totalEventsInDb total',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                      ],
+                      if (_searchController.text.isNotEmpty) ...[
+                        Spacer(),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFFF6B6B), Color(0xFFFFB347)],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () {
+                                setState(() {
+                                  _searchController.clear();
+                                });
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.clear, size: 16, color: Colors.white),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Clear search',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Events display
+          _isLoading
+              ? _buildLoadingCard()
+              : filteredEvents.isEmpty
+                  ? _buildEmptyState()
+                  : _currentViewMode == ViewMode.list
+                      ? _buildListView(filteredEvents)
+                      : _buildGridView(filteredEvents),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return SearchBarGlassmorphic(
+      controller: _searchController,
+      hintText: 'Search events, categories, locations...',
+      onChanged: (value) {
+        setState(() {}); // Trigger rebuild to filter events
+      },
+      onClear: () {
+        setState(() {});
+      },
+    ).animate().slideY(
+      delay: 200.ms,
+      duration: 600.ms,
+      begin: 1,
+      end: 0,
+      curve: Curves.easeOut,
+    );
+  }
+
+  Widget _buildEventsList(List<Event> events) {
+    print('🔍 DEBUG _buildEventsList: Building list with ${events.length} events');
+    print('🔍 DEBUG _buildEventsList: _isLoading = $_isLoading');
+    
+    // Add debug for empty events
+    if (events.isEmpty && this.events.isNotEmpty) {
+      print('🔴 WARNING: All events were filtered out!');
+      print('🔴 Original events count: ${this.events.length}');
+      print('🔴 After filtering: 0');
+    }
+    
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.dubaiTeal,
+        ),
+      );
+    }
+
+    if (events.isEmpty) {
+      print('🔍 DEBUG _buildEventsList: Showing empty state');
+      return _buildEmptyState();
+    }
+
+    print('🔍 DEBUG _buildEventsList: Showing ${_currentViewMode == ViewMode.grid ? 'grid' : 'list'} view');
+    if (_currentViewMode == ViewMode.grid) {
+      return _buildGridView(events);
+    } else {
+      return _buildListView(events);
+    }
+  }
+
+  Widget _buildGridView(List<Event> filteredEvents) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount = 1;
+    if (screenWidth > 1200) {
+      crossAxisCount = 3;
+    } else if (screenWidth > 800) {
+      crossAxisCount = 2;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: 0.95, // Increased from 0.85 to make cards shorter and reduce white space
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: filteredEvents.length + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == filteredEvents.length) {
+            // Show loading indicator
+            return Center(
+              child: Container(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(
+                  color: AppColors.dubaiTeal,
+                ),
+              ),
+            );
+          }
+          
+          final event = filteredEvents[index];
+          return _buildEventCard(event)
+              .animate()
+              .fadeIn(
+                delay: Duration(milliseconds: index * 100),
+                duration: 600.ms,
+                curve: Curves.easeOutQuart,
+              )
+              .slideY(
+                begin: 0.2,
+                end: 0,
+                delay: Duration(milliseconds: index * 100),
+                duration: 600.ms,
+                curve: Curves.easeOutQuart,
+              )
+              .scale(
+                begin: Offset(0.8, 0.8),
+                end: Offset(1, 1),
+                delay: Duration(milliseconds: index * 100),
+                duration: 600.ms,
+                curve: Curves.easeOutQuart,
+              );
+        },
+      ),
+    );
+  }
+
+  Widget _buildListView(List<Event> filteredEvents) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      itemCount: filteredEvents.length + (_isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == filteredEvents.length) {
+          // Show loading indicator
+          return Center(
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(
+                color: AppColors.dubaiTeal,
+              ),
+            ),
+          );
+        }
+        
+        final event = filteredEvents[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: _buildEventCard(event)
+              .animate()
+              .fadeIn(
+                delay: Duration(milliseconds: index * 80),
+                duration: 500.ms,
+                curve: Curves.easeOutQuart,
+              )
+              .slideX(
+                begin: 0.1,
+                end: 0,
+                delay: Duration(milliseconds: index * 80),
+                duration: 500.ms,
+                curve: Curves.easeOutQuart,
+              ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(48),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFF6B6B).withOpacity(0.1), Color(0xFFFFB347).withOpacity(0.1)],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.search_off,
+              size: 64,
+              color: Color(0xFFFF6B6B),
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            'No events found',
+            style: GoogleFonts.comfortaa(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF333333),
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            _getEmptyStateMessage(),
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              color: Color(0xFF666666),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_currentFilters.hasActiveFilters || _searchController.text.isNotEmpty) ...[
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFFF6B6B), Color(0xFFFFB347)],
+                    ),
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFFFF6B6B).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(25),
+                      onTap: _clearAllFilters,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.clear_all, color: Colors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text(
+                              'Clear Filters',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              OutlinedButton(
+                onPressed: () => context.go('/'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Color(0xFFFF6B6B),
+                  side: BorderSide(color: Color(0xFFFF6B6B)),
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: Text(
+                  'Browse All Events',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(
+      delay: 400.ms,
+      duration: 800.ms,
+    );
+  }
+
+  // Helper methods
+  List<BreadcrumbItem> _getBreadcrumbItems() {
+    if (selectedCategory != null) {
+      return BreadcrumbNavigation.forCategory(selectedCategory!);
+    } else if (searchQuery != null) {
+      return BreadcrumbNavigation.forSearchResults(searchQuery!);
+    } else if (selectedLocation != null) {
+      return BreadcrumbNavigation.forLocation(selectedLocation!);
+    }
+    return BreadcrumbNavigation.forAllEvents();
+  }
+
+  String _getEmptyStateMessage() {
+    if (_searchController.text.isNotEmpty) {
+      return 'No events match your search for "${_searchController.text}". Try adjusting your search terms or filters.';
+    } else if (_currentFilters.hasActiveFilters) {
+      return 'No events match your current filters. Try adjusting or clearing your filters to see more events.';
+    } else if (selectedCategory != null) {
+      return 'No events found in the ${selectedCategory} category. Check back later for new events.';
+    } else if (selectedLocation != null) {
+      return 'No events found in ${selectedLocation}. Try exploring other areas or check back later.';
+    }
+    return 'No events are currently available. Please check back later for upcoming events.';
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _currentFilters = const EventFilterData();
+      _searchController.clear();
+      selectedCategory = null;
+      selectedLocation = null;
+    });
+  }
+
+  void _navigateToEventDetail(Event event) {
+    // Navigate to full event details page using Go Router
+    context.go('/event/${event.id}');
+  }
+
+  List<Event> _getFilteredEvents() {
+    if (_searchController.text.isEmpty && !_currentFilters.hasActiveFilters) {
+      return events;
+    }
+    
+    List<Event> filtered = List.from(events);
+    
+    // Apply search filter
+    if (_searchController.text.isNotEmpty) {
+      final query = _searchController.text.toLowerCase();
+      filtered = filtered.where((event) =>
+        event.title.toLowerCase().contains(query) ||
+        event.description.toLowerCase().contains(query) ||
+        event.category.toLowerCase().contains(query) ||
+        event.venue.area.toLowerCase().contains(query) ||
+        event.tags.any((tag) => tag.toLowerCase().contains(query))
+      ).toList();
+    }
+    
+    // Apply filter data filters
+    if (_currentFilters.hasActiveFilters) {
+      // Category filter
+      if (_currentFilters.categories.isNotEmpty) {
+        filtered = filtered.where((event) => 
+          _currentFilters.categories.any((category) => 
+            event.category.toLowerCase().contains(category.toLowerCase())
+          )
+        ).toList();
+      }
+      
+      // Location filter
+      if (_currentFilters.locations.isNotEmpty) {
+        filtered = filtered.where((event) => 
+          _currentFilters.locations.any((location) => 
+            event.venue.area.toLowerCase().contains(location.toLowerCase())
+          )
+        ).toList();
+      }
+      
+      // Price filter
+      if (_currentFilters.minPrice != null || _currentFilters.maxPrice != null) {
+        filtered = filtered.where((event) {
+          final price = event.pricing.basePrice;
+          final minPrice = _currentFilters.minPrice ?? 0;
+          final maxPrice = _currentFilters.maxPrice ?? double.infinity;
+          return price >= minPrice && price <= maxPrice;
+        }).toList();
+      }
+      
+      // Age group filter
+      if (_currentFilters.ageGroups.isNotEmpty) {
+        filtered = filtered.where((event) => 
+          _currentFilters.ageGroups.any((ageGroup) => 
+            event.ageRange.toLowerCase().contains(ageGroup.toLowerCase()) ||
+            ageGroup.toLowerCase() == 'all ages'
+          )
+        ).toList();
+      }
+      
+      // Date range filter
+      if (_currentFilters.dateRange != null) {
+        final now = DateTime.now();
+        filtered = filtered.where((event) {
+          switch (_currentFilters.dateRange) {
+            case 'Today':
+              return event.isToday;
+            case 'This Weekend':
+              return event.isThisWeekend;
+            case 'This Week':
+              final weekEnd = now.add(Duration(days: 7));
+              return event.startDate.isBefore(weekEnd);
+            case 'This Month':
+              final monthEnd = DateTime(now.year, now.month + 1);
+              return event.startDate.isBefore(monthEnd);
+            default:
+              return true;
+          }
+        }).toList();
+      }
+      
+      // Custom date range filter
+      if (_currentFilters.customDateStart != null) {
+        filtered = filtered.where((event) => 
+          event.startDate.isAfter(_currentFilters.customDateStart!)
+        ).toList();
+      }
+      
+      if (_currentFilters.customDateEnd != null) {
+        filtered = filtered.where((event) => 
+          event.startDate.isBefore(_currentFilters.customDateEnd!)
+        ).toList();
+      }
+      
+      // Time of day filter
+      if (_currentFilters.timeOfDay.isNotEmpty) {
+        filtered = filtered.where((event) {
+          final hour = event.startDate.hour;
+          return _currentFilters.timeOfDay.any((timeSlot) {
+            switch (timeSlot.toLowerCase()) {
+              case 'morning':
+                return hour >= 6 && hour < 12;
+              case 'afternoon':
+                return hour >= 12 && hour < 18;
+              case 'evening':
+                return hour >= 18 && hour < 24;
+              case 'all day':
+                return true;
+              default:
+                return true;
+            }
+          });
+        }).toList();
+      }
+      
+      // Features filter
+      if (_currentFilters.features.isNotEmpty) {
+        filtered = filtered.where((event) => 
+          _currentFilters.features.any((feature) => 
+            event.tags.any((tag) => tag.toLowerCase().contains(feature.toLowerCase())) ||
+            (feature.toLowerCase().contains('free') && event.isFree) ||
+            (feature.toLowerCase().contains('parking') && event.venue.parkingAvailable) ||
+            (feature.toLowerCase().contains('metro') && event.venue.publicTransportAccess)
+          )
+        ).toList();
+      }
+    }
+    
+    // Apply widget level filters (for backward compatibility)
+    if (selectedCategory != null) {
+      filtered = filtered.where((event) => 
+        event.category.toLowerCase() == selectedCategory!.toLowerCase()
+      ).toList();
+    }
+    
+    if (selectedLocation != null) {
+      filtered = filtered.where((event) => 
+        event.venue.area.toLowerCase() == selectedLocation!.toLowerCase()
+      ).toList();
+    }
+    
+    return filtered;
+  }
+
+  List<Event> _applySorting(List<Event> events) {
+    List<Event> sorted = List.from(events);
+    
+    switch (_currentSortOption) {
+      case SortOption.date:
+        sorted.sort((a, b) => a.startDate.compareTo(b.startDate));
+        break;
+      case SortOption.popularity:
+        sorted.sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
+        break;
+      case SortOption.priceLowToHigh:
+        sorted.sort((a, b) => a.pricing.basePrice.compareTo(b.pricing.basePrice));
+        break;
+      case SortOption.priceHighToLow:
+        sorted.sort((a, b) => b.pricing.basePrice.compareTo(a.pricing.basePrice));
+        break;
+      case SortOption.rating:
+        sorted.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+      case SortOption.alphabetical:
+        sorted.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case SortOption.distance:
+        // For now, just sort by area name - in real app would use user location
+        sorted.sort((a, b) => a.venue.area.compareTo(b.venue.area));
+        break;
+    }
+    
+    return sorted;
+  }
+
+  int _getGridCrossAxisCount(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 1200) {
+      return 3;
+    } else if (screenWidth > 800) {
+      return 2;
+    }
+    return 1;
+  }
+
+  /// Show the advanced filter panel
+  void _showAdvancedFilterPanel() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.all(16),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.9,
+          constraints: BoxConstraints(
+            maxWidth: 800,
+            maxHeight: 700,
+          ),
+          child: AdvancedFilterPanel(
+            onFiltersChanged: (filters) => _applyAdvancedFilters(filters),
+            onReset: () => _resetAdvancedFilters(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Apply advanced filters and reload events
+  void _applyAdvancedFilters(Map<String, dynamic> filters) async {
+    setState(() {
+      _activeFilters = filters;
+      _isLoading = true;
+    });
+
+    try {
+      // Use enhanced events service for filtered search
+      List<Event> filteredEvents = await EnhancedEventsService.searchEventsWithFilters(filters);
+      
+      setState(() {
+        events = filteredEvents;
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Found ${filteredEvents.length} events matching your filters'),
+          backgroundColor: AppColors.dubaiTeal,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        errorMessage = 'Failed to apply filters: $e';
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to apply filters'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// Reset advanced filters
+  void _resetAdvancedFilters() {
+    setState(() {
+      _activeFilters.clear();
+    });
+    _loadEvents(); // Reload original events
+  }
+
+  /// Toggle enhanced event card view
+  void _toggleEnhancedView() {
+    setState(() {
+      _useEnhancedCard = !_useEnhancedCard;
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_useEnhancedCard 
+            ? 'Enhanced event cards enabled' 
+            : 'Enhanced event cards disabled'),
+        backgroundColor: AppColors.dubaiTeal,
+      ),
+    );
+  }
+
+  Widget _buildEventCard(Event event) {
+    return Container(
+      margin: _currentViewMode == ViewMode.list ? EdgeInsets.only(bottom: 16) : EdgeInsets.zero,
+      child: _useEnhancedCard 
+          ? EnhancedEventCard(
+              event: event,
+              showQualityMetrics: _showQualityMetrics,
+              showSocialMedia: true,
+              onTap: () => _navigateToEventDetail(event),
+            )
+          : EventCardEnhanced(
+              event: event,
+              onTap: () => _navigateToEventDetail(event),
+              onFavorite: () {
+                // TODO: Implement favorite functionality
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Added ${event.title} to favorites'),
+                    backgroundColor: AppColors.dubaiTeal,
+                  ),
+                );
+              },
+              isFavorite: false, // TODO: Get from favorites provider
+            ),
+    );
+  }
+
+  // Helper methods for formatting event information
+  String _formatEventDateTime(Event event, bool isMobile) {
+    final startDate = event.startDate;
+    final now = DateTime.now();
+    final isToday = startDate.day == now.day && 
+                   startDate.month == now.month && 
+                   startDate.year == now.year;
+    
+    String dayName;
+    if (isToday) {
+      dayName = 'Today';
+    } else {
+      final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      dayName = weekdays[startDate.weekday - 1];
+    }
+    
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final month = months[startDate.month - 1];
+    
+    final startTime = '${startDate.hour.toString().padLeft(2, '0')}:${startDate.minute.toString().padLeft(2, '0')}';
+    
+    if (isMobile) {
+      return '$dayName, $month ${startDate.day} • $startTime';
+    } else {
+      final endDate = event.endDate ?? startDate.add(event.duration);
+      final endTime = '${endDate.hour.toString().padLeft(2, '0')}:${endDate.minute.toString().padLeft(2, '0')}';
+      return '$dayName, $month ${startDate.day} • $startTime - $endTime';
+    }
+  }
+
+  String _formatAgeSuitability(Event event, bool isMobile) {
+    final suitability = event.familySuitability;
+    String ageText = event.ageRange;
+    
+    if (isMobile) {
+      if (suitability.isAllAges) return 'All ages';
+      return ageText;
+    } else {
+      if (suitability.isAllAges) {
+        return 'All ages welcome | Perfect for families';
+      } else if (suitability.isBabyFriendly) {
+        return '$ageText | Toddler-friendly';
+      } else {
+        return '$ageText | Perfect for families';
+      }
+    }
+  }
+
+  String _formatDuration(Event event) {
+    final duration = event.duration;
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    
+    if (hours == 0) {
+      return '${minutes}min experience';
+    } else if (hours >= 6) {
+      return 'Full day adventure';
+    } else if (hours == 1 && minutes == 0) {
+      return 'Quick 1-hour activity';
+    } else if (minutes == 0) {
+      return '${hours}-hour experience';
+    } else {
+      return '${hours}h ${minutes}min experience';
+    }
+  }
+
+  List<String> _getKeyFeatures(Event event) {
+    List<String> features = [];
+    
+    // Map categories and tags to features with emojis
+    if (event.category.toLowerCase().contains('outdoor') || event.tags.contains('outdoor')) {
+      features.add('🌲 Outdoor Fun');
+    }
+    if (event.category.toLowerCase().contains('water') || event.tags.contains('water')) {
+      features.add('🌊 Water Activities');
+    }
+    if (event.category.toLowerCase().contains('arts') || event.tags.contains('arts')) {
+      features.add('🎨 Arts & Crafts');
+    }
+    if (event.category.toLowerCase().contains('cultural') || event.tags.contains('cultural')) {
+      features.add('🏛️ Cultural Experience');
+    }
+    if (event.category.toLowerCase().contains('food') || event.tags.contains('food')) {
+      features.add('🍕 Food Included');
+    }
+    if (event.category.toLowerCase().contains('education') || event.tags.contains('educational')) {
+      features.add('📚 Educational');
+    }
+    if (event.category.toLowerCase().contains('entertainment') || event.tags.contains('entertainment')) {
+      features.add('🎭 Live Shows');
+    }
+    
+    // Add accessibility features
+    if (event.venue.parkingAvailable) {
+      features.add('🚗 Free Parking');
+    }
+    if (event.familySuitability.strollerFriendly) {
+      features.add('🚶‍♀️ Stroller OK');
+    }
+    if (event.tags.contains('indoor') || event.category.toLowerCase().contains('indoor')) {
+      features.add('🌡️ Air Conditioned');
+    }
+    if (event.tags.contains('photography') || event.category.toLowerCase().contains('photo')) {
+      features.add('📸 Photo Ops');
+    }
+    if (event.familySuitability.educationalContent) {
+      features.add('🎓 Learn & Play');
+    }
+    
+    // Default features if none found
+    if (features.isEmpty) {
+      if (event.isFree) {
+        features.add('🎫 Free Entry');
+      }
+      features.add('👨‍👩‍👧‍👦 Family Fun');
+      features.add('📍 Dubai Activity');
+    }
+    
+    return features;
+  }
+
+  Widget _buildFeatureTag(String feature, bool isMobile) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 6 : 8,
+        vertical: isMobile ? 3 : 4,
+      ),
+      decoration: BoxDecoration(
+        color: Color(0xFF0D7377).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Color(0xFF0D7377).withOpacity(0.2),
+          width: 0.5,
+        ),
+      ),
+      child: Text(
+        feature,
+        style: GoogleFonts.inter(
+          fontSize: isMobile ? 9 : 11,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF0D7377),
+        ),
+      ),
+    );
+  }
+
+  String _getEnticingDescription(Event event, bool isMobile) {
+    // Use shortDescription if available, otherwise create one from the event data
+    if (event.shortDescription != null && event.shortDescription!.isNotEmpty) {
+      return event.shortDescription!;
+    }
+    
+    // Generate enticing descriptions based on category and features
+    if (event.category.toLowerCase().contains('miracle') || event.title.toLowerCase().contains('garden')) {
+      return isMobile 
+          ? "45 million flowers in stunning themed gardens with..."
+          : "45 million flowers in stunning themed gardens with interactive displays and cultural performances";
+    } else if (event.category.toLowerCase().contains('mall') || event.venue.name.toLowerCase().contains('mall')) {
+      return isMobile
+          ? "Hands-on activities, mini-golf, face painting and..."
+          : "Hands-on activities, mini-golf, face painting and exclusive family discounts at 200+ stores";
+    } else if (event.category.toLowerCase().contains('cultural')) {
+      return isMobile
+          ? "Traditional crafts, storytelling, and cultural..."
+          : "Traditional crafts, storytelling, and cultural performances in historic setting";
+    } else if (event.category.toLowerCase().contains('outdoor') || event.tags.contains('outdoor')) {
+      return isMobile
+          ? "Guided family adventure with breakfast and..."
+          : "Guided family hike with breakfast and stunning mountain photography opportunities";
+    } else if (event.category.toLowerCase().contains('water') || event.tags.contains('water')) {
+      return isMobile
+          ? "Interactive marine workshop with feeding sessions..."
+          : "Interactive marine workshop with feeding sessions and behind-the-scenes tours";
+    } else if (event.category.toLowerCase().contains('arts')) {
+      return isMobile
+          ? "Creative workshops with professional artists and..."
+          : "Creative workshops with professional artists and take-home masterpieces for the family";
+    } else if (event.category.toLowerCase().contains('entertainment')) {
+      return isMobile
+          ? "Live performances, games, and interactive..."
+          : "Live performances, games, and interactive entertainment for all ages with special family packages";
+    } else {
+      // Fallback description
+      return isMobile
+          ? "Exciting family activity with interactive experiences..."
+          : "Exciting family activity with interactive experiences and memories to last a lifetime";
+    }
+  }
+
+  Widget _buildImageFallback() {
+    return Container(
+      width: double.infinity,
+      height: 160,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0D7377), Color(0xFF329D9C)],
+        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.image,
+              size: 40,
+              color: Colors.white.withOpacity(0.8),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Dubai Family Event',
+              style: GoogleFonts.comfortaa(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingCard() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0xFF0D7377).withOpacity(0.1),
+                blurRadius: 20,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Container(
+            height: isMobile ? 380 : 450,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image skeleton
+                Container(
+                  height: isMobile ? 140 : 160,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF0D7377).withOpacity(0.2),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                
+                // Skeleton content
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(isMobile ? 12 : 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title skeleton
+                        Container(
+                          width: double.infinity,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0D7377).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        )
+                            .animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                        
+                        SizedBox(height: 8),
+                        
+                        // Location skeleton
+                        Container(
+                          width: 150,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0D7377).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        )
+                            .animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                        
+                        SizedBox(height: 12),
+                        
+                        // Date/time skeleton
+                        Container(
+                          width: double.infinity,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0D7377).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        )
+                            .animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                        
+                        SizedBox(height: 8),
+                        
+                        // Age suitability skeleton
+                        Container(
+                          width: 180,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0D7377).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        )
+                            .animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                        
+                        SizedBox(height: 8),
+                        
+                        // Duration skeleton
+                        Container(
+                          width: 120,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0D7377).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        )
+                            .animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                        
+                        SizedBox(height: 12),
+                        
+                        // Feature tags skeleton
+                        Row(
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            )
+                                .animate(onPlay: (controller) => controller.repeat())
+                                .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                            SizedBox(width: 8),
+                            Container(
+                              width: 70,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            )
+                                .animate(onPlay: (controller) => controller.repeat())
+                                .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                            if (!isMobile) ...[
+                              SizedBox(width: 8),
+                              Container(
+                                width: 90,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF0D7377).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              )
+                                  .animate(onPlay: (controller) => controller.repeat())
+                                  .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                            ],
+                          ],
+                        ),
+                        
+                        SizedBox(height: 12),
+                        
+                        // Description skeleton
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 13,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF0D7377).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              )
+                                  .animate(onPlay: (controller) => controller.repeat())
+                                  .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                              SizedBox(height: 4),
+                              Container(
+                                width: isMobile ? double.infinity : 200,
+                                height: 13,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF0D7377).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              )
+                                  .animate(onPlay: (controller) => controller.repeat())
+                                  .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                              if (!isMobile) ...[
+                                SizedBox(height: 4),
+                                Container(
+                                  width: 150,
+                                  height: 13,
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF0D7377).withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                )
+                                    .animate(onPlay: (controller) => controller.repeat())
+                                    .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Get the appropriate count to display based on filter state
+  int _getDisplayCount() {
+    if (_hasActiveFilters()) {
+      // When filters are active, show filtered count
+      return _getFilteredEvents().length;
+    } else {
+      // When no filters, show total from database
+      return _totalEventsInDb;
+    }
+  }
+  
+  /// Get the appropriate label for the count
+  String _getCountLabel() {
+    final count = _getDisplayCount();
+    if (_hasActiveFilters()) {
+      return count == 1 ? 'event found' : 'events found';
+    } else {
+      return count == 1 ? 'event available' : 'events available';
+    }
+  }
+  
+  /// Check if any filters are currently active
+  bool _hasActiveFilters() {
+    return _searchController.text.isNotEmpty || 
+           _currentFilters.hasActiveFilters ||
+           selectedCategory != null ||
+           selectedLocation != null;
+  }
+  
+  /// Get the appropriate page title based on category
+  String _getPageTitle() {
+    return widget.categoryDisplayName ?? 'All Events';
+  }
+  
+  /// Get the appropriate page subtitle based on category
+  String _getPageSubtitle() {
+    if (widget.categoryDisplayName != null) {
+      return 'Discover ${widget.categoryDisplayName!.toLowerCase()} events in Dubai';
+    }
+    return 'Discover amazing family activities in Dubai';
+  }
+}

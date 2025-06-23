@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    mydscvr.ai - Dubai Events Discovery Platform
+    Discover amazing family-friendly events in the heart of Dubai
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  
+  <!-- Content Security Policy for Flutter Web with Google Sign-In -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: https://apis.google.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: https://developers.google.com; font-src 'self' https:; connect-src 'self' https: http: https://accounts.google.com https://api.mydscvr.ai; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Discover amazing family-friendly events in Dubai! mydscvr.ai helps busy Dubai families find perfect activities for children of all ages. From beach fun to art workshops, explore the best family events in the UAE.">
+  <meta name="keywords" content="Dubai events, family events, kids activities, Dubai attractions, family fun, children events, UAE events, Dubai entertainment, family outings, mydscvr.ai">
+  <meta name="author" content="mydscvr.ai Team">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph Meta Tags for Social Sharing -->
+  <meta property="og:title" content="mydscvr.ai - Dubai Events Discovery Platform">
+  <meta property="og:description" content="Discover amazing family-friendly events in Dubai! Find perfect activities for children of all ages in the heart of the UAE.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mydscvr.ai">
+  <meta property="og:image" content="https://mydscvr.ai/images/og-image.jpg">
+  <meta property="og:locale" content="en_AE">
+  <meta property="og:site_name" content="mydscvr.ai">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="mydscvr.ai - Dubai Events Discovery Platform">
+  <meta name="twitter:description" content="Discover amazing family-friendly events in Dubai! Find perfect activities for children of all ages.">
+  <meta name="twitter:image" content="https://mydscvr.ai/images/twitter-card.jpg">
+
+  <!-- iOS Meta Tags & Icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="mydscvr.ai">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/Icon-192.png">
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#17A2B8">
+  <meta name="msapplication-TileColor" content="#17A2B8">
+  <meta name="msapplication-navbutton-color" content="#17A2B8">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png"/>
+
+  <!-- Preconnect for Performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Page Title -->
+  <title>mydscvr.ai - Discover Amazing Family Events in Dubai 🎉</title>
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Loading Styles -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #17A2B8 0%, #6C5CE7 100%);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    /* Ensure Flutter app takes full height with no extra spacing */
+    flt-glass-pane {
+      height: 100vh !important;
+    }
+
+    /* Remove any default spacing from Flutter web */
+    flt-scene-host {
+      height: 100vh !important;
+    }
+
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #FF7B7B 0%, #FFA726 100%);
+      z-index: 9999;
+    }
+
+    .loading-logo {
+      width: 120px;
+      height: 120px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .loading-logo img {
+      width: 100px;
+      height: auto;
+      max-height: 100px;
+      object-fit: contain;
+    }
+
+    .loading-logo-fallback {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #17A2B8 0%, #6C5CE7 100%);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .loading-subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 16px;
+      text-align: center;
+      max-width: 300px;
+      line-height: 1.4;
+    }
+
+    .loading-spinner {
+      margin-top: 30px;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Hide loading when Flutter is ready */
+    .flutter-ready .loading-container {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-container" id="loading">
+    <div class="loading-logo">
+      <img src="assets/assets/images/mydscvr-logo.png" alt="mydscvr.ai logo" id="loading-logo-img" 
+           onerror="handleLogoError()" />
+      <div class="loading-logo-fallback" id="loading-logo-fallback" style="display: none;">
+        M
+      </div>
+    </div>
+    <div class="loading-text">mydscvr.ai</div>
+    <div class="loading-subtitle">Discovering amazing family events in Dubai...</div>
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Flutter App -->
+  <script>
+    // Configure Flutter web for clean URLs
+    window.flutterConfiguration = {
+      canvasKitBaseUrl: "/canvaskit/",
+      // Use path-based routing instead of hash routing
+      usePathUrlStrategy: true
+    };
+    
+    // Handle logo loading error
+    function handleLogoError() {
+      const img = document.getElementById('loading-logo-img');
+      const fallback = document.getElementById('loading-logo-fallback');
+      if (img && fallback) {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+        console.log('Logo failed to load, showing fallback. Tried path:', img.src);
+      }
+    }
+    
+    // Debug: Check if logo loads successfully
+    document.addEventListener('DOMContentLoaded', function() {
+      const img = document.getElementById('loading-logo-img');
+      if (img) {
+        img.onload = function() {
+          console.log('Logo loaded successfully from:', img.src);
+        };
+        console.log('Attempting to load logo from:', img.src);
+      }
+    });
+    
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.opacity = '0';
+        loading.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          loading.style.display = 'none';
+          document.body.classList.add('flutter-ready');
+        }, 500);
+      }
+    });
+  </script>
+  
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

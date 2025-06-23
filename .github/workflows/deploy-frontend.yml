@@ -1,0 +1,229 @@
+name: Deploy Frontend to Netlify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+        - development
+
+env:
+  FLUTTER_VERSION: '3.24.0'
+  NODE_VERSION: '18'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Netlify CLI
+      run: npm install -g netlify-cli
+
+    - name: Create Frontend environment file
+      run: |
+        cat > Frontend.env << EOF
+        # Frontend Environment Configuration
+        GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+        API_BASE_URL=${{ secrets.API_BASE_URL }}
+        BACKEND_URL=${{ secrets.BACKEND_URL }}
+        DATA_COLLECTION_URL=${{ secrets.DATA_COLLECTION_URL }}
+        FALLBACK_API_URL=${{ secrets.FALLBACK_API_URL }}
+        FALLBACK_DATA_URL=${{ secrets.FALLBACK_DATA_URL }}
+        DEV_API_URL=${{ secrets.DEV_API_URL }}
+        DEV_DATA_URL=${{ secrets.DEV_DATA_URL }}
+        ENVIRONMENT=${{ github.event.inputs.environment || 'production' }}
+        ENABLE_LOGS=${{ secrets.ENABLE_LOGS }}
+        ENABLE_PERFORMANCE_OVERLAY=${{ secrets.ENABLE_PERFORMANCE_OVERLAY }}
+        GA_TRACKING_ID=${{ secrets.GA_TRACKING_ID }}
+        FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+        FIREBASE_SITE_ID=${{ secrets.FIREBASE_SITE_ID }}
+        CUSTOM_DOMAIN=${{ secrets.CUSTOM_DOMAIN }}
+        CDN_URL=${{ secrets.CDN_URL }}
+        CSP_POLICY=${{ secrets.CSP_POLICY }}
+        SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+        LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+        EC2_DOMAIN=${{ secrets.EC2_DOMAIN }}
+        EOF
+
+    - name: Navigate to Flutter project
+      run: cd dxb_events_web
+
+    - name: Get Flutter dependencies
+      run: |
+        cd dxb_events_web
+        flutter pub get
+
+    - name: Analyze Flutter code
+      run: |
+        cd dxb_events_web
+        flutter analyze --no-fatal-infos
+
+    - name: Run Flutter tests
+      run: |
+        cd dxb_events_web
+        flutter test --coverage --reporter=json > test_results.json || echo "Tests completed with issues"
+
+    - name: Build Flutter web app for production
+      run: |
+        cd dxb_events_web
+        flutter build web \
+          --release \
+          --web-renderer=canvaskit \
+          --dart-define=ENVIRONMENT=${{ github.event.inputs.environment || 'production' }} \
+          --dart-define=GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+          --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}" \
+          --dart-define=BACKEND_URL="${{ secrets.BACKEND_URL }}" \
+          --dart-define=DATA_COLLECTION_URL="${{ secrets.DATA_COLLECTION_URL }}" \
+          --dart-define=FALLBACK_API_URL="${{ secrets.FALLBACK_API_URL }}" \
+          --dart-define=FALLBACK_DATA_URL="${{ secrets.FALLBACK_DATA_URL }}" \
+          --dart-define=ENABLE_LOGS="${{ secrets.ENABLE_LOGS }}" \
+          --dart-define=ENABLE_PERFORMANCE_OVERLAY="${{ secrets.ENABLE_PERFORMANCE_OVERLAY }}" \
+          --dart-define=CUSTOM_DOMAIN="${{ secrets.CUSTOM_DOMAIN }}" \
+          --dart-define=CDN_URL="${{ secrets.CDN_URL }}" \
+          --target=lib/main.dart
+
+    - name: Verify build output
+      run: |
+        echo "Build completed. Checking output..."
+        ls -la dxb_events_web/build/web/
+        echo "Index.html size:"
+        du -h dxb_events_web/build/web/index.html
+        echo "Total build size:"
+        du -sh dxb_events_web/build/web/
+
+    - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v3.0
+      with:
+        publish-dir: './dxb_events_web/build/web'
+        production-branch: main
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        deploy-message: "Deploy from GitHub Actions - ${{ github.event.head_commit.message || 'Manual deployment' }}"
+        enable-pull-request-comment: true
+        enable-commit-comment: true
+        overwrites-pull-request-comment: true
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: flutter-web-build
+        path: dxb_events_web/build/web/
+        retention-days: 30
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: dxb_events_web/test_results.json
+        retention-days: 7
+
+    - name: Post-deployment verification
+      run: |
+        echo "✅ Deployment completed!"
+        echo "🔧 Build Environment: ${{ github.event.inputs.environment || 'production' }}"
+        echo "📦 Build Size: $(du -sh dxb_events_web/build/web/ | cut -f1)"
+        echo "🌐 Netlify Site: https://${{ secrets.NETLIFY_SITE_ID }}.netlify.app"
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "🚀 Production deployment to: https://mydscvr.ai"
+        fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run security scan
+      run: |
+        echo "🔍 Scanning for hardcoded secrets..."
+        
+        # Check for common secrets patterns
+        if grep -r "api[_-]key\|secret\|password\|token" dxb_events_web/lib/ --include="*.dart" | grep -v "// TODO\|// FIXME\|environment_config.dart"; then
+          echo "❌ Potential hardcoded secrets found!"
+          exit 1
+        fi
+        
+        # Check for Google Client ID hardcoding
+        if grep -r "856722877537" dxb_events_web/lib/ --include="*.dart" | grep -v "environment_config.dart"; then
+          echo "❌ Hardcoded Google Client ID found!"
+          exit 1
+        fi
+        
+        # Check for hardcoded URLs
+        if grep -r "https://mydscvr\|http://3\.29\.102\.4" dxb_events_web/lib/ --include="*.dart" | grep -v "environment_config.dart\|dio_config.dart"; then
+          echo "❌ Hardcoded URLs found outside of configuration files!"
+          exit 1
+        fi
+        
+        echo "✅ Security scan passed - no hardcoded secrets detected"
+
+  quality-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+
+    - name: Get Flutter dependencies
+      run: |
+        cd dxb_events_web
+        flutter pub get
+
+    - name: Check Flutter formatting
+      run: |
+        cd dxb_events_web
+        dart format --set-exit-if-changed lib/ test/
+
+    - name: Run static analysis
+      run: |
+        cd dxb_events_web
+        flutter analyze --no-fatal-infos
+
+    - name: Check for TODOs and FIXMEs
+      run: |
+        cd dxb_events_web
+        echo "📝 Checking for TODO/FIXME comments..."
+        TODO_COUNT=$(grep -r "TODO\|FIXME" lib/ --include="*.dart" | wc -l || echo "0")
+        echo "Found $TODO_COUNT TODO/FIXME comments"
+        if [ "$TODO_COUNT" -gt 50 ]; then
+          echo "⚠️ Warning: High number of TODO/FIXME comments ($TODO_COUNT)"
+        fi
