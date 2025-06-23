@@ -1177,17 +1177,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       // Category filter
       if (_currentFilters.categories.isNotEmpty) {
         filtered = filtered.where((event) => 
-          _currentFilters.categories.any((category) => 
-            event.category.toLowerCase().contains(category.toLowerCase())
+          _currentFilters.categories.any((displayCategory) => 
+            _mapCategoryToDbValue(displayCategory).contains(event.category.toLowerCase())
           )
         ).toList();
       }
       
-      // Location filter
+      // Location filter with fuzzy matching
       if (_currentFilters.locations.isNotEmpty) {
         filtered = filtered.where((event) => 
           _currentFilters.locations.any((location) => 
-            event.venue.area.toLowerCase().contains(location.toLowerCase())
+            _isLocationMatch(event.venue.area, location)
           )
         ).toList();
       }
@@ -1215,18 +1215,26 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       // Date range filter
       if (_currentFilters.dateRange != null) {
         final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        
         filtered = filtered.where((event) {
+          final eventDate = DateTime(event.startDate.year, event.startDate.month, event.startDate.day);
+          
           switch (_currentFilters.dateRange) {
             case 'Today':
               return event.isToday;
             case 'This Weekend':
               return event.isThisWeekend;
-            case 'This Week':
-              final weekEnd = now.add(Duration(days: 7));
-              return event.startDate.isBefore(weekEnd);
+            case 'Next Week':
+              final nextWeekStart = today.add(Duration(days: 7 - now.weekday + 1)); // Next Monday
+              final nextWeekEnd = nextWeekStart.add(Duration(days: 6)); // Next Sunday
+              return eventDate.isAfter(nextWeekStart.subtract(Duration(days: 1))) && 
+                     eventDate.isBefore(nextWeekEnd.add(Duration(days: 1)));
             case 'This Month':
-              final monthEnd = DateTime(now.year, now.month + 1);
-              return event.startDate.isBefore(monthEnd);
+              final monthStart = DateTime(now.year, now.month, 1);
+              final monthEnd = DateTime(now.year, now.month + 1, 0);
+              return eventDate.isAfter(monthStart.subtract(Duration(days: 1))) && 
+                     eventDate.isBefore(monthEnd.add(Duration(days: 1)));
             default:
               return true;
           }
@@ -1234,16 +1242,29 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       }
       
       // Custom date range filter
-      if (_currentFilters.customDateStart != null) {
-        filtered = filtered.where((event) => 
-          event.startDate.isAfter(_currentFilters.customDateStart!)
-        ).toList();
-      }
-      
-      if (_currentFilters.customDateEnd != null) {
-        filtered = filtered.where((event) => 
-          event.startDate.isBefore(_currentFilters.customDateEnd!)
-        ).toList();
+      if (_currentFilters.customDateStart != null || _currentFilters.customDateEnd != null) {
+        filtered = filtered.where((event) {
+          final eventDate = DateTime(event.startDate.year, event.startDate.month, event.startDate.day);
+          
+          bool matchesStart = true;
+          bool matchesEnd = true;
+          
+          if (_currentFilters.customDateStart != null) {
+            final startDate = DateTime(_currentFilters.customDateStart!.year, 
+                                     _currentFilters.customDateStart!.month, 
+                                     _currentFilters.customDateStart!.day);
+            matchesStart = eventDate.isAtSameMomentAs(startDate) || eventDate.isAfter(startDate);
+          }
+          
+          if (_currentFilters.customDateEnd != null) {
+            final endDate = DateTime(_currentFilters.customDateEnd!.year, 
+                                   _currentFilters.customDateEnd!.month, 
+                                   _currentFilters.customDateEnd!.day);
+            matchesEnd = eventDate.isAtSameMomentAs(endDate) || eventDate.isBefore(endDate);
+          }
+          
+          return matchesStart && matchesEnd;
+        }).toList();
       }
       
       // Time of day filter
@@ -1926,5 +1947,89 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       return 'Discover ${widget.categoryDisplayName!.toLowerCase()} events in Dubai';
     }
     return 'Discover amazing family activities in Dubai';
+  }
+  
+  /// Map display category names to database category values
+  List<String> _mapCategoryToDbValue(String displayCategory) {
+    switch (displayCategory.toLowerCase()) {
+      case 'kids & family':
+        return ['kids_and_family', 'family'];
+      case 'outdoor activities':
+        return ['outdoor_activities', 'outdoor'];
+      case 'indoor activities':
+        return ['indoor_activities', 'indoor'];
+      case 'food & dining':
+        return ['food_and_dining', 'food'];
+      case 'cultural':
+        return ['cultural', 'culture'];
+      case 'tours & sightseeing':
+        return ['tours_and_sightseeing', 'tours', 'sightseeing'];
+      case 'water sports':
+        return ['water_sports', 'water'];
+      case 'music & concerts':
+        return ['music_and_concerts', 'music', 'concerts'];
+      case 'comedy & shows':
+        return ['comedy_and_shows', 'comedy', 'shows', 'entertainment'];
+      case 'sports & fitness':
+        return ['sports_and_fitness', 'sports', 'fitness'];
+      case 'business & networking':
+        return ['business_and_networking', 'business', 'networking'];
+      case 'festivals & celebrations':
+        return ['festivals_and_celebrations', 'festivals', 'celebrations'];
+      default:
+        return [displayCategory.toLowerCase()];
+    }
+  }
+  
+  /// Check if event location matches filter location with fuzzy matching
+  bool _isLocationMatch(String eventArea, String filterLocation) {
+    final eventAreaLower = eventArea.toLowerCase();
+    final filterLocationLower = filterLocation.toLowerCase();
+    
+    // Direct contains match
+    if (eventAreaLower.contains(filterLocationLower) || 
+        filterLocationLower.contains(eventAreaLower)) {
+      return true;
+    }
+    
+    // Handle common variations and abbreviations
+    final locationMappings = {
+      'dubai marina': ['marina', 'dmcc', 'jbr walk'],
+      'jbr': ['jumeirah beach residence', 'marina', 'beach walk'],
+      'downtown dubai': ['downtown', 'burj khalifa', 'dubai mall', 'souk al bahar'],
+      'palm jumeirah': ['palm', 'atlantis', 'golden mile'],
+      'jumeirah': ['umm suqeim', 'burj al arab', 'madinat jumeirah'],
+      'deira': ['gold souk', 'spice souk', 'al rigga'],
+      'bur dubai': ['al fahidi', 'bastakiya', 'dubai museum'],
+      'business bay': ['bay avenue', 'bay square'],
+      'al barsha': ['mall of emirates', 'barsha heights'],
+      'city walk': ['al safa', 'boxpark'],
+      'difc': ['financial centre', 'gate village'],
+      'dubailand': ['global village', 'dragon mart']
+    };
+    
+    // Check if filter location maps to event area
+    for (String key in locationMappings.keys) {
+      if (filterLocationLower.contains(key) || key.contains(filterLocationLower)) {
+        for (String mapping in locationMappings[key]!) {
+          if (eventAreaLower.contains(mapping)) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    // Check reverse mapping (event area maps to filter location)
+    for (String key in locationMappings.keys) {
+      if (eventAreaLower.contains(key) || key.contains(eventAreaLower)) {
+        for (String mapping in locationMappings[key]!) {
+          if (filterLocationLower.contains(mapping)) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    return false;
   }
 }

@@ -37,7 +37,7 @@ import '../../services/providers/auth_provider_mongodb.dart';
 // Feature imports
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
-import '../events/event_detail_screen.dart';
+import '../event_details/event_details_screen.dart';
 import '../../services/events_service.dart';
 
 class AnimatedHomeScreen extends ConsumerStatefulWidget {
@@ -874,7 +874,7 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
           // Navigate to event details page
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EventDetailScreen(event: event),
+              builder: (context) => EventDetailsScreen(event: event),
             ),
           );
         },

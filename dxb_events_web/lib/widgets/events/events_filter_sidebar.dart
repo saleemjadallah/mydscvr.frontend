@@ -129,16 +129,18 @@ class _EventsFilterSidebarState extends ConsumerState<EventsFilterSidebar> {
   ];
 
   static const List<String> _categoryOptions = [
-    'Family Fun',
-    'Outdoor Activities',
-    'Educational',
-    'Sports',
-    'Arts & Culture',
+    'Kids & Family',
+    'Outdoor Activities', 
+    'Indoor Activities',
     'Food & Dining',
-    'Beach & Water',
-    'Nature & Wildlife',
-    'Entertainment',
-    'Cultural'
+    'Cultural',
+    'Tours & Sightseeing',
+    'Water Sports',
+    'Music & Concerts',
+    'Comedy & Shows',
+    'Sports & Fitness',
+    'Business & Networking',
+    'Festivals & Celebrations'
   ];
 
   static const List<String> _ageGroupOptions = [
