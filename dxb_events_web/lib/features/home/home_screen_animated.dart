@@ -874,7 +874,7 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
           // Navigate to event details page
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EventDetailsScreen(event: event),
+              builder: (context) => EventDetailsScreen(eventId: event.id, event: event),
             ),
           );
         },

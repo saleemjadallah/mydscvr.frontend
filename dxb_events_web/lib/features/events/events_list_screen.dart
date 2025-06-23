@@ -1206,8 +1206,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       if (_currentFilters.ageGroups.isNotEmpty) {
         filtered = filtered.where((event) => 
           _currentFilters.ageGroups.any((ageGroup) => 
-            event.ageRange.toLowerCase().contains(ageGroup.toLowerCase()) ||
-            ageGroup.toLowerCase() == 'all ages'
+            _isAgeGroupMatch(event, ageGroup)
           )
         ).toList();
       }
@@ -1269,33 +1268,18 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       
       // Time of day filter
       if (_currentFilters.timeOfDay.isNotEmpty) {
-        filtered = filtered.where((event) {
-          final hour = event.startDate.hour;
-          return _currentFilters.timeOfDay.any((timeSlot) {
-            switch (timeSlot.toLowerCase()) {
-              case 'morning':
-                return hour >= 6 && hour < 12;
-              case 'afternoon':
-                return hour >= 12 && hour < 18;
-              case 'evening':
-                return hour >= 18 && hour < 24;
-              case 'all day':
-                return true;
-              default:
-                return true;
-            }
-          });
-        }).toList();
+        filtered = filtered.where((event) => 
+          _currentFilters.timeOfDay.any((timeSlot) => 
+            _isTimeSlotMatch(event, timeSlot)
+          )
+        ).toList();
       }
       
       // Features filter
       if (_currentFilters.features.isNotEmpty) {
         filtered = filtered.where((event) => 
-          _currentFilters.features.any((feature) => 
-            event.tags.any((tag) => tag.toLowerCase().contains(feature.toLowerCase())) ||
-            (feature.toLowerCase().contains('free') && event.isFree) ||
-            (feature.toLowerCase().contains('parking') && event.venue.parkingAvailable) ||
-            (feature.toLowerCase().contains('metro') && event.venue.publicTransportAccess)
+          _currentFilters.features.every((feature) => 
+            _hasFeature(event, feature)
           )
         ).toList();
       }
@@ -2031,5 +2015,119 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     }
     
     return false;
+  }
+  
+  /// Check if event matches the selected age group filter
+  bool _isAgeGroupMatch(Event event, String ageGroup) {
+    final minAge = event.familySuitability.minAge;
+    final maxAge = event.familySuitability.maxAge;
+    
+    switch (ageGroup) {
+      case 'Toddlers (0-3)':
+        // Event is suitable for toddlers if min age is 0-3 or null (all ages)
+        return minAge == null || minAge <= 3;
+      
+      case 'Kids (4-12)':
+        // Event is suitable for kids if it overlaps with 4-12 age range
+        if (minAge == null && maxAge == null) return true; // All ages
+        if (minAge == null) return maxAge! >= 4; // No min age, max age >= 4
+        if (maxAge == null) return minAge <= 12; // No max age, min age <= 12
+        return minAge <= 12 && maxAge >= 4; // Overlap with 4-12 range
+      
+      case 'Teens (13-17)':
+        // Event is suitable for teens if it overlaps with 13-17 age range
+        if (minAge == null && maxAge == null) return true; // All ages
+        if (minAge == null) return maxAge! >= 13; // No min age, max age >= 13
+        if (maxAge == null) return minAge <= 17; // No max age, min age <= 17
+        return minAge <= 17 && maxAge >= 13; // Overlap with 13-17 range
+      
+      case 'All Ages':
+        // All ages events have no restrictions or very broad restrictions
+        return minAge == null || minAge <= 5; // No minimum or very low minimum
+      
+      default:
+        return true;
+    }
+  }
+  
+  /// Check if event has the specified feature
+  bool _hasFeature(Event event, String feature) {
+    switch (feature.toLowerCase()) {
+      case 'stroller friendly':
+        return event.familySuitability.strollerFriendly;
+      
+      case 'parking available':
+        return event.venue.parkingAvailable;
+      
+      case 'metro access':
+        return event.venue.publicTransportAccess || 
+               (event.metroAccessible == true);
+      
+      case 'indoor':
+        return event.category.toLowerCase().contains('indoor') ||
+               event.tags.any((tag) => tag.toLowerCase().contains('indoor')) ||
+               (event.venueType?.toLowerCase().contains('indoor') == true);
+      
+      case 'outdoor':
+        return event.category.toLowerCase().contains('outdoor') ||
+               event.tags.any((tag) => tag.toLowerCase().contains('outdoor')) ||
+               (event.venueType?.toLowerCase().contains('outdoor') == true);
+      
+      case 'air conditioned':
+        // Assume indoor venues are air conditioned
+        return event.category.toLowerCase().contains('indoor') ||
+               event.tags.any((tag) => tag.toLowerCase().contains('indoor')) ||
+               event.tags.any((tag) => tag.toLowerCase().contains('ac')) ||
+               event.tags.any((tag) => tag.toLowerCase().contains('air conditioned'));
+      
+      case 'free entry':
+        return event.isFree;
+      
+      case 'educational content':
+        return event.familySuitability.educationalContent ||
+               event.tags.any((tag) => tag.toLowerCase().contains('educational')) ||
+               event.tags.any((tag) => tag.toLowerCase().contains('learning')) ||
+               event.category.toLowerCase().contains('educational');
+      
+      default:
+        // Fallback to tag matching
+        return event.tags.any((tag) => 
+          tag.toLowerCase().contains(feature.toLowerCase())
+        );
+    }
+  }
+  
+  /// Check if event matches the selected time slot
+  bool _isTimeSlotMatch(Event event, String timeSlot) {
+    final hour = event.startDate.hour;
+    final endHour = event.endDate?.hour;
+    
+    switch (timeSlot.toLowerCase()) {
+      case 'morning':
+        // Event starts in morning (6 AM - 12 PM)
+        return hour >= 6 && hour < 12;
+      
+      case 'afternoon':
+        // Event starts in afternoon (12 PM - 6 PM)
+        return hour >= 12 && hour < 18;
+      
+      case 'evening':
+        // Event starts in evening (6 PM - 12 AM)
+        return hour >= 18 || hour < 6; // Include late night events
+      
+      case 'all day':
+        // Multi-hour events or events with long duration
+        if (endHour != null) {
+          final duration = event.endDate!.difference(event.startDate).inHours;
+          return duration >= 6; // Events lasting 6+ hours are considered "all day"
+        } else if (event.durationHours != null) {
+          return event.durationHours! >= 6;
+        }
+        // For events without end time, assume single time slot
+        return false;
+      
+      default:
+        return true;
+    }
   }
 }
