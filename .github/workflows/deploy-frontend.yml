@@ -95,6 +95,7 @@ jobs:
         cd dxb_events_web
         flutter build web \
           --release \
+          --no-tree-shake-icons \
           --dart-define=ENVIRONMENT=${{ github.event.inputs.environment || 'production' }} \
           --dart-define=GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
           --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}" \

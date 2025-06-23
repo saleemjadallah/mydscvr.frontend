@@ -6,7 +6,7 @@ import '../core/config/api_config.dart';
 
 /// Enhanced Events Service that utilizes all new backend filtering capabilities
 class EnhancedEventsService {
-  static const String baseUrl = ApiConfig.baseUrl;
+  static String get baseUrl => ApiConfig.baseUrl;
 
   /// Search events with enhanced filters using the backend's filter-to-query system
   static Future<List<Event>> searchEventsWithFilters(Map<String, dynamic> filters) async {

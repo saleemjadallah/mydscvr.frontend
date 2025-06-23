@@ -87,7 +87,7 @@ class AppTheme {
     ),
 
     // Card theme with soft shadows
-    cardTheme: const CardThemeData(
+    cardTheme: CardThemeData(
       color: AppColors.surface,
       elevation: 4,
       shadowColor: AppColors.shadowLight,
@@ -224,7 +224,7 @@ class AppTheme {
     ),
 
     // Dialog theme
-    dialogTheme: const DialogThemeData(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surface,
       elevation: 24,
       shape: RoundedRectangleBorder(
