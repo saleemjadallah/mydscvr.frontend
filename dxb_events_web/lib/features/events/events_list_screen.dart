@@ -494,6 +494,58 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       
                       SizedBox(width: 12),
                       
+                      // Calendar Date Filter
+                      Material(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: (_currentFilters.customDateStart != null || _currentFilters.customDateEnd != null)
+                                ? AppColors.dubaiGold.withOpacity(0.3)
+                                : Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF0D7377).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => _showDateFilterDialog(),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              child: Stack(
+                                children: [
+                                  Icon(
+                                    LucideIcons.calendar,
+                                    color: Colors.white.withOpacity(0.9),
+                                    size: 20,
+                                  ),
+                                  if (_currentFilters.customDateStart != null || _currentFilters.customDateEnd != null)
+                                    Positioned(
+                                      right: -2,
+                                      top: -2,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.dubaiGold,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(width: 12),
+                      
                       // Enhanced View Toggle
                       Material(
                         color: Colors.white.withOpacity(0.2),
@@ -2294,5 +2346,255 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   bool _isPriceSearch(String query) {
     final priceKeywords = ['free', 'cheap', 'budget', 'affordable', 'cost'];
     return priceKeywords.any((keyword) => query.contains(keyword));
+  }
+  
+  /// Show calendar date filter dialog
+  Future<void> _showDateFilterDialog() async {
+    DateTime? startDate = _currentFilters.customDateStart;
+    DateTime? endDate = _currentFilters.customDateEnd;
+    String selectedRange = _currentFilters.dateRange ?? 'custom';
+    
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+          title: Row(
+            children: [
+              Icon(LucideIcons.calendar, color: AppColors.dubaiTeal, size: 24),
+              SizedBox(width: 8),
+              Text('Filter by Date', style: GoogleFonts.comfortaa(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              )),
+            ],
+          ),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Quick date range options
+                Text('Quick Options:', style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                )),
+                SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildDateRangeChip('Today', 'today', selectedRange, (value) => setDialogState(() => selectedRange = value)),
+                    _buildDateRangeChip('This Week', 'this_week', selectedRange, (value) => setDialogState(() => selectedRange = value)),
+                    _buildDateRangeChip('Next Week', 'next_week', selectedRange, (value) => setDialogState(() => selectedRange = value)),
+                    _buildDateRangeChip('This Month', 'this_month', selectedRange, (value) => setDialogState(() => selectedRange = value)),
+                    _buildDateRangeChip('Custom Range', 'custom', selectedRange, (value) => setDialogState(() => selectedRange = value)),
+                  ],
+                ),
+                
+                if (selectedRange == 'custom') ...[
+                  SizedBox(height: 20),
+                  Text('Custom Date Range:', style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  )),
+                  SizedBox(height: 12),
+                  
+                  // Start date picker
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: startDate ?? DateTime.now(),
+                              firstDate: DateTime.now().subtract(Duration(days: 30)),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: AppColors.dubaiTeal,
+                                      onPrimary: Colors.white,
+                                      surface: Colors.white,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (picked != null) {
+                              setDialogState(() {
+                                startDate = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(LucideIcons.calendar, size: 16, color: AppColors.dubaiTeal),
+                                SizedBox(width: 8),
+                                Text(
+                                  startDate != null 
+                                    ? '${startDate!.day}/${startDate!.month}/${startDate!.year}'
+                                    : 'Start Date',
+                                  style: GoogleFonts.inter(
+                                    color: startDate != null ? AppColors.textPrimary : AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('to', style: GoogleFonts.inter(color: AppColors.textSecondary)),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: endDate ?? startDate ?? DateTime.now(),
+                              firstDate: startDate ?? DateTime.now(),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: AppColors.dubaiTeal,
+                                      onPrimary: Colors.white,
+                                      surface: Colors.white,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (picked != null) {
+                              setDialogState(() {
+                                endDate = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(LucideIcons.calendar, size: 16, color: AppColors.dubaiTeal),
+                                SizedBox(width: 8),
+                                Text(
+                                  endDate != null 
+                                    ? '${endDate!.day}/${endDate!.month}/${endDate!.year}'
+                                    : 'End Date',
+                                  style: GoogleFonts.inter(
+                                    color: endDate != null ? AppColors.textPrimary : AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop({'clear': true});
+              },
+              child: Text('Clear Filter', style: GoogleFonts.inter(color: AppColors.dubaiCoral)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel', style: GoogleFonts.inter(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop({
+                  'dateRange': selectedRange != 'custom' ? selectedRange : null,
+                  'startDate': selectedRange == 'custom' ? startDate : null,
+                  'endDate': selectedRange == 'custom' ? endDate : null,
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.dubaiTeal,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Apply Filter'),
+            ),
+          ],
+        );
+        },
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        if (result['clear'] == true) {
+          // Clear date filters
+          _currentFilters = EventFilterData(
+            locations: _currentFilters.locations,
+            categories: _currentFilters.categories,
+            ageGroups: _currentFilters.ageGroups,
+            minPrice: _currentFilters.minPrice,
+            maxPrice: _currentFilters.maxPrice,
+            timeOfDay: _currentFilters.timeOfDay,
+            features: _currentFilters.features,
+            // Clear date-related fields
+            dateRange: null,
+            customDateStart: null,
+            customDateEnd: null,
+          );
+        } else {
+          // Apply new date filters
+          _currentFilters = _currentFilters.copyWith(
+            dateRange: result['dateRange'],
+            customDateStart: result['startDate'],
+            customDateEnd: result['endDate'],
+          );
+        }
+        _loadEvents();
+      });
+    }
+  }
+  
+  Widget _buildDateRangeChip(String label, String value, String selectedRange, Function(String) onSelected) {
+    final isSelected = selectedRange == value;
+    return InkWell(
+      onTap: () => onSelected(value),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.dubaiTeal : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.dubaiTeal : Colors.grey.withOpacity(0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
   }
 }
