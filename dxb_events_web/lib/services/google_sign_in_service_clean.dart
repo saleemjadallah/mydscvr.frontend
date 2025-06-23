@@ -136,7 +136,7 @@ class GoogleSignInServiceClean {
               google.accounts.id.initialize({
                 client_id: '$_clientId',
                 callback: $callbackName,
-                auto_select: false,
+                auto_select: true, // Changed to true for automatic sign-in
                 cancel_on_tap_outside: false,
                 use_fedcm_for_prompt: false,
                 itp_support: true
@@ -150,25 +150,15 @@ class GoogleSignInServiceClean {
                 
                 if (notification.isNotDisplayed()) {
                   console.log('⚠️ One Tap not displayed - reason:', notification.getNotDisplayedReason());
-                  // Fallback to renderButton if One Tap fails
-                  setTimeout(() => {
-                    console.log('🔄 Attempting fallback to sign-in button...');
-                    const buttonDiv = document.createElement('div');
-                    buttonDiv.id = 'google-signin-fallback';
-                    buttonDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-                    document.body.appendChild(buttonDiv);
-                    
-                    google.accounts.id.renderButton(buttonDiv, {
-                      theme: 'outline',
-                      size: 'large',
-                      text: 'sign_in_with',
-                      shape: 'rectangular'
-                    });
-                  }, 1000);
+                  // Directly call the callback with null instead of showing another button
+                  console.log('🔄 One Tap failed, calling callback with null');
+                  $callbackName(null);
                 } else if (notification.isSkippedMoment()) {
                   console.log('👤 User skipped One Tap');
+                  $callbackName(null);
                 } else if (notification.isDismissedMoment()) {
                   console.log('❌ User dismissed One Tap');
+                  $callbackName(null);
                 }
               });
               

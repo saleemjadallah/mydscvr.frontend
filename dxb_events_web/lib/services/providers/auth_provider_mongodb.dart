@@ -73,21 +73,51 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading);
     
     try {
-      final user = await _authService.getCurrentUser();
-      if (user != null) {
-        final accessToken = await _authService.getAccessToken();
-        final sessionToken = await _authService.getSessionToken();
-        
+      print('🔄 Initializing authentication...');
+      
+      // First, try to get cached user data
+      final cachedUser = await _authService.getCachedUser();
+      final accessToken = await _authService.getAccessToken();
+      final sessionToken = await _authService.getSessionToken();
+      
+      print('🔄 Cached user: ${cachedUser?.email}');
+      print('🔄 Access token exists: ${accessToken != null}');
+      print('🔄 Session token exists: ${sessionToken != null}');
+      
+      if (cachedUser != null && accessToken != null) {
+        // We have cached user data and tokens, authenticate immediately
+        print('✅ Restoring session from cache');
         state = state.copyWith(
           status: AuthStatus.authenticated,
-          user: user,
+          user: cachedUser,
           accessToken: accessToken,
           sessionToken: sessionToken,
         );
+      } else if (accessToken != null) {
+        // We have tokens but no cached user, try to fetch from API
+        print('🔄 Fetching user from API...');
+        final user = await _authService.getCurrentUser();
+        if (user != null) {
+          print('✅ User fetched from API successfully');
+          state = state.copyWith(
+            status: AuthStatus.authenticated,
+            user: user,
+            accessToken: accessToken,
+            sessionToken: sessionToken,
+          );
+        } else {
+          print('❌ Failed to fetch user from API, clearing tokens');
+          await _authService.clearTokens();
+          state = state.copyWith(status: AuthStatus.unauthenticated);
+        }
       } else {
+        print('ℹ️ No tokens found, user not authenticated');
         state = state.copyWith(status: AuthStatus.unauthenticated);
       }
     } catch (e) {
+      print('❌ Error during auth initialization: $e');
+      // Clear potentially corrupted data
+      await _authService.clearTokens();
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
         error: 'Failed to restore session: $e',
@@ -175,35 +205,52 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, error: null);
     
     try {
+      print('🔵 Starting Google Sign-In...');
       final googleResult = await _googleSignInService.signInWithGoogle();
       
       if (googleResult != null) {
+        print('🔵 Google Sign-In successful, processing result...');
+        print('🔵 Access token: ${googleResult['access_token']?.substring(0, 20) ?? 'null'}...');
+        print('🔵 Refresh token: ${googleResult['refresh_token']?.substring(0, 20) ?? 'null'}...');
+        print('🔵 User data: ${googleResult['user']?['email'] ?? 'no email'}');
+        
         // Extract user data from Google response
         final user = UserProfile.fromJson(googleResult['user']);
+        
+        // Get session token from either refresh_token or session_token field
+        final sessionToken = googleResult['refresh_token'] ?? googleResult['session_token'] ?? '';
         
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
           accessToken: googleResult['access_token'],
-          sessionToken: googleResult['refresh_token'],
+          sessionToken: sessionToken,
           error: null,
         );
         
         // Store tokens for persistence
+        print('🔵 Storing tokens for persistence...');
         await _authService.saveTokens(
           googleResult['access_token'],
-          googleResult['refresh_token'],
+          sessionToken,
         );
         
+        // Cache user data for persistence
+        print('🔵 Caching user data...');
+        await _authService.cacheUser(user);
+        
+        print('✅ Google Sign-In completed successfully');
         return true;
       } else {
+        print('❌ Google Sign-In returned null result');
         state = state.copyWith(
           status: AuthStatus.error,
-          error: 'Google Sign-In failed',
+          error: 'Google Sign-In was cancelled or failed',
         );
         return false;
       }
     } catch (e) {
+      print('❌ Google Sign-In error: $e');
       state = state.copyWith(
         status: AuthStatus.error,
         error: 'Google Sign-In failed: $e',

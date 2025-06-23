@@ -264,39 +264,50 @@ class AuthApiService {
   
   Future<UserProfile?> getCurrentUser() async {
     try {
+      print('🔍 Getting current user...');
+      
       // Try to get from cache first
       final cachedUser = await getCachedUser();
       final token = await getAccessToken();
       
+      print('🔍 Cached user exists: ${cachedUser != null}');
+      print('🔍 Access token exists: ${token != null}');
+      
       if (token == null) {
+        print('🔍 No access token found');
         return null;
       }
       
       // If we have a cached user and recent token, return cached
       if (cachedUser != null) {
+        print('🔍 Returning cached user: ${cachedUser.email}');
         return cachedUser;
       }
       
       // Otherwise, fetch from API
+      print('🔍 Fetching user from API...');
       final response = await _dio.get(
         '$_authPath/profile',
-        options: Options(
-        ),
+        options: Options(),
       );
+      
+      print('🔍 API response status: ${response.statusCode}');
       
       final user = UserProfile.fromJson(response.data);
       await cacheUser(user);
       
+      print('🔍 User fetched and cached: ${user.email}');
       return user;
       
     } on DioException catch (e) {
+      print('❌ DioException getting user: ${e.response?.statusCode} - ${e.message}');
       if (e.response?.statusCode == 401) {
+        print('❌ Unauthorized, clearing tokens');
         await clearTokens();
       }
-      print('Error getting current user: $e');
       return null;
     } catch (e) {
-      print('Error getting current user: $e');
+      print('❌ Error getting current user: $e');
       return null;
     }
   }
