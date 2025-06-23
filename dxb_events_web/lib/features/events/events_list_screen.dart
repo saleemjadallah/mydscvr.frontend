@@ -13,6 +13,7 @@ import '../../services/enhanced_events_service.dart';
 import '../../widgets/events/event_card_enhanced.dart';
 import '../../widgets/events/enhanced_event_card.dart';
 import '../../widgets/events/search_bar_glassmorphic.dart';
+import '../../widgets/events/enhanced_events_search.dart';
 // import '../../widgets/events/event_list_item.dart';
 import '../../widgets/events/events_filter_sidebar.dart';
 import '../../widgets/events/events_filter_sidebar_glassmorphic.dart';
@@ -718,15 +719,12 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             padding: EdgeInsets.all(20),
             child: Column(
               children: [
-                // Search bar
-                SearchBarGlassmorphic(
+                // Enhanced search bar with live suggestions
+                EnhancedEventsSearch(
                   controller: _searchController,
                   hintText: 'Search events, categories, locations...',
-                  onChanged: (value) {
+                  onSearchChanged: (value) {
                     setState(() {}); // Trigger rebuild to filter events
-                  },
-                  onClear: () {
-                    setState(() {});
                   },
                 ),
                 
@@ -1160,16 +1158,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     
     List<Event> filtered = List.from(events);
     
-    // Apply search filter
+    // Apply enhanced search filter
     if (_searchController.text.isNotEmpty) {
-      final query = _searchController.text.toLowerCase();
-      filtered = filtered.where((event) =>
-        event.title.toLowerCase().contains(query) ||
-        event.description.toLowerCase().contains(query) ||
-        event.category.toLowerCase().contains(query) ||
-        event.venue.area.toLowerCase().contains(query) ||
-        event.tags.any((tag) => tag.toLowerCase().contains(query))
-      ).toList();
+      filtered = _applySmartSearch(filtered, _searchController.text);
     }
     
     // Apply filter data filters
@@ -2129,5 +2120,173 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       default:
         return true;
     }
+  }
+  
+  /// Apply smart search with intelligent matching and ranking
+  List<Event> _applySmartSearch(List<Event> events, String query) {
+    final searchQuery = query.trim().toLowerCase();
+    if (searchQuery.isEmpty) return events;
+    
+    // Split query into keywords for multi-word search
+    final keywords = searchQuery.split(' ').where((word) => word.length >= 2).toList();
+    if (keywords.isEmpty) return events;
+    
+    // List to store events with their relevance scores
+    List<MapEntry<Event, double>> scoredEvents = [];
+    
+    for (final event in events) {
+      final score = _calculateSearchScore(event, searchQuery, keywords);
+      if (score > 0) {
+        scoredEvents.add(MapEntry(event, score));
+      }
+    }
+    
+    // Sort by relevance score (highest first)
+    scoredEvents.sort((a, b) => b.value.compareTo(a.value));
+    
+    // Return sorted events
+    return scoredEvents.map((entry) => entry.key).toList();
+  }
+  
+  /// Calculate search relevance score for an event
+  double _calculateSearchScore(Event event, String fullQuery, List<String> keywords) {
+    double score = 0.0;
+    
+    final title = event.title.toLowerCase();
+    final description = event.description.toLowerCase();
+    final category = event.category.toLowerCase();
+    final area = event.venue.area.toLowerCase();
+    final venueName = event.venue.name.toLowerCase();
+    final tags = event.tags.map((tag) => tag.toLowerCase()).toList();
+    
+    // Full query exact matches (highest priority)
+    if (title.contains(fullQuery)) {
+      score += title.startsWith(fullQuery) ? 100.0 : 80.0; // Bonus for title starting with query
+    }
+    if (description.contains(fullQuery)) score += 60.0;
+    if (category.contains(fullQuery)) score += 70.0;
+    if (area.contains(fullQuery)) score += 50.0;
+    if (venueName.contains(fullQuery)) score += 55.0;
+    
+    // Tag matches for full query
+    for (final tag in tags) {
+      if (tag.contains(fullQuery)) {
+        score += tag == fullQuery ? 75.0 : 45.0; // Bonus for exact tag match
+      }
+    }
+    
+    // Keyword-based scoring
+    for (final keyword in keywords) {
+      // Title keyword matches
+      if (title.contains(keyword)) {
+        score += title.startsWith(keyword) ? 30.0 : 20.0;
+      }
+      
+      // Category keyword matches
+      if (category.contains(keyword)) score += 25.0;
+      
+      // Location keyword matches
+      if (area.contains(keyword)) score += 20.0;
+      if (venueName.contains(keyword)) score += 18.0;
+      
+      // Description keyword matches
+      if (description.contains(keyword)) score += 15.0;
+      
+      // Tag keyword matches
+      for (final tag in tags) {
+        if (tag.contains(keyword)) {
+          score += tag == keyword ? 22.0 : 12.0;
+        }
+      }
+      
+      // Enhanced content matches (if available)
+      if (event.enhancedContent != null) {
+        final highlights = event.enhancedContent!.highlights.join(' ').toLowerCase();
+        final keyPoints = event.enhancedContent!.keyPoints.join(' ').toLowerCase();
+        
+        if (highlights.contains(keyword)) score += 10.0;
+        if (keyPoints.contains(keyword)) score += 8.0;
+      }
+    }
+    
+    // Category-based bonuses for specific search terms
+    score += _getCategoryBonus(fullQuery, category);
+    
+    // Location-based bonuses
+    score += _getLocationBonus(fullQuery, area, venueName);
+    
+    // Family-friendly bonus for family-related searches
+    if (_isFamilySearch(fullQuery) && event.familySuitability.minAge != null && event.familySuitability.minAge! <= 12) {
+      score += 15.0;
+    }
+    
+    // Free events bonus for price-related searches
+    if (_isPriceSearch(fullQuery) && event.isFree) {
+      score += 10.0;
+    }
+    
+    return score;
+  }
+  
+  /// Get category-specific bonus scores
+  double _getCategoryBonus(String query, String category) {
+    final Map<String, List<String>> categoryKeywords = {
+      'kids_and_family': ['family', 'kids', 'children', 'playground', 'fun'],
+      'outdoor_activities': ['outdoor', 'park', 'beach', 'adventure', 'nature'],
+      'indoor_activities': ['indoor', 'mall', 'center', 'museum', 'gallery'],
+      'food_and_dining': ['food', 'restaurant', 'dining', 'cafe', 'meal'],
+      'water_sports': ['water', 'beach', 'swimming', 'boat', 'diving'],
+      'cultural': ['culture', 'heritage', 'art', 'history', 'traditional'],
+      'music_and_concerts': ['music', 'concert', 'show', 'performance', 'band'],
+      'sports_and_fitness': ['sport', 'fitness', 'gym', 'exercise', 'training'],
+    };
+    
+    for (final entry in categoryKeywords.entries) {
+      if (category.contains(entry.key)) {
+        for (final keyword in entry.value) {
+          if (query.contains(keyword)) {
+            return 20.0;
+          }
+        }
+      }
+    }
+    
+    return 0.0;
+  }
+  
+  /// Get location-specific bonus scores
+  double _getLocationBonus(String query, String area, String venueName) {
+    // Popular location keywords
+    final locationKeywords = {
+      'marina': ['marina', 'jbr', 'beach walk'],
+      'downtown': ['downtown', 'burj khalifa', 'dubai mall'],
+      'jumeirah': ['jumeirah', 'burj al arab', 'palm'],
+      'business bay': ['business bay', 'canal'],
+      'deira': ['deira', 'gold souk', 'spice souk'],
+    };
+    
+    for (final entry in locationKeywords.entries) {
+      if (area.contains(entry.key) || venueName.contains(entry.key)) {
+        for (final keyword in entry.value) {
+          if (query.contains(keyword)) {
+            return 15.0;
+          }
+        }
+      }
+    }
+    
+    return 0.0;
+  }
+  
+  /// Check if search is family-related
+  bool _isFamilySearch(String query) {
+    final familyKeywords = ['family', 'kids', 'children', 'toddler', 'baby', 'playground'];
+    return familyKeywords.any((keyword) => query.contains(keyword));
+  }
+  
+  /// Check if search is price-related
+  bool _isPriceSearch(String query) {
+    final priceKeywords = ['free', 'cheap', 'budget', 'affordable', 'cost'];
+    return priceKeywords.any((keyword) => query.contains(keyword));
   }
 }
