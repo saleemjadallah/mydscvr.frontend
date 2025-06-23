@@ -17,6 +17,7 @@ class DioConfig {
     
     // If custom API URL is provided at compile time, use it
     if (customApiUrl.isNotEmpty) {
+      print('🔧 DioConfig: Using environment API_BASE_URL: $customApiUrl');
       return customApiUrl;
     }
     
@@ -24,14 +25,17 @@ class DioConfig {
     if (!kIsWeb) {
       // For mobile platforms, we need absolute URLs
       // Default to production backend for mobile
+      print('🔧 DioConfig: Mobile platform detected, using: $productionUrl');
       return productionUrl;
     }
     
-    // For web platforms, check the current domain
+    // For web platforms, check the current domain and use Netlify proxy
     try {
       if (Uri.base.host.contains('mydscvr.xyz') || Uri.base.host.contains('mydscvr.ai')) {
-        return 'https://mydscvr.xyz/api';
+        print('🔧 DioConfig: Production domain detected, using Netlify proxy: /api');
+        return '/api'; // Use Netlify proxy for CORS handling
       } else if (Uri.base.host.contains('localhost')) {
+        print('🔧 DioConfig: Localhost detected, using: $localUrl');
         return localUrl;
       }
     } catch (e) {
@@ -39,6 +43,7 @@ class DioConfig {
     }
     
     // For web development and other cases, use Netlify proxy
+    print('🔧 DioConfig: Default fallback, using Netlify proxy: /api');
     return '/api'; // Use Netlify proxy for CORS handling
   }
   
