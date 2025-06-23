@@ -2201,11 +2201,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       
       // Enhanced content matches (if available)
       if (event.enhancedContent != null) {
-        final highlights = event.enhancedContent!.highlights.join(' ').toLowerCase();
-        final keyPoints = event.enhancedContent!.keyPoints.join(' ').toLowerCase();
+        final highlights = event.enhancedContent!.highlights?.toLowerCase() ?? '';
+        final familySummary = event.enhancedContent!.familySummary?.toLowerCase() ?? '';
+        final kidsDescription = event.enhancedContent!.kidsDescription?.toLowerCase() ?? '';
+        final practicalInfo = event.enhancedContent!.practicalInfo?.toLowerCase() ?? '';
+        final tips = event.enhancedContent!.tips?.toLowerCase() ?? '';
         
         if (highlights.contains(keyword)) score += 10.0;
-        if (keyPoints.contains(keyword)) score += 8.0;
+        if (familySummary.contains(keyword)) score += 12.0;
+        if (kidsDescription.contains(keyword)) score += 11.0;
+        if (practicalInfo.contains(keyword)) score += 8.0;
+        if (tips.contains(keyword)) score += 7.0;
       }
     }
     

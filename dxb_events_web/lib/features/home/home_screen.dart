@@ -1397,7 +1397,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     
     // IMPROVED: Better family event detection with more comprehensive matching
     final familyCount = eventsForCounting.where((e) => 
-      e.tags.any((tag) => {
+      e.tags.any((tag) {
         final tagLower = tag.toLowerCase();
         return tagLower.contains('family') || 
                tagLower.contains('kids') || 
@@ -1406,13 +1406,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                tagLower.contains('all-ages') ||
                tag == 'Family-friendly' ||  // Exact match for hyphenated version
                tag == 'Family-Friendly';    // Exact match for title case version
-      }())
+      })
     ).length;
     
     // NEW: Indoor activities detection using tags AND venue information
-    final indoorCount = eventsForCounting.where((e) => {
+    final indoorCount = eventsForCounting.where((e) {
       // Check tags for indoor keywords
-      final hasIndoorTags = e.tags.any((tag) => {
+      final hasIndoorTags = e.tags.any((tag) {
         final tagLower = tag.toLowerCase();
         return tagLower.contains('indoor') ||
                tagLower.contains('theatre') ||
@@ -1423,7 +1423,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                tagLower.contains('mall') ||
                tagLower.contains('cinema') ||
                tagLower.contains('arts'); // Arts events are often indoor
-      }());
+      });
       
       // Check venue name for indoor locations
       final venueName = e.venue.name.toLowerCase();
@@ -1438,7 +1438,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                            venueName.contains('gallery');
       
       return hasIndoorTags || hasIndoorVenue;
-    }()).length;
+    }).length;
     
     // Debug: Check what events we're using for counting
     print('🔍 DEBUG: Using ${eventsForCounting.length} events for category counting (_allEventsForCounting: ${_allEventsForCounting.length}, _featuredEvents: ${_featuredEvents.length})');
@@ -1460,7 +1460,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     
     // Enhanced debugging: Show sample tags from each category
     final familyEvents = eventsForCounting.where((e) => 
-      e.tags.any((tag) => {
+      e.tags.any((tag) {
         final tagLower = tag.toLowerCase();
         return tagLower.contains('family') || 
                tagLower.contains('kids') || 
@@ -1469,7 +1469,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                tagLower.contains('all-ages') ||
                tag == 'Family-friendly' ||
                tag == 'Family-Friendly';
-      }())
+      })
     ).toList();
     
     print('🔍 DEBUG: Category counts - Family: $familyCount, Indoor: $indoorCount, Beach: $beachCount, Cultural: $culturalCount');
