@@ -77,11 +77,11 @@ gh workflow run deploy-frontend.yml -f environment=development
 
 ## Build Optimizations
 
-- **Web Renderer**: CanvasKit for better performance
-- **Tree Shaking**: Eliminates unused code
-- **Code Splitting**: Reduces initial bundle size
+- **Release Mode**: Optimized production build
+- **Environment Variables**: Secure configuration injection
 - **Asset Compression**: Optimized images and fonts
-- **Service Worker**: Caching for offline support
+- **Code Generation**: Automated serialization code
+- **Dependency Resolution**: Clean package management
 
 ## Quality Assurance
 
