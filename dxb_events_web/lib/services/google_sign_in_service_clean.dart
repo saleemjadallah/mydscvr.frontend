@@ -32,22 +32,61 @@ class GoogleSignInServiceClean {
 
   /// Wait for Google API to load
   Future<void> _waitForGoogleAPI() async {
+    // First check if script failed to load
+    try {
+      if (js.context.hasProperty('googleScriptError') && js.context['googleScriptError'] == true) {
+        throw Exception('Google Identity Services script failed to load. Please check your network connection and disable ad blockers.');
+      }
+    } catch (e) {
+      // Continue if property doesn't exist
+    }
+    
     var attempts = 0;
-    while (attempts < 50) {
+    while (attempts < 150) { // Increased from 100 to 150 attempts
       try {
+        // Check if script loaded successfully
+        bool scriptLoaded = false;
+        try {
+          scriptLoaded = js.context.hasProperty('googleScriptLoaded') && js.context['googleScriptLoaded'] == true;
+        } catch (e) {
+          // Continue checking
+        }
+        
         if (js.context.hasProperty('google') && 
             js.context['google'] != null &&
-            js.context['google']['accounts'] != null) {
+            js.context['google']['accounts'] != null &&
+            js.context['google']['accounts']['id'] != null) {
+          debugPrint('✅ Google API loaded successfully after ${attempts + 1} attempts (script loaded: $scriptLoaded)');
           return;
         }
+        
+        // Special logging for the first few attempts
+        if (attempts < 5) {
+          debugPrint('⏳ Attempt ${attempts + 1}: Waiting for Google API...');
+          debugPrint('   - Script loaded flag: $scriptLoaded');
+          debugPrint('   - Google object: ${js.context.hasProperty('google')}');
+        } else if (attempts % 10 == 0) {
+          debugPrint('⏳ Still waiting for Google API (attempt ${attempts + 1}/150)...');
+        }
+        
       } catch (e) {
-        // Continue waiting
+        if (attempts < 5) {
+          debugPrint('⏳ Attempt ${attempts + 1}: Exception checking Google API ($e)');
+        }
       }
       
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 200));
       attempts++;
     }
-    throw Exception('Google API failed to load');
+    
+    debugPrint('❌ Google API failed to load after ${attempts} attempts');
+    debugPrint('🔧 Troubleshooting tips:');
+    debugPrint('   1. Check if ad blockers are blocking Google scripts');
+    debugPrint('   2. Verify network connectivity');
+    debugPrint('   3. Try refreshing the page');
+    debugPrint('   4. Check browser console for errors');
+    
+    throw Exception('Google API failed to load after ${attempts} attempts. Please check your network connection, disable ad blockers, and refresh the page.');
   }
 
   /// Clean Google Sign-In using One Tap (no redirect URI needed)
@@ -86,38 +125,63 @@ class GoogleSignInServiceClean {
         // Initialize Google One Tap - this doesn't use redirect URIs
         js.context.callMethod('eval', ['''
           try {
-            console.log('Setting up Google One Tap...');
+            console.log('🔍 Setting up Google One Tap...');
+            console.log('🔧 Client ID:', '$_clientId');
+            console.log('🔧 Callback function:', '$callbackName');
             
             if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+              console.log('✅ Google Identity Services available');
               
               // Initialize One Tap - no redirect URI needed
               google.accounts.id.initialize({
                 client_id: '$_clientId',
                 callback: $callbackName,
                 auto_select: false,
-                cancel_on_tap_outside: false
+                cancel_on_tap_outside: false,
+                use_fedcm_for_prompt: false,
+                itp_support: true
               });
               
-              console.log('Google One Tap initialized, prompting user...');
+              console.log('✅ Google One Tap initialized, prompting user...');
               
               // Show One Tap prompt
               google.accounts.id.prompt((notification) => {
-                console.log('One Tap notification:', notification.getMomentType());
+                console.log('📋 One Tap notification:', notification.getMomentType());
                 
                 if (notification.isNotDisplayed()) {
-                  console.log('One Tap not displayed');
+                  console.log('⚠️ One Tap not displayed - reason:', notification.getNotDisplayedReason());
+                  // Fallback to renderButton if One Tap fails
+                  setTimeout(() => {
+                    console.log('🔄 Attempting fallback to sign-in button...');
+                    const buttonDiv = document.createElement('div');
+                    buttonDiv.id = 'google-signin-fallback';
+                    buttonDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+                    document.body.appendChild(buttonDiv);
+                    
+                    google.accounts.id.renderButton(buttonDiv, {
+                      theme: 'outline',
+                      size: 'large',
+                      text: 'sign_in_with',
+                      shape: 'rectangular'
+                    });
+                  }, 1000);
                 } else if (notification.isSkippedMoment()) {
-                  console.log('User skipped One Tap');
+                  console.log('👤 User skipped One Tap');
                 } else if (notification.isDismissedMoment()) {
-                  console.log('User dismissed One Tap');
+                  console.log('❌ User dismissed One Tap');
                 }
               });
               
             } else {
+              console.error('❌ Google Identity Services not available');
+              console.log('🔍 Google object:', typeof google);
+              console.log('🔍 Google.accounts:', typeof google?.accounts);
+              console.log('🔍 Google.accounts.id:', typeof google?.accounts?.id);
               throw new Error('Google Identity Services not available');
             }
           } catch (error) {
-            console.error('Google One Tap setup error:', error);
+            console.error('💥 Google One Tap setup error:', error);
+            console.error('💥 Error stack:', error.stack);
             throw error;
           }
         ''']);

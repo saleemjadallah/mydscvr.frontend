@@ -65,7 +65,7 @@
   <link rel="manifest" href="manifest.json">
   
   <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleScriptLoaded()" onerror="onGoogleScriptError()"></script>
 
   <!-- Loading Styles -->
   <style>
@@ -201,6 +201,34 @@
       // Use path-based routing instead of hash routing
       usePathUrlStrategy: true
     };
+    
+    // Google Sign-In Script Loading Handlers
+    function onGoogleScriptLoaded() {
+      console.log('✅ Google Identity Services script loaded successfully');
+      console.log('🔍 Google object available:', typeof google !== 'undefined');
+      console.log('🔍 Google.accounts available:', typeof google?.accounts !== 'undefined');
+      console.log('🔍 Google.accounts.id available:', typeof google?.accounts?.id !== 'undefined');
+      
+      // Set a flag that Flutter can check
+      window.googleScriptLoaded = true;
+      
+      // Dispatch custom event for Flutter to listen to
+      window.dispatchEvent(new CustomEvent('google-script-loaded'));
+    }
+    
+    function onGoogleScriptError() {
+      console.error('❌ Failed to load Google Identity Services script');
+      console.error('🔧 This might be due to:');
+      console.error('   - Ad blockers blocking Google scripts');
+      console.error('   - Network connectivity issues');
+      console.error('   - Google services being unavailable');
+      
+      // Set error flag
+      window.googleScriptError = true;
+      
+      // Dispatch error event
+      window.dispatchEvent(new CustomEvent('google-script-error'));
+    }
     
     // Handle logo loading error
     function handleLogoError() {
