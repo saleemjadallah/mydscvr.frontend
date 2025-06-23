@@ -27,6 +27,21 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
   Map<String, int> _categoryCounts = {};
   bool _isLoading = true;
   
+  // Static fallback counts for immediate display
+  static const Map<String, int> _fallbackCounts = {
+    'culture': 12,
+    'outdoor': 18,
+    'kids': 24,
+    'food': 15,
+    'entertainment': 20,
+    'indoor': 16,
+  };
+  
+  // Cache for category data
+  static Map<String, List<Event>>? _cachedCategoryEvents;
+  static Map<String, int>? _cachedCategoryCounts;
+  static DateTime? _cacheTimestamp;
+  
   final categories = [
     {
       'id': 'culture',
@@ -124,122 +139,103 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
   void initState() {
     super.initState();
     _eventsService = EventsService();
-    _loadCategoryData();
+    
+    // Show fallback counts immediately for faster perceived loading
+    _categoryCounts = Map.from(_fallbackCounts);
+    _isLoading = false; // Show UI immediately
+    
+    // Load real data in background
+    _loadCategoryDataOptimized();
   }
 
-  Future<void> _loadCategoryData() async {
-    final Map<String, List<Event>> categoryEvents = {};
-    final Map<String, int> categoryCounts = {};
-
-    for (final category in categories) {
-      final categoryId = category['id'] as String;
-      final apiCategories = category['apiCategories'] as List<String>;
-      final tags = category['tags'] as List<String>;
+  Future<void> _loadCategoryDataOptimized() async {
+    // Check if we have recent cached data (valid for 5 minutes)
+    final now = DateTime.now();
+    if (_cachedCategoryEvents != null && 
+        _cachedCategoryCounts != null && 
+        _cacheTimestamp != null &&
+        now.difference(_cacheTimestamp!).inMinutes < 5) {
       
-      // Fetch events for this category
-      final events = await _fetchEventsForCategory(apiCategories, tags);
-      categoryEvents[categoryId] = events;
-      categoryCounts[categoryId] = events.length;
-    }
-
-    if (mounted) {
-      setState(() {
-        _categoryEvents = categoryEvents;
-        _categoryCounts = categoryCounts;
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<List<Event>> _fetchEventsForCategory(List<String> apiCategories, List<String> tags) async {
-    final Set<Event> allEvents = {};
-
-    print('🔍 Fetching events for category with API categories: $apiCategories');
-    print('🔍 Tags to match: $tags');
-
-    // Fetch events by exact category match
-    for (final category in apiCategories) {
-      try {
-        final response = await _eventsService.getEvents(
-          category: category,
-          perPage: 50,
-          sortBy: 'start_date',
-        );
-        
-        if (response.isSuccess && response.data != null) {
-          print('🔍 Found ${response.data!.length} events for exact category "$category"');
-          allEvents.addAll(response.data!);
-        } else {
-          print('🔍 No events found for exact category "$category" - ${response.error}');
-        }
-      } catch (e) {
-        print('❌ Error fetching events for category $category: $e');
+      print('📦 Using cached category data');
+      if (mounted) {
+        setState(() {
+          _categoryEvents = Map.from(_cachedCategoryEvents!);
+          _categoryCounts = Map.from(_cachedCategoryCounts!);
+        });
       }
+      return;
     }
 
-    // Also fetch all events and filter by tags and category matching
+    print('🔄 Loading fresh category data...');
+    
     try {
+      // Fetch all events once instead of multiple calls
       final response = await _eventsService.getEvents(
-        perPage: 200, // Increased to get more events for filtering
+        perPage: 100, // Reduced from 200
         sortBy: 'start_date',
       );
       
       if (response.isSuccess && response.data != null) {
-        print('🔍 Fetched ${response.data!.length} total events for filtering');
+        final allEvents = response.data!;
+        print('📊 Processing ${allEvents.length} events for categories');
         
-        final filteredEvents = response.data!.where((event) {
-          // Check category match (case-insensitive)
-          final categoryMatch = apiCategories.any((category) => 
-            event.category.toLowerCase() == category.toLowerCase()
-          );
+        final Map<String, List<Event>> categoryEvents = {};
+        final Map<String, int> categoryCounts = {};
+
+        // Process all categories in parallel using the same event data
+        for (final category in categories) {
+          final categoryId = category['id'] as String;
+          final apiCategories = category['apiCategories'] as List<String>;
+          final tags = category['tags'] as List<String>;
           
-          // Check tag match (case-insensitive partial matching)
-          final tagMatch = tags.any((tag) => 
-            event.tags.any((eventTag) => 
-              eventTag.toLowerCase().contains(tag.toLowerCase())
-            ) ||
-            event.category.toLowerCase().contains(tag.toLowerCase()) ||
-            event.title.toLowerCase().contains(tag.toLowerCase()) ||
-            event.description.toLowerCase().contains(tag.toLowerCase())
-          );
-          
-          final hasMatch = categoryMatch || tagMatch;
-          
-          if (hasMatch) {
-            print('🔍 Event "${event.title}" matches - Category: ${event.category}, Tags: ${event.tags}');
-          }
-          
-          return hasMatch;
-        });
+          final filteredEvents = _filterEventsForCategory(allEvents, apiCategories, tags);
+          categoryEvents[categoryId] = filteredEvents.take(10).toList(); // Limit to top 10
+          categoryCounts[categoryId] = filteredEvents.length;
+        }
+
+        // Cache the results
+        _cachedCategoryEvents = Map.from(categoryEvents);
+        _cachedCategoryCounts = Map.from(categoryCounts);
+        _cacheTimestamp = now;
+
+        if (mounted) {
+          setState(() {
+            _categoryEvents = categoryEvents;
+            _categoryCounts = categoryCounts;
+          });
+        }
         
-        allEvents.addAll(filteredEvents);
-        print('🔍 Added ${filteredEvents.length} events through filtering (category + tag matching)');
+        print('✅ Category data loaded and cached');
+      } else {
+        print('❌ Failed to load events: ${response.error}');
+        // Keep fallback counts if API fails
       }
     } catch (e) {
-      print('❌ Error fetching events for filtering: $e');
+      print('❌ Error loading category data: $e');
+      // Keep fallback counts if error occurs
     }
-
-    // Convert to list, filter for upcoming events, and sort
-    final upcomingEvents = allEvents
-        .toList(); // Temporarily removed .where((event) => event.isUpcoming) to show all events
-    
-    // Sort by start date
-    upcomingEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
-        
-    print('🔍 Final result: ${upcomingEvents.length} events for this category (showing all events for testing)');
-    if (upcomingEvents.isNotEmpty) {
-      print('🔍 Sample events: ${upcomingEvents.take(3).map((e) => "${e.title} (${e.category})").join(", ")}');
-    } else {
-      print('🔍 No events found - checking all events without date filter...');
-      final allEventsWithoutDateFilter = allEvents.toList();
-      print('🔍 Total events without date filter: ${allEventsWithoutDateFilter.length}');
-      if (allEventsWithoutDateFilter.isNotEmpty) {
-        print('🔍 Sample all events: ${allEventsWithoutDateFilter.take(3).map((e) => "${e.title} (${e.category})").join(", ")}');
-      }
-    }
-    
-    return upcomingEvents;
   }
+  
+  List<Event> _filterEventsForCategory(List<Event> allEvents, List<String> apiCategories, List<String> tags) {
+    return allEvents.where((event) {
+      // Check category match (case-insensitive)
+      final categoryMatch = apiCategories.any((category) => 
+        event.category.toLowerCase() == category.toLowerCase()
+      );
+      
+      // Check tag match (case-insensitive partial matching)
+      final tagMatch = tags.any((tag) => 
+        event.tags.any((eventTag) => 
+          eventTag.toLowerCase().contains(tag.toLowerCase())
+        ) ||
+        event.category.toLowerCase().contains(tag.toLowerCase()) ||
+        event.title.toLowerCase().contains(tag.toLowerCase())
+      );
+      
+      return categoryMatch || tagMatch;
+    }).toList();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -275,11 +271,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
           
           const SizedBox(height: 24),
           
-          // Loading state
-          if (_isLoading)
-            _buildLoadingGrid()
-          else
-            // Responsive Grid
+          // Responsive Grid (show immediately with fallback data)
             LayoutBuilder(
               builder: (context, constraints) {
                 final isLarge = constraints.maxWidth > 1200;
@@ -313,42 +305,11 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
     );
   }
 
-  Widget _buildLoadingGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isLarge = constraints.maxWidth > 1200;
-        final isMedium = constraints.maxWidth > 800;
-        final crossAxisCount = isLarge ? 3 : (isMedium ? 2 : 1);
-        
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: 1.2,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-          ),
-          itemCount: 6,
-          itemBuilder: (context, index) {
-            return Container(
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   Widget _buildCategoryBubble(Map<String, dynamic> category, bool isHovered) {
     final categoryId = category['id'] as String;
     final eventCount = _categoryCounts[categoryId] ?? 0;
+    final isLoadingReal = _cachedCategoryEvents == null; // Show loading indicator if no cached data
     
     return MouseRegion(
       onEnter: (_) => setState(() => _hoveredCategory = category['id']),
@@ -440,7 +401,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
                 ),
                 
                 // Content
-                if (!isHovered) _buildDefaultContent(category, eventCount),
+                if (!isHovered) _buildDefaultContent(category, eventCount, isLoadingReal),
                 
                 // Hover Preview
                 if (isHovered) _buildHoverContent(category, categoryId),
@@ -452,7 +413,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
     );
   }
 
-  Widget _buildDefaultContent(Map<String, dynamic> category, int eventCount) {
+  Widget _buildDefaultContent(Map<String, dynamic> category, int eventCount, bool isLoadingReal) {
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: _hoveredCategory == category['id'] ? 0.0 : 1.0,
@@ -485,13 +446,29 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    '$eventCount events',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$eventCount events',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (isLoadingReal) ...[
+                        const SizedBox(width: 4),
+                        SizedBox(
+                          width: 8,
+                          height: 8,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.7)),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
