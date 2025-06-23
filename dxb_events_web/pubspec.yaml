@@ -99,7 +99,7 @@ dev_dependencies:
   mockito: ^5.4.2
   integration_test:
     sdk: flutter
-  dwds: ^24.3.10
+  dwds: ^24.3.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
