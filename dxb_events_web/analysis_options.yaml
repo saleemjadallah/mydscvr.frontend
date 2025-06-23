@@ -32,23 +32,6 @@ linter:
     sized_box_for_whitespace: false
     unnecessary_to_list_in_spreads: false
     use_build_context_synchronously: false
-    unused_import: false
-    unused_local_variable: false
-    unused_field: false
-    unused_element: false
-    unused_catch_clause: false
-    unused_catch_stack: false
-    dead_code: false
-    dead_null_aware_expression: false
-    unnecessary_null_comparison: false
-    unnecessary_non_null_assertion: false
-    invalid_null_aware_operator: false
-    unchecked_use_of_nullable_value: false
-    unnecessary_type_check: false
-    unnecessary_import: false
-    override_on_non_overriding_member: false
-    unreachable_switch_default: false
-    prefer_typing_uninitialized_variables: false
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
 # Additional information about this file can be found at

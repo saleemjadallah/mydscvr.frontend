@@ -18,12 +18,10 @@ class AppTheme {
       secondary: AppColors.dubaiCoral,
       tertiary: AppColors.dubaiGold,
       surface: AppColors.surface,
-      background: AppColors.background,
       error: AppColors.error,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: AppColors.textPrimary,
-      onBackground: AppColors.textPrimary,
       onError: Colors.white,
     ),
 
@@ -89,7 +87,7 @@ class AppTheme {
     ),
 
     // Card theme with soft shadows
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       color: AppColors.surface,
       elevation: 4,
       shadowColor: AppColors.shadowLight,
@@ -226,7 +224,7 @@ class AppTheme {
     ),
 
     // Dialog theme
-    dialogTheme: DialogTheme(
+    dialogTheme: const DialogThemeData(
       backgroundColor: AppColors.surface,
       elevation: 24,
       shape: RoundedRectangleBorder(
@@ -276,7 +274,6 @@ class AppTheme {
       secondary: AppColors.dubaiCoral,
       tertiary: AppColors.dubaiGold,
       surface: const Color(0xFF2D2D2D),
-      background: const Color(0xFF1A1A1A),
       error: AppColors.error,
     ),
   );
