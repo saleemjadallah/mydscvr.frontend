@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -825,92 +826,138 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
     }
     
     return Container(
-      margin: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: FadeInSlideUp(
         delay: const Duration(milliseconds: 200),
-        child: Container(
-          height: 280,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.elasticOut,
+          height: 380, // 30% taller for premium real estate
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: AppColors.oceanGradient,
+            borderRadius: BorderRadius.circular(32), // Ultra-modern radius
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF17A2B8), // Teal
+                Color(0xFF6C5CE7), // Purple
+                Color(0xFF17A2B8), // Back to teal
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
             boxShadow: [
+              // Multi-layered shadow system
               BoxShadow(
-                color: AppColors.dubaiTeal.withOpacity(0.3),
+                color: AppColors.dubaiTeal.withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+                spreadRadius: 5,
+              ),
+              BoxShadow(
+                color: const Color(0xFF6C5CE7).withOpacity(0.3),
                 blurRadius: 20,
-                offset: const Offset(0, 10),
+                offset: const Offset(0, 8),
+                spreadRadius: 2,
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 40,
+                offset: const Offset(0, 25),
+                spreadRadius: 10,
               ),
             ],
+            // Animated gradient border
+            border: Border.all(
+              width: 2,
+              color: Colors.white.withOpacity(0.3),
+            ),
           ),
-          child: Stack(
-            children: [
-              // Background pattern bubbles
-              FadeInSlideUp(
-                delay: const Duration(milliseconds: 400),
-                child: Positioned(
-                  top: 20,
-                  right: 60,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Stack(
+              children: [
+                // Glass morphism backdrop
+                Positioned.fill(
                   child: Container(
-                    width: 80,
-                    height: 80,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.1),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.15),
+                          Colors.white.withOpacity(0.05),
+                          Colors.white.withOpacity(0.1),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              FadeInSlideUp(
-                delay: const Duration(milliseconds: 600),
-                child: Positioned(
-                  bottom: 40,
-                  left: 30,
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.08),
-                    ),
-                  ),
-                ),
-              ),
+                
+                // Animated floating particles
+                ...List.generate(6, (index) => _buildFloatingParticle(index)),
+                
+                // Premium gradient mesh background
+                _buildGradientMeshBackground(),
               
-              // MyDscvr Logo/Badge
+              // Premium floating algorithm badge
               FadeInSlideUp(
                 delay: const Duration(milliseconds: 800),
                 child: Positioned(
-                  top: 16,
-                  right: 16,
+                  top: 20,
+                  right: 20,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFD4AF37), // Gold
+                          Color(0xFFFFD700), // Bright gold
+                          Color(0xFFD4AF37), // Gold
+                        ],
                       ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFD4AF37).withOpacity(0.4),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          LucideIcons.sparkles,
-                          size: 16,
+                          LucideIcons.zap,
+                          size: 18,
                           color: Colors.white,
-                        ),
-                        const SizedBox(width: 4),
+                        ).animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 2000.ms, color: Colors.white.withOpacity(0.8)),
+                        const SizedBox(width: 6),
                         Text(
-                          'Choice',
+                          'AI Choice',
                           style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                      .scale(
+                        begin: const Offset(0.95, 0.95),
+                        end: const Offset(1.05, 1.05),
+                        duration: 2000.ms,
+                        curve: Curves.easeInOut,
+                      ),
                 ),
               ),
               
@@ -920,20 +967,43 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with algorithm badge
+                    // Enhanced header with premium typography
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         FadeInSlideUp(
                           delay: const Duration(milliseconds: 300),
-                          child: Text(
-                            'MyDscvr\'s Choice',
-                            style: GoogleFonts.comfortaa(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          child: ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                colors: [
+                                  Colors.white,
+                                  const Color(0xFFD4AF37), // Gold accent for "Choice"
+                                  Colors.white,
+                                ],
+                                stops: const [0.0, 0.7, 1.0],
+                              ).createShader(bounds);
+                            },
+                            child: Text(
+                              'MyDscvr\'s Choice',
+                              style: GoogleFonts.comfortaa(
+                                fontSize: 32, // Larger for premium impact
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.2, // Enhanced letter spacing
+                                height: 1.1,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ).animate()
+                              .fadeIn(duration: 600.ms, delay: 300.ms)
+                              .slideY(begin: 0.3, end: 0.0, duration: 800.ms, curve: Curves.easeOutCubic),
                         ),
                         
                         const SizedBox(height: 8),
@@ -986,31 +1056,90 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
                     Expanded(
                       child: Row(
                         children: [
-                          // Event image placeholder
+                          // Premium event image with enhanced styling
                           FadeInSlideUp(
                             delay: const Duration(milliseconds: 700),
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                color: Colors.white.withOpacity(0.2),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
+                            child: MouseRegion(
+                              onEnter: (_) => setState(() => _hoveredEventId = placeholderEvent.id),
+                              onExit: (_) => setState(() => _hoveredEventId = null),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                transform: Matrix4.identity()
+                                  ..scale(_hoveredEventId == placeholderEvent.id ? 1.05 : 1.0),
+                                width: 160, // Larger premium size
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24), // Increased radius
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white.withOpacity(0.3),
+                                      Colors.white.withOpacity(0.1),
+                                      const Color(0xFFD4AF37).withOpacity(0.2), // Gold tint
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: Icon(
-                                LucideIcons.calendar,
-                                color: Colors.white.withOpacity(0.8),
-                                size: 40,
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.6), // Enhanced border
+                                    width: 3,
+                                  ),
+                                  boxShadow: [
+                                    // Multiple shadow layers for depth
+                                    BoxShadow(
+                                      color: const Color(0xFFD4AF37).withOpacity(0.3),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                      spreadRadius: 2,
+                                    ),
+                                    BoxShadow(
+                                      color: AppColors.dubaiTeal.withOpacity(0.2),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 4),
+                                      spreadRadius: 1,
+                                    ),
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.15),
+                                      blurRadius: 25,
+                                      offset: const Offset(0, 12),
+                                      spreadRadius: 3,
+                                    ),
+                                  ],
+                                ),
+                                child: Stack(
+                                  children: [
+                                    // Background icon with glow effect
+                                    Center(
+                                      child: Icon(
+                                        LucideIcons.sparkles,
+                                        color: Colors.white.withOpacity(0.9),
+                                        size: 50,
+                                      ).animate(onPlay: (controller) => controller.repeat())
+                                          .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6))
+                                          .scale(
+                                            begin: const Offset(0.9, 0.9),
+                                            end: const Offset(1.1, 1.1),
+                                            duration: 2000.ms,
+                                            curve: Curves.easeInOut,
+                                          ),
+                                    ),
+                                    // Overlay gradient for premium look
+                                    Positioned.fill(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(21),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.transparent,
+                                              const Color(0xFFD4AF37).withOpacity(0.1),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -1027,14 +1156,24 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
                                   child: Text(
                                     placeholderEvent.title,
                                     style: GoogleFonts.inter(
-                                      fontSize: 18,
+                                      fontSize: 22, // Larger premium title
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
-                                      height: 1.2,
+                                      height: 1.3, // Better line height
+                                      letterSpacing: 0.3,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.4),
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 3,
+                                        ),
+                                      ],
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                  ),
+                                  ).animate()
+                                      .fadeIn(duration: 600.ms, delay: 900.ms)
+                                      .slideX(begin: 0.3, end: 0.0, duration: 800.ms, curve: Curves.easeOutCubic),
                                 ),
                                 
                                 const SizedBox(height: 8),
@@ -1168,10 +1307,11 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
+          ), // End Stack children
+        ), // End ClipRRect
+      ), // End AnimatedContainer  
+    ), // End FadeInSlideUp
+    ); // End Container
   }
   
   Widget _buildAnimatedMyDscvrChoiceLoading() {
@@ -1322,6 +1462,52 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
     print('🎯 DEBUG: Selected curated event: ${selectedEvents.first.title} (score: ${topEvents[rotationIndex].value.toStringAsFixed(1)})');
     
     return selectedEvents;
+  }
+
+  /// Build floating particle animation for premium background effect
+  Widget _buildFloatingParticle(int index) {
+    final random = Random(index * 42);
+    final size = 4.0 + random.nextDouble() * 8.0;
+    final left = random.nextDouble() * 300;
+    final top = random.nextDouble() * 300;
+    final duration = 3000 + random.nextInt(4000);
+    
+    return Positioned(
+      left: left,
+      top: top,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              Colors.white.withOpacity(0.8),
+              const Color(0xFFD4AF37).withOpacity(0.4),
+              Colors.transparent,
+            ],
+          ),
+        ),
+      ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+          .scale(
+            begin: const Offset(0.3, 0.3),
+            end: const Offset(1.5, 1.5),
+            duration: duration.ms,
+            curve: Curves.easeInOut,
+          )
+          .fadeIn(duration: (duration * 0.3).round().ms)
+          .then()
+          .fadeOut(duration: (duration * 0.3).round().ms),
+    );
+  }
+
+  /// Build gradient mesh background for ultra-modern premium effect
+  Widget _buildGradientMeshBackground() {
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: GradientMeshPainter(),
+      ),
+    );
   }
 
   String _formatEventTime(DateTime date) {
@@ -1550,4 +1736,68 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
       ),
     );
   }
+}
+
+/// Custom painter for premium gradient mesh background effect
+class GradientMeshPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    // Create multiple gradient overlays for mesh effect
+    final gradients = [
+      RadialGradient(
+        center: const Alignment(-0.3, -0.5),
+        radius: 0.8,
+        colors: [
+          const Color(0xFFD4AF37).withOpacity(0.15), // Gold
+          Colors.transparent,
+        ],
+      ),
+      RadialGradient(
+        center: const Alignment(0.7, 0.3),
+        radius: 0.6,
+        colors: [
+          const Color(0xFF6C5CE7).withOpacity(0.1), // Purple
+          Colors.transparent,
+        ],
+      ),
+      RadialGradient(
+        center: const Alignment(0.2, 0.8),
+        radius: 0.5,
+        colors: [
+          const Color(0xFF17A2B8).withOpacity(0.12), // Teal
+          Colors.transparent,
+        ],
+      ),
+    ];
+
+    for (int i = 0; i < gradients.length; i++) {
+      final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+      paint.shader = gradients[i].createShader(rect);
+      canvas.drawRect(rect, paint);
+    }
+
+    // Add subtle geometric pattern
+    paint.shader = null;
+    paint.color = Colors.white.withOpacity(0.03);
+    paint.strokeWidth = 1;
+    paint.style = PaintingStyle.stroke;
+
+    for (int i = 0; i < 6; i++) {
+      final path = Path();
+      final startX = (size.width / 6) * i;
+      path.moveTo(startX, 0);
+      path.quadraticBezierTo(
+        startX + size.width / 12,
+        size.height / 2,
+        startX + size.width / 6,
+        size.height,
+      );
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 } 
