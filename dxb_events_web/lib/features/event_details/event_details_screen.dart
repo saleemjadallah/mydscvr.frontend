@@ -394,8 +394,10 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
   Widget _buildTabContent(Event event) {
     return SliverFillRemaining(
+      hasScrollBody: true,
       child: TabBarView(
         controller: _tabController,
+        physics: const ClampingScrollPhysics(),
         children: [
           _buildOverviewTab(event),
           _buildDetailsTab(event),
@@ -408,6 +410,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
   Widget _buildOverviewTab(Event event) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,6 +608,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
   Widget _buildDetailsTab(Event event) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -796,6 +800,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
   Widget _buildLocationTab(Event event) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -884,6 +889,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
   Widget _buildAdviceTab(Event event) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: EventAdviceWidget(
         eventId: event.id,
