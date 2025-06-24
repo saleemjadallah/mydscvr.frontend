@@ -183,9 +183,9 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
                 child: _buildAnimatedTrendingEvents(),
               ),
               
-              // Family Spotlight
+              // MyDscvr's Choice banner
               SliverToBoxAdapter(
-                child: _buildAnimatedFamilySpotlight(),
+                child: _buildAnimatedMyDscvrChoice(),
               ),
               
               // Explore All Events CTA
@@ -790,98 +790,420 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
     );
   }
 
-  Widget _buildAnimatedFamilySpotlight() {
+  Widget _buildAnimatedMyDscvrChoice() {
+    print('🎯 DEBUG: Building Animated MyDscvr\'s Choice Banner');
+    
+    // Use first available event as placeholder
+    final placeholderEvent = _upcomingEvents.isNotEmpty ? _upcomingEvents.first : null;
+    
+    if (placeholderEvent == null) {
+      return _buildAnimatedMyDscvrChoiceLoading();
+    }
+    
     return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FadeInSlideUp(
-            child: Text(
-              'Family Spotlight ⭐',
-              style: GoogleFonts.comfortaa(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+      margin: const EdgeInsets.all(24),
+      child: FadeInSlideUp(
+        delay: const Duration(milliseconds: 200),
+        child: Container(
+          height: 280,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: AppColors.oceanGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.dubaiTeal.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-            ),
+            ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          FadeInSlideUp(
-            delay: const Duration(milliseconds: 200),
-            child: CurvedContainer(
-              gradient: AppColors.sunsetGradient,
-              curveHeight: 30,
-              curvePosition: CurvePosition.both,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  FadeInSlideUp(
-                    delay: const Duration(milliseconds: 400),
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      child: const Icon(
-                        LucideIcons.users,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+          child: Stack(
+            children: [
+              // Background pattern bubbles
+              FadeInSlideUp(
+                delay: const Duration(milliseconds: 400),
+                child: Positioned(
+                  top: 20,
+                  right: 60,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.1),
                     ),
                   ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  FadeInSlideUp(
-                    delay: const Duration(milliseconds: 600),
-                    child: Text(
-                      'The Ahmed Family',
-                      style: GoogleFonts.comfortaa(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                ),
+              ),
+              FadeInSlideUp(
+                delay: const Duration(milliseconds: 600),
+                child: Positioned(
+                  bottom: 40,
+                  left: 30,
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.08),
                     ),
                   ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  FadeInSlideUp(
-                    delay: const Duration(milliseconds: 800),
-                    child: Text(
-                      '"DXB Events helped us discover amazing family activities we never knew existed in Dubai!"',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.9),
-                        fontStyle: FontStyle.italic,
+                ),
+              ),
+              
+              // MyDscvr Logo/Badge
+              FadeInSlideUp(
+                delay: const Duration(milliseconds: 800),
+                child: Positioned(
+                  top: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  FadeInSlideUp(
-                    delay: const Duration(milliseconds: 1000),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          LucideIcons.star,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.sparkles,
                           size: 16,
-                          color: AppColors.dubaiGold,
-                        );
-                      }),
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Choice',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              
+              // Main content
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with algorithm badge
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FadeInSlideUp(
+                          delay: const Duration(milliseconds: 300),
+                          child: Text(
+                            'MyDscvr\'s Choice',
+                            style: GoogleFonts.comfortaa(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 8),
+                        
+                        FadeInSlideUp(
+                          delay: const Duration(milliseconds: 500),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.dubaiGold.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.dubaiGold.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.zap,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'AI Curated Daily',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Event content
+                    Expanded(
+                      child: Row(
+                        children: [
+                          // Event image placeholder
+                          FadeInSlideUp(
+                            delay: const Duration(milliseconds: 700),
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.white.withOpacity(0.2),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                LucideIcons.calendar,
+                                color: Colors.white.withOpacity(0.8),
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                          
+                          const SizedBox(width: 20),
+                          
+                          // Event details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 900),
+                                  child: Text(
+                                    placeholderEvent.title,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      height: 1.2,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 8),
+                                
+                                // Date and location
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1100),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        LucideIcons.calendar,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _formatEventTime(placeholderEvent.startDate),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          color: Colors.white.withOpacity(0.9),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 4),
+                                
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1200),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        LucideIcons.mapPin,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          placeholderEvent.venue.area,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            color: Colors.white.withOpacity(0.9),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 12),
+                                
+                                // Algorithm insight
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1300),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Perfect for families like yours',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                
+                                const Spacer(),
+                                
+                                // CTA Button
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1400),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      context.go('/event/${placeholderEvent.id}');
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: AppColors.dubaiTeal,
+                                      elevation: 8,
+                                      shadowColor: Colors.black.withOpacity(0.2),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Discover Why',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Icon(
+                                          LucideIcons.arrowRight,
+                                          size: 16,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+  
+  Widget _buildAnimatedMyDscvrChoiceLoading() {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      child: FadeInSlideUp(
+        delay: const Duration(milliseconds: 200),
+        child: Container(
+          height: 280,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
+                  strokeWidth: 2,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Curating today\'s perfect choice...',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatEventTime(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final eventDay = DateTime(date.year, date.month, date.day);
+    
+    final hour = date.hour == 0 ? 12 : date.hour > 12 ? date.hour - 12 : date.hour;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+    final timeString = '$hour:$minute $period';
+    
+    if (eventDay == today) {
+      return 'Today $timeString';
+    } else if (eventDay == today.add(const Duration(days: 1))) {
+      return 'Tomorrow $timeString';
+    } else {
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${date.day} ${months[date.month - 1]} $timeString';
+    }
   }
 
   Widget _buildAnimatedHiddenGem() {
