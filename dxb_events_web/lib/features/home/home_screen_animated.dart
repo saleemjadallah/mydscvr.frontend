@@ -101,25 +101,18 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
           }
           if (upcomingResponse.isSuccess) {
             final allEvents = upcomingResponse.data ?? [];
-            // First try to get future events
-            var futureEvents = allEvents
+            print('📊 DEBUG: Total events from API: ${allEvents.length}');
+            
+            // Only get future events - this is for events users can actually attend
+            final futureEvents = allEvents
                 .where((e) => e.startDate.isAfter(DateTime.now()))
                 .toList();
-            
-            // If no future events, get recent events (last 30 days)
-            if (futureEvents.isEmpty) {
-              final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-              futureEvents = allEvents
-                  .where((e) => e.startDate.isAfter(thirtyDaysAgo))
-                  .toList();
-            }
-            
-            // If still empty, just use all events
-            if (futureEvents.isEmpty && allEvents.isNotEmpty) {
-              futureEvents = allEvents;
-            }
+            print('📊 DEBUG: Future events found: ${futureEvents.length}');
             
             _upcomingEvents = futureEvents.take(6).toList();
+            print('📊 DEBUG: Final upcoming events: ${_upcomingEvents.length}');
+          } else {
+            print('❌ DEBUG: API call failed: ${upcomingResponse.error}');
           }
           _isLoading = false;
           _errorMessage = upcomingResponse.error ?? totalCountResponse.error;
