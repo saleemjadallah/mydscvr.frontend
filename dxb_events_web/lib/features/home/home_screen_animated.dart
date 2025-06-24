@@ -158,11 +158,6 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
               // Beautiful hero section with curves and bubbles
               _buildAnimatedHeroSection(),
               
-              // Quick Filters
-              SliverToBoxAdapter(
-                child: _buildAnimatedQuickFilters(),
-              ),
-              
               // Featured Events
               SliverToBoxAdapter(
                 child: _buildAnimatedFeaturedEvents(),
@@ -755,114 +750,6 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
     );
   }
 
-  Widget _buildAnimatedQuickFilters() {
-    final quickFilters = [
-      {
-        'label': 'Today',
-        'type': 'today',
-        'icon': LucideIcons.calendar,
-        'gradient': AppColors.oceanGradient
-      },
-      {
-        'label': 'This Week',
-        'type': 'thisWeek',
-        'icon': LucideIcons.clock,
-        'gradient': AppColors.sunsetGradient
-      },
-      {
-        'label': 'Free Events',
-        'type': 'free',
-        'icon': LucideIcons.gift,
-        'gradient': AppColors.forestGradient
-      },
-      {
-        'label': 'Near Me',
-        'type': 'nearMe',
-        'icon': LucideIcons.mapPin,
-        'gradient': AppColors.royalGradient
-      },
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FadeInSlideUp(
-            delay: const Duration(milliseconds: 200),
-            child: Text(
-              'Quick Filters',
-              style: GoogleFonts.comfortaa(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: quickFilters.asMap().entries.map((entry) {
-                final index = entry.key;
-                final filter = entry.value;
-                
-                return Container(
-                  margin: EdgeInsets.only(
-                    right: index < quickFilters.length - 1 ? 12 : 0,
-                  ),
-                  child: FadeInSlideUp(
-                    delay: Duration(milliseconds: 300 + (index * 100)),
-                    child: PulsingButton(
-                      onPressed: () {
-                        // Navigate to events page where users can apply filters
-                        context.go('/events');
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        decoration: BoxDecoration(
-                          gradient: filter['gradient'] as LinearGradient,
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              filter['icon'] as IconData,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              filter['label'] as String,
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAnimatedFeaturedEvents() {
     return FadeInSlideUp(
