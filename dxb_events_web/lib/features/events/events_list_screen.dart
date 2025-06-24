@@ -228,6 +228,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1200;
+    final isMobile = screenWidth <= 800;
 
     return Scaffold(
       body: Column(
@@ -258,7 +259,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                 
                 // Main header
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 16 : 24, 
+                    vertical: isMobile ? 12 : 16
+                  ),
                   child: Row(
                     children: [
                       // Back button
@@ -329,18 +333,23 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                               Text(
                                 _getPageTitle(),
                                 style: GoogleFonts.comfortaa(
-                                  fontSize: 20,
+                                  fontSize: isMobile ? 16 : 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              Text(
-                                _getPageSubtitle(),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white.withOpacity(0.8),
+                              if (!isMobile || _getPageSubtitle().length < 30)
+                                Text(
+                                  _getPageSubtitle(),
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 10 : 12,
+                                    color: Colors.white.withOpacity(0.8),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
                             ],
                           ),
                         ],
@@ -361,7 +370,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(3),
+                        padding: EdgeInsets.all(isMobile ? 2 : 3),
                         child: Row(
                           children: [
                             Material(
@@ -389,13 +398,16 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                                     });
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: isMobile ? 8 : 12, 
+                                      vertical: isMobile ? 6 : 8
+                                    ),
                                     child: Icon(
                                       Icons.view_list,
                                       color: _currentViewMode == ViewMode.list 
                                           ? Colors.white 
                                           : Colors.white.withOpacity(0.7),
-                                      size: 20,
+                                      size: isMobile ? 18 : 20,
                                     ),
                                   ),
                                 ),
@@ -426,13 +438,16 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                                     });
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: isMobile ? 8 : 12, 
+                                      vertical: isMobile ? 6 : 8
+                                    ),
                                     child: Icon(
                                       Icons.grid_view,
                                       color: _currentViewMode == ViewMode.grid 
                                           ? Colors.white 
                                           : Colors.white.withOpacity(0.7),
-                                      size: 20,
+                                      size: isMobile ? 18 : 20,
                                     ),
                                   ),
                                 ),
@@ -442,7 +457,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                         ),
                       ),
                       
-                      SizedBox(width: 12),
+                      SizedBox(width: isMobile ? 8 : 12),
                       
                       // Advanced Filter button
                       Material(
@@ -466,13 +481,13 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             borderRadius: BorderRadius.circular(12),
                             onTap: () => _showAdvancedFilterPanel(),
                             child: Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(isMobile ? 8 : 10),
                               child: Stack(
                                 children: [
                                   Icon(
                                     LucideIcons.filter,
                                     color: Colors.white.withOpacity(0.9),
-                                    size: 20,
+                                    size: isMobile ? 18 : 20,
                                   ),
                                   if (_activeFilters.isNotEmpty)
                                     Positioned(
@@ -494,7 +509,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                         ),
                       ),
                       
-                      SizedBox(width: 12),
+                      SizedBox(width: isMobile ? 8 : 12),
                       
                       // Calendar Date Filter
                       Material(
@@ -518,13 +533,13 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             borderRadius: BorderRadius.circular(12),
                             onTap: () => _showDateFilterDialog(),
                             child: Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(isMobile ? 8 : 10),
                               child: Stack(
                                 children: [
                                   Icon(
                                     LucideIcons.calendar,
                                     color: Colors.white.withOpacity(0.9),
-                                    size: 20,
+                                    size: isMobile ? 18 : 20,
                                   ),
                                   if (_currentFilters.customDateStart != null || _currentFilters.customDateEnd != null)
                                     Positioned(
@@ -546,7 +561,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                         ),
                       ),
                       
-                      SizedBox(width: 12),
+                      SizedBox(width: isMobile ? 8 : 12),
                       
                       // Enhanced View Toggle
                       Material(
@@ -570,18 +585,18 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             borderRadius: BorderRadius.circular(12),
                             onTap: () => _toggleEnhancedView(),
                             child: Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(isMobile ? 8 : 10),
                               child: Icon(
                                 _useEnhancedCard ? LucideIcons.star : LucideIcons.starOff,
                                 color: Colors.white.withOpacity(0.9),
-                                size: 20,
+                                size: isMobile ? 18 : 20,
                               ),
                             ),
                           ),
                         ),
                       ),
                       
-                      SizedBox(width: 12),
+                      SizedBox(width: isMobile ? 8 : 12),
                       
                       // Refresh button with better styling
                       Material(
@@ -605,10 +620,11 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                               _loadEvents();
                             },
                             child: Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(isMobile ? 8 : 10),
                               child: Icon(
                                 Icons.refresh,
                                 color: Colors.white.withOpacity(0.9),
+                                size: isMobile ? 18 : 20,
                               ),
                             ),
                           ),
