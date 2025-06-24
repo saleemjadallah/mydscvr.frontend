@@ -100,10 +100,26 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
             _totalVenuesCount = (_totalEventsCount / 4).ceil();
           }
           if (upcomingResponse.isSuccess) {
-            _upcomingEvents = (upcomingResponse.data ?? [])
+            final allEvents = upcomingResponse.data ?? [];
+            // First try to get future events
+            var futureEvents = allEvents
                 .where((e) => e.startDate.isAfter(DateTime.now()))
-                .take(6)
                 .toList();
+            
+            // If no future events, get recent events (last 30 days)
+            if (futureEvents.isEmpty) {
+              final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+              futureEvents = allEvents
+                  .where((e) => e.startDate.isAfter(thirtyDaysAgo))
+                  .toList();
+            }
+            
+            // If still empty, just use all events
+            if (futureEvents.isEmpty && allEvents.isNotEmpty) {
+              futureEvents = allEvents;
+            }
+            
+            _upcomingEvents = futureEvents.take(6).toList();
           }
           _isLoading = false;
           _errorMessage = upcomingResponse.error ?? totalCountResponse.error;
