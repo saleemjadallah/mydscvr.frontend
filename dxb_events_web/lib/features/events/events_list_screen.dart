@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/dubai_app_bar.dart';
@@ -22,6 +23,7 @@ import '../../widgets/events/events_sort_controls.dart';
 import '../../widgets/common/breadcrumb_navigation.dart';
 import '../../widgets/common/glassmorphic_background.dart';
 import '../../widgets/common/footer.dart';
+import '../event_details/event_details_screen.dart';
 
 class EventsListScreen extends ConsumerStatefulWidget {
   final String? initialCategory;
@@ -953,12 +955,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
 
   Widget _buildGridView(List<Event> filteredEvents) {
     final screenWidth = MediaQuery.of(context).size.width;
-    int crossAxisCount = 1;
-    if (screenWidth > 1200) {
-      crossAxisCount = 3;
-    } else if (screenWidth > 800) {
-      crossAxisCount = 2;
+    final isMobile = screenWidth <= 800;
+    
+    // Use carousel for mobile, grid for larger screens
+    if (isMobile) {
+      return _buildMobileCarousel(filteredEvents);
     }
+    
+    // Desktop/tablet grid view
+    int crossAxisCount = screenWidth > 1200 ? 3 : 2;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -967,7 +972,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         physics: NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.95, // Increased from 0.85 to make cards shorter and reduce white space
+          childAspectRatio: 0.85,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
@@ -1009,6 +1014,103 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
               );
         },
       ),
+    );
+  }
+  
+  Widget _buildMobileCarousel(List<Event> filteredEvents) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Carousel section header
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Events (${filteredEvents.length})',
+                style: GoogleFonts.comfortaa(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                'Swipe to browse →',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Horizontal carousel
+        SizedBox(
+          height: 360, // Increased height for better mobile viewing
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: filteredEvents.length + (_isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == filteredEvents.length) {
+                // Show loading indicator
+                return Container(
+                  width: 280,
+                  margin: const EdgeInsets.only(right: 16),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.dubaiTeal,
+                    ),
+                  ),
+                );
+              }
+              
+              final event = filteredEvents[index];
+              return Container(
+                width: 280, // Fixed width for carousel items
+                margin: const EdgeInsets.only(right: 16),
+                child: _buildMobileEventCard(event)
+                    .animate()
+                    .fadeIn(
+                      delay: Duration(milliseconds: index * 80),
+                      duration: 500.ms,
+                      curve: Curves.easeOutQuart,
+                    )
+                    .slideX(
+                      begin: 0.3,
+                      end: 0,
+                      delay: Duration(milliseconds: index * 80),
+                      duration: 500.ms,
+                      curve: Curves.easeOutQuart,
+                    ),
+              );
+            },
+          ),
+        ),
+        
+        // Load more indicator or end message
+        if (_hasMore && !_isLoadingMore)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: TextButton.icon(
+                onPressed: _loadMoreEvents,
+                icon: Icon(LucideIcons.moreHorizontal, color: AppColors.dubaiTeal),
+                label: Text(
+                  'Load More Events',
+                  style: GoogleFonts.inter(
+                    color: AppColors.dubaiTeal,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -2593,6 +2695,332 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             color: isSelected ? Colors.white : AppColors.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
+        ),
+      ),
+    );
+  }
+  
+  /// Format category name for display
+  String _formatCategoryName(String category) {
+    switch (category.toLowerCase()) {
+      case 'tours_and_sightseeing':
+        return 'Tours';
+      case 'business_and_networking':
+        return 'Business';
+      case 'kids_and_family':
+        return 'Family';
+      case 'food_and_dining':
+        return 'Food';
+      case 'indoor_activities':
+        return 'Indoor';
+      case 'outdoor_activities':
+        return 'Outdoor';
+      case 'water_sports':
+        return 'Water';
+      case 'music_and_concerts':
+        return 'Music';
+      case 'comedy_and_shows':
+        return 'Shows';
+      case 'sports_and_fitness':
+        return 'Sports';
+      case 'festivals_and_celebrations':
+        return 'Festival';
+      default:
+        return category.replaceAll('_', ' ').split(' ').map((word) => 
+          word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : ''
+        ).join(' ');
+    }
+  }
+  
+  /// Get display description for event
+  String _getDisplayDescription(Event event) {
+    if (event.shortDescription != null && event.shortDescription!.isNotEmpty) {
+      return event.shortDescription!;
+    }
+    
+    if (event.description.isNotEmpty) {
+      // Truncate long descriptions for mobile cards
+      if (event.description.length > 150) {
+        return '${event.description.substring(0, 150)}...';
+      }
+      return event.description;
+    }
+    
+    // Fallback description based on category
+    final area = event.venue.area;
+    switch (event.category.toLowerCase()) {
+      case 'kids_and_family':
+        return 'Perfect family activity with fun for all ages in $area.';
+      case 'food_and_dining':
+        return 'Delicious dining experience in the heart of $area.';
+      case 'outdoor_activities':
+        return 'Exciting outdoor adventure in beautiful $area.';
+      case 'cultural':
+        return 'Immersive cultural experience showcasing local heritage.';
+      default:
+        return 'Exciting event experience in $area.';
+    }
+  }
+  
+  /// Build mobile-optimized event card for carousel
+  Widget _buildMobileEventCard(Event event) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      shadowColor: AppColors.dubaiTeal.withOpacity(0.2),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => EventDetailsScreen(
+                eventId: event.id,
+                event: event,
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Large image section for mobile
+            Container(
+              height: 180, // Generous height for mobile viewing
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                color: Colors.grey[200],
+              ),
+              child: Stack(
+                children: [
+                  // Event image
+                  if (event.imageUrl.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      child: CachedNetworkImage(
+                        imageUrl: event.imageUrl,
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: AppColors.dubaiTeal.withOpacity(0.1),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.dubaiTeal,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => _buildImageFallback(),
+                      ),
+                    )
+                  else
+                    _buildImageFallback(),
+                  
+                  // Gradient overlay for better text readability
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  // Price badge in top-right
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: event.isFree ? AppColors.dubaiTeal : AppColors.dubaiGold,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        event.displayPrice,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  // Category badge in top-left
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _formatCategoryName(event.category),
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Content section with generous padding
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Event title
+                    Text(
+                      event.title,
+                      style: GoogleFonts.comfortaa(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Date and time
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.calendar,
+                          size: 14,
+                          color: AppColors.dubaiTeal,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _formatEventDateTime(event, true),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 6),
+                    
+                    // Location
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.mapPin,
+                          size: 14,
+                          color: AppColors.dubaiCoral,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${event.venue.name} • ${event.venue.area}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Description
+                    Expanded(
+                      child: Text(
+                        _getDisplayDescription(event),
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Bottom row with rating and family score
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Rating
+                        Row(
+                          children: [
+                            Icon(
+                              LucideIcons.star,
+                              size: 14,
+                              color: AppColors.dubaiGold,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              event.rating.toStringAsFixed(1),
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        // Age range
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.dubaiTeal.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            event.ageRange,
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.dubaiTeal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
