@@ -800,13 +800,18 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
   }
 
   Widget _buildAnimatedMyDscvrChoice() {
-    print('🎯 DEBUG: Building Animated MyDscvr\'s Choice Banner');
+    print('🎯 DEBUG: Building Animated MyDscvr\'s Choice Banner - isLoading: $_isLoading, events: ${_upcomingEvents.length}');
+    
+    // Show loading state while data is being fetched
+    if (_isLoading) {
+      return _buildAnimatedMyDscvrChoiceLoading();
+    }
     
     // Use first available event as placeholder
     final placeholderEvent = _upcomingEvents.isNotEmpty ? _upcomingEvents.first : null;
     
     if (placeholderEvent == null) {
-      return _buildAnimatedMyDscvrChoiceLoading();
+      return _buildAnimatedMyDscvrChoiceEmpty();
     }
     
     return Container(
@@ -1185,6 +1190,52 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedMyDscvrChoiceEmpty() {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      child: FadeInSlideUp(
+        delay: const Duration(milliseconds: 200),
+        child: Container(
+          height: 280,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.sparkles,
+                  size: 48,
+                  color: AppColors.textSecondary.withOpacity(0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No upcoming events available',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Check back soon for our next curated choice!',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: AppColors.textSecondary.withOpacity(0.7),
                   ),
                 ),
               ],
