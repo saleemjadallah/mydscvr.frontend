@@ -103,14 +103,15 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
             final allEvents = upcomingResponse.data ?? [];
             print('📊 DEBUG: Total events from API: ${allEvents.length}');
             
-            // Only get future events - this is for events users can actually attend
+            // Get future events for MyDscvr's Choice
             final futureEvents = allEvents
                 .where((e) => e.startDate.isAfter(DateTime.now()))
                 .toList();
             print('📊 DEBUG: Future events found: ${futureEvents.length}');
             
-            _upcomingEvents = futureEvents.take(6).toList();
-            print('📊 DEBUG: Final upcoming events: ${_upcomingEvents.length}');
+            // Select the best curated event using smart algorithm
+            _upcomingEvents = _selectBestCuratedEvents(futureEvents);
+            print('📊 DEBUG: Final curated events: ${_upcomingEvents.length}');
           } else {
             print('❌ DEBUG: API call failed: ${upcomingResponse.error}');
           }
@@ -1244,6 +1245,74 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
         ),
       ),
     );
+  }
+
+  /// Smart algorithm to select the best curated events for MyDscvr's Choice
+  List<Event> _selectBestCuratedEvents(List<Event> futureEvents) {
+    if (futureEvents.isEmpty) return [];
+    
+    // Score each event based on curation criteria
+    final scoredEvents = futureEvents.map((event) {
+      double score = 0.0;
+      
+      // 1. Rating score (40% weight) - events with higher ratings get priority
+      if (event.rating > 0) {
+        score += (event.rating / 5.0) * 40;
+      }
+      
+      // 2. Family-friendly bonus (25% weight) - family events are premium
+      final isFamilyFriendly = event.tags.any((tag) => 
+        tag.toLowerCase().contains('family') || 
+        tag.toLowerCase().contains('kids') ||
+        tag.toLowerCase().contains('children'));
+      if (isFamilyFriendly) {
+        score += 25;
+      }
+      
+      // 3. Rich content score (20% weight) - events with more tags are better curated
+      final tagCount = event.tags.length;
+      if (tagCount >= 5) {
+        score += 20;
+      } else if (tagCount >= 3) {
+        score += 15;
+      } else if (tagCount >= 1) {
+        score += 10;
+      }
+      
+      // 4. Venue quality bonus (10% weight) - premium venues get priority
+      final premiumVenues = ['Dubai Mall', 'Mall of the Emirates', 'JBR', 'Downtown Dubai', 'Marina'];
+      final isPremiumVenue = premiumVenues.any((venue) => 
+        event.venue.name.toLowerCase().contains(venue.toLowerCase()) ||
+        event.venue.area.toLowerCase().contains(venue.toLowerCase()));
+      if (isPremiumVenue) {
+        score += 10;
+      }
+      
+      // 5. Timing bonus (5% weight) - events happening this weekend get slight priority
+      final now = DateTime.now();
+      final weekend = now.add(Duration(days: (6 - now.weekday) % 7));
+      final isWeekend = event.startDate.isBefore(weekend.add(const Duration(days: 2))) &&
+                       event.startDate.isAfter(weekend.subtract(const Duration(days: 1)));
+      if (isWeekend) {
+        score += 5;
+      }
+      
+      return MapEntry(event, score);
+    }).toList();
+    
+    // Sort by score (highest first) and add rotation for variety
+    scoredEvents.sort((a, b) => b.value.compareTo(a.value));
+    
+    // Add daily rotation among top-scored events to keep it fresh
+    final topEvents = scoredEvents.take(5).toList();
+    final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
+    final rotationIndex = dayOfYear % topEvents.length;
+    
+    // Return the selected event(s) with rotation
+    final selectedEvents = [topEvents[rotationIndex].key];
+    print('🎯 DEBUG: Selected curated event: ${selectedEvents.first.title} (score: ${topEvents[rotationIndex].value.toStringAsFixed(1)})');
+    
+    return selectedEvents;
   }
 
   String _formatEventTime(DateTime date) {
