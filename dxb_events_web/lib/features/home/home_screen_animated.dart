@@ -103,11 +103,20 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
             final allEvents = upcomingResponse.data ?? [];
             print('📊 DEBUG: Total events from API: ${allEvents.length}');
             
-            // Get future events for MyDscvr's Choice
-            final futureEvents = allEvents
+            // First try future events
+            var futureEvents = allEvents
                 .where((e) => e.startDate.isAfter(DateTime.now()))
                 .toList();
             print('📊 DEBUG: Future events found: ${futureEvents.length}');
+            
+            // If no future events, temporarily use all events for debugging
+            if (futureEvents.isEmpty && allEvents.isNotEmpty) {
+              print('⚠️ DEBUG: No future events found, checking all events for debugging...');
+              futureEvents = allEvents.take(10).toList(); // Take first 10 for debugging
+              for (var event in futureEvents) {
+                print('📅 DEBUG: Event "${event.title}" - Date: ${event.startDate}');
+              }
+            }
             
             // Select the best curated event using smart algorithm
             _upcomingEvents = _selectBestCuratedEvents(futureEvents);
