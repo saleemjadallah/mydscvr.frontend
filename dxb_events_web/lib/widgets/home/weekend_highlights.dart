@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -54,18 +55,18 @@ class _WeekendHighlightsState extends State<WeekendHighlights> {
           print('🔍 WeekendHighlights: Event $i: "${event.title}" - ${event.startDate.toString()} (${event.venue.area})');
         }
         
-        // Find the best weekend event
-        final weekendEvent = _findBestWeekendEvent(events);
+        // Use rotation logic instead of complex weekend detection
+        final rotatingEvent = _getRotatingEvent(events);
         
         setState(() {
-          _weekendEvent = weekendEvent;
+          _weekendEvent = rotatingEvent;
           _isLoading = false;
         });
         
-        if (weekendEvent != null) {
-          print('🔍 WeekendHighlights: Found weekend event: ${weekendEvent.title}');
+        if (rotatingEvent != null) {
+          print('🔍 WeekendHighlights: Selected rotating event: ${rotatingEvent.title}');
         } else {
-          print('🔍 WeekendHighlights: No weekend events found');
+          print('🔍 WeekendHighlights: No events available');
         }
       } else {
         print('❌ WeekendHighlights: API Error: ${response.error}');
@@ -83,126 +84,53 @@ class _WeekendHighlightsState extends State<WeekendHighlights> {
     }
   }
 
-  Event? _findBestWeekendEvent(List<Event> events) {
+  /// Get rotating event that changes every 2-3 days
+  Event? _getRotatingEvent(List<Event> events) {
+    if (events.isEmpty) return null;
+    
     final now = DateTime.now();
     
-    print('🔍 WeekendHighlights: Current time: $now (weekday: ${now.weekday})');
-    
-    // Calculate this weekend (Friday evening, Saturday, Sunday)
-    final daysUntilFriday = (5 - now.weekday) % 7; // Friday = 5
-    final thisFriday = now.add(Duration(days: daysUntilFriday));
-    final thisSaturday = thisFriday.add(const Duration(days: 1));
-    final thisSunday = thisSaturday.add(const Duration(days: 1));
-    final nextMonday = thisSunday.add(const Duration(days: 1));
-    
-    print('🔍 WeekendHighlights: This weekend is ${thisFriday.day}/${thisFriday.month} - ${thisSunday.day}/${thisSunday.month}');
-    print('🔍 WeekendHighlights: Weekend range: ${thisFriday.toString()} to ${nextMonday.toString()}');
-    
-    // Enhanced weekend event filtering
-    final fridayEvening = DateTime(thisFriday.year, thisFriday.month, thisFriday.day, 18);
-    print('🔍 WeekendHighlights: Friday evening cutoff: ${fridayEvening.toString()}');
-    
-    final weekendEvents = events.where((event) {
-      // Check 1: Direct weekend events (start_date during weekend)
+    // Filter for valid events (not too old, not too far future)
+    final validEvents = events.where((event) {
       final eventDate = event.startDate;
-      final isDirectWeekendEvent = eventDate.isAfter(fridayEvening.subtract(const Duration(hours: 1))) && 
-                                  eventDate.isBefore(nextMonday);
-      
-      if (isDirectWeekendEvent) {
-        print('🔍 WeekendHighlights: ✅ Direct weekend event: "${event.title}" on ${eventDate.toString()}');
-        return true;
-      }
-      
-      // Check 2: Long-running events that span the weekend
-      final endDate = event.endDate;
-      if (endDate != null) {
-        final spansWeekend = eventDate.isBefore(nextMonday) && endDate.isAfter(fridayEvening);
-        if (spansWeekend) {
-          print('🔍 WeekendHighlights: ✅ Long-running event spanning weekend: "${event.title}" (${eventDate.toString()} to ${endDate.toString()})');
-          return true;
-        }
-      }
-      
-      // Check 3: Recurring/ongoing events (detect by keywords and patterns)
-      final isRecurring = _isRecurringEvent(event);
-      final isOngoingAttraction = _isOngoingAttraction(event);
-      
-      if (isRecurring || isOngoingAttraction) {
-        // For recurring events, check if they could be active during weekend
-        // (events within the last month are considered "current")
-        final isRecentEnoughToBeActive = eventDate.isAfter(now.subtract(const Duration(days: 30)));
-        if (isRecentEnoughToBeActive) {
-          print('🔍 WeekendHighlights: ✅ Recurring/ongoing event: "${event.title}" (type: ${isRecurring ? "recurring" : "attraction"})');
-          return true;
-        }
-      }
-      
-      return false;
+      final isNotTooOld = eventDate.isAfter(now.subtract(const Duration(days: 45)));
+      final isNotTooFuture = eventDate.isBefore(now.add(const Duration(days: 90)));
+      return isNotTooOld && isNotTooFuture;
     }).toList();
     
-    print('🔍 WeekendHighlights: Found ${weekendEvents.length} this weekend events (including recurring/spanning)');
+    print('🔍 WeekendHighlights: Found ${validEvents.length} valid events for rotation');
     
-    if (weekendEvents.isEmpty) {
-      print('🔍 WeekendHighlights: No events found for this weekend. Checking all event dates:');
-      for (int i = 0; i < events.length && i < 10; i++) {
-        final event = events[i];
-        final eventDate = event.startDate;
-        final isAfterFriday = eventDate.isAfter(fridayEvening.subtract(const Duration(hours: 1)));
-        final isBeforeMonday = eventDate.isBefore(nextMonday);
-        print('🔍   Event "$i: ${event.title}" - ${eventDate.toString()} (After Friday: $isAfterFriday, Before Monday: $isBeforeMonday)');
-      }
-      
-      // If no events this weekend, look for next weekend
-      final nextFriday = thisFriday.add(const Duration(days: 7));
-      final nextSaturday = thisSaturday.add(const Duration(days: 7));
-      final nextSunday = thisSunday.add(const Duration(days: 7));
-      final nextNextMonday = nextMonday.add(const Duration(days: 7));
-      
-      final nextWeekendEvents = events.where((event) {
-        final eventDate = event.startDate;
-        final nextFridayEvening = DateTime(nextFriday.year, nextFriday.month, nextFriday.day, 18);
-        return eventDate.isAfter(nextFridayEvening.subtract(const Duration(hours: 1))) && 
-               eventDate.isBefore(nextNextMonday);
-      }).toList();
-      
-      print('🔍 WeekendHighlights: Found ${nextWeekendEvents.length} next weekend events');
-      
-      if (nextWeekendEvents.isNotEmpty) {
-        // Sort by rating and family score
-        nextWeekendEvents.sort((a, b) {
-          final scoreA = (a.rating * 10) + (a.isFree ? 5 : 0) + (a.isTrending ? 3 : 0);
-          final scoreB = (b.rating * 10) + (b.isFree ? 5 : 0) + (b.isTrending ? 3 : 0);
-          return scoreB.compareTo(scoreA);
-        });
-        return nextWeekendEvents.first;
-      }
-      
-      // Last resort: find any upcoming event (even if not weekend)
-      final upcomingEvents = events.where((event) => event.startDate.isAfter(now)).toList();
-      print('🔍 WeekendHighlights: Found ${upcomingEvents.length} upcoming events');
-      
-      if (upcomingEvents.isNotEmpty) {
-        upcomingEvents.sort((a, b) {
-          final scoreA = (a.rating * 10) + (a.isFree ? 5 : 0) + (a.isTrending ? 3 : 0);
-          final scoreB = (b.rating * 10) + (b.isFree ? 5 : 0) + (b.isTrending ? 3 : 0);
-          return scoreB.compareTo(scoreA);
-        });
-        print('🔍 WeekendHighlights: No weekend events, showing best upcoming event: ${upcomingEvents.first.title}');
-        return upcomingEvents.first;
-      }
-      
-      print('🔍 WeekendHighlights: No upcoming events found at all!');
-      return null;
+    if (validEvents.isEmpty) {
+      // Fallback to any event if no valid ones
+      return events.isNotEmpty ? events.first : null;
     }
     
-    // Sort weekend events by rating and preference
-    weekendEvents.sort((a, b) {
-      final scoreA = (a.rating * 10) + (a.isFree ? 5 : 0) + (a.isTrending ? 3 : 0);
-      final scoreB = (b.rating * 10) + (b.isFree ? 5 : 0) + (b.isTrending ? 3 : 0);
-      return scoreB.compareTo(scoreA);
-    });
+    // Generate rotation seed that changes every 2 days
+    final rotationSeed = _getRotationSeed();
     
-    return weekendEvents.first;
+    // Shuffle events using the rotation seed for consistent rotation
+    final shuffledEvents = List<Event>.from(validEvents);
+    shuffledEvents.shuffle(Random(rotationSeed));
+    
+    // Sort by rating to ensure quality, then pick from top shuffled events
+    shuffledEvents.sort((a, b) => b.rating.compareTo(a.rating));
+    
+    final selectedEvent = shuffledEvents.first;
+    print('🔍 WeekendHighlights: Rotation seed: $rotationSeed, selected: ${selectedEvent.title}');
+    
+    return selectedEvent;
+  }
+
+  /// Generate rotation seed that changes every 2 days
+  int _getRotationSeed() {
+    final now = DateTime.now();
+    final epochStart = DateTime(2024, 1, 1);
+    final daysSinceEpoch = now.difference(epochStart).inDays;
+    
+    // Changes every 2 days: day 0-1 = seed 0, day 2-3 = seed 1, etc.
+    final rotationCycle = daysSinceEpoch ~/ 2;
+    
+    return rotationCycle;
   }
 
   String _getWeekendDateRange(Event event) {

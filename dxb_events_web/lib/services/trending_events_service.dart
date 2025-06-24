@@ -190,45 +190,28 @@ class TrendingEventsService {
 
   /// Generate realistic "interested" count based on trending score
   int _generateSimulatedInterestCount(double trendingScore) {
-    final baseCount = (trendingScore * 15).round(); // Higher score = more interest
     final weekSeed = _getWeeksSinceEpoch();
     final random = Random(DateTime.now().millisecondsSinceEpoch + weekSeed);
     
-    // Add some realistic variation
-    final variation = random.nextInt(300) + 100; // 100-400 variation
-    final total = baseCount + variation;
+    // Generate count between 500-900, rounded to nearest 10
+    final baseCount = random.nextInt(41) + 50; // 50-90 (will be multiplied by 10)
+    final total = baseCount * 10; // Results in 500-900
     
-    // Return in realistic ranges
-    if (total >= 1000) {
-      return ((total / 100).round() * 100).clamp(800, 2000); // Round to hundreds
-    } else {
-      return (total / 10).round() * 10; // Round to tens
-    }
+    return total; // Already rounded to tens (500, 510, 520, etc.)
   }
 
   /// Generate realistic "time ago" based on event and score
   String _generateSimulatedTimeAgo(Event event, double trendingScore) {
     final timeOptions = [
+      '1 hr ago',
       '2 hrs ago',
-      '4 hrs ago', 
-      '6 hrs ago',
-      '8 hrs ago',
-      '12 hrs ago',
-      '1 day ago',
-      '2 days ago',
+      '3 hrs ago',
     ];
     
-    // Higher scoring events appear more "recent"
-    final index = trendingScore >= 80 ? 0 : 
-                  trendingScore >= 70 ? 1 :
-                  trendingScore >= 60 ? 2 :
-                  trendingScore >= 50 ? 3 : 
-                  trendingScore >= 40 ? 4 : 
-                  trendingScore >= 30 ? 5 : 6;
-    
+    // Randomly select from the 3 options for new app realism
     final weekSeed = _getWeeksSinceEpoch();
     final random = Random(event.id.hashCode + weekSeed);
-    final selectedIndex = (index + random.nextInt(2)).clamp(0, timeOptions.length - 1);
+    final selectedIndex = random.nextInt(timeOptions.length);
     
     return timeOptions[selectedIndex];
   }
