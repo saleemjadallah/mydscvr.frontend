@@ -304,54 +304,30 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       
                       SizedBox(width: 16),
                       
-                      // Logo/Title
-                      Row(
+                      // Title only
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color(0xFF0D7377).withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.event_note,
+                          Text(
+                            _getPageTitle(),
+                            style: GoogleFonts.comfortaa(
+                              fontSize: isMobile ? 16 : 20,
+                              fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              size: 24,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _getPageTitle(),
-                                style: GoogleFonts.comfortaa(
-                                  fontSize: isMobile ? 16 : 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          if (!isMobile || _getPageSubtitle().length < 30)
+                            Text(
+                              _getPageSubtitle(),
+                              style: TextStyle(
+                                fontSize: isMobile ? 10 : 12,
+                                color: Colors.white.withOpacity(0.8),
                               ),
-                              if (!isMobile || _getPageSubtitle().length < 30)
-                                Text(
-                                  _getPageSubtitle(),
-                                  style: TextStyle(
-                                    fontSize: isMobile ? 10 : 12,
-                                    color: Colors.white.withOpacity(0.8),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                            ],
-                          ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                         ],
                       ),
                       
@@ -561,42 +537,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                         ),
                       ),
                       
-                      SizedBox(width: isMobile ? 8 : 12),
-                      
-                      // Enhanced View Toggle
-                      Material(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: _useEnhancedCard 
-                                ? AppColors.dubaiTeal.withOpacity(0.3)
-                                : Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0xFF0D7377).withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => _toggleEnhancedView(),
-                            child: Container(
-                              padding: EdgeInsets.all(isMobile ? 8 : 10),
-                              child: Icon(
-                                _useEnhancedCard ? LucideIcons.star : LucideIcons.starOff,
-                                color: Colors.white.withOpacity(0.9),
-                                size: isMobile ? 18 : 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      SizedBox(width: isMobile ? 8 : 12),
                       
                       // Refresh button with better styling
                       Material(
