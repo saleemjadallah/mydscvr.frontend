@@ -171,6 +171,13 @@ final GoRouter _router = GoRouter(
       ),
     ),
     GoRoute(
+      path: '/entertainment',
+      builder: (context, state) => const EventsListScreen(
+        initialCategory: 'entertainment',
+        categoryDisplayName: 'Entertainment',
+      ),
+    ),
+    GoRoute(
       path: '/comedy-and-shows',
       builder: (context, state) => const EventsListScreen(
         initialCategory: 'comedy_and_shows',

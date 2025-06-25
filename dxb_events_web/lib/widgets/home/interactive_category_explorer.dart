@@ -27,14 +27,14 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
   Map<String, int> _categoryCounts = {};
   bool _isLoading = true;
   
-  // Static fallback counts for immediate display
+  // Static fallback counts for immediate display (conservative estimates)
   static const Map<String, int> _fallbackCounts = {
-    'culture': 12,
-    'outdoor': 18,
-    'kids': 24,
-    'food': 15,
-    'entertainment': 20,
-    'indoor': 16,
+    'culture': 5,
+    'outdoor': 8,
+    'kids': 12,
+    'food': 6,
+    'entertainment': 4, // Conservative estimate until real data loads
+    'indoor': 7,
   };
   
   // Cache for category data
@@ -140,9 +140,9 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
     super.initState();
     _eventsService = EventsService();
     
-    // Show fallback counts immediately for faster perceived loading
-    _categoryCounts = Map.from(_fallbackCounts);
-    _isLoading = false; // Show UI immediately
+    // Start with empty counts - show real data only
+    _categoryCounts = {};
+    _isLoading = true; // Show loading state until real data arrives
     
     // Load real data in background
     _loadCategoryDataOptimized();
@@ -206,6 +206,10 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         }
         
         print('✅ Category data loaded and cached');
+        print('📊 Category counts: $categoryCounts');
+        // Debug: Show unique categories in the data
+        final uniqueCategories = allEvents.map((e) => e.category).toSet().toList();
+        print('🏷️ Available categories in data: $uniqueCategories');
       } else {
         print('❌ Failed to load events: ${response.error}');
         // Keep fallback counts if API fails
@@ -334,7 +338,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
               routeName = '/food-and-dining';
               break;
             case 'entertainment':
-              routeName = '/music-and-concerts'; // Map to closest existing route
+              routeName = '/entertainment'; // Direct mapping to entertainment route
               break;
             case 'indoor':
               routeName = '/indoor-activities';
@@ -450,7 +454,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '$eventCount events',
+                        isLoadingReal || eventCount == 0 ? 'Loading...' : '$eventCount events',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
