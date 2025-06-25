@@ -645,7 +645,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
               'Stroller Friendly: ${event.familySuitability.strollerFriendly ? "Yes" : "No"}',
               'Baby Changing: ${event.familySuitability.babyChanging ? "Yes" : "No"}',
               if (event.familySuitability.notes != null)
-                'Notes: ${event.familySuitability.notes}',
+                _buildFamilyNotesOrScore(event),
             ],
           ),
           
@@ -1046,6 +1046,32 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   // Helper Methods
+  String _buildFamilyNotesOrScore(Event event) {
+    final notes = event.familySuitability.notes;
+    
+    // Check if notes contains only a family score (pattern: "Family Score: X/100")
+    if (notes != null && notes.startsWith('Family Score: ') && notes.endsWith('/100')) {
+      // Extract the score from the notes
+      final scoreMatch = RegExp(r'Family Score: (\d+)/100').firstMatch(notes);
+      if (scoreMatch != null) {
+        final score = int.parse(scoreMatch.group(1)!);
+        return 'Family Rating: ${_getFamilyRatingDescription(score)} ($score% family-friendly)';
+      }
+    }
+    
+    // If it's actual notes (not just a family score), show them as is
+    return 'Notes: $notes';
+  }
+
+  String _getFamilyRatingDescription(int score) {
+    if (score >= 90) return 'Perfect for Families';
+    if (score >= 80) return 'Excellent for Families';
+    if (score >= 70) return 'Great for Families';
+    if (score >= 60) return 'Good for Families';
+    if (score >= 50) return 'Suitable for Families';
+    return 'Family Considerations Required';
+  }
+
   int _getViewCount(String eventId) {
     // Generate a pseudo-random view count based on event ID
     // This ensures the same event always shows the same view count
