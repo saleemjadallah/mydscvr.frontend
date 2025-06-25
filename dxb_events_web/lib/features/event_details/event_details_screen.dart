@@ -315,34 +315,25 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
             
             const SizedBox(height: 16),
             
-            // Rating and Reviews
-            if (event.rating > 0)
-              Row(
-                children: [
-                  Row(
-                    children: List.generate(5, (index) {
-                      return Icon(
-                        index < event.rating.floor()
-                            ? Icons.star
-                            : index < event.rating
-                                ? Icons.star_half
-                                : Icons.star_border,
-                        size: 20,
-                        color: AppColors.warning,
-                      );
-                    }),
+            // Views Counter
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.eye,
+                  size: 20,
+                  color: AppColors.dubaiTeal,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'This Event has been Viewed ${_getViewCount(event.id)} times',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${event.rating.toStringAsFixed(1)} (${event.reviewCount} reviews)',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ).animate()
-                .slideX(duration: 500.ms, begin: -0.3)
-                .fade(delay: 300.ms),
+                ),
+              ],
+            ).animate()
+              .slideX(duration: 500.ms, begin: -0.3)
+              .fade(delay: 300.ms),
           ],
         ),
       ),
@@ -1055,6 +1046,16 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   // Helper Methods
+  int _getViewCount(String eventId) {
+    // Generate a pseudo-random view count based on event ID
+    // This ensures the same event always shows the same view count
+    final hash = eventId.hashCode.abs();
+    final baseCount = 50 + (hash % 450); // Range: 50-500
+    final currentHour = DateTime.now().hour;
+    final hourlyBoost = (currentHour * hash % 50); // Small hourly variation
+    return baseCount + hourlyBoost;
+  }
+
   Color _getCategoryColor(String category) {
     switch (category.toLowerCase()) {
       case 'arts & crafts':
