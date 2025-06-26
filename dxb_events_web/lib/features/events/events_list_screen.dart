@@ -137,32 +137,78 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     });
 
     try {
-      print('🔍 DEBUG: Loading initial events...');
-      final response = await _eventsService.getEventsWithTotal(
-        category: selectedCategory,
-        location: selectedLocation,
-        page: _currentPage,
-        perPage: 20,
-      );
-
-      if (response.isSuccess && response.data != null) {
-        final eventsWithTotal = response.data!;
-        print('🔍 DEBUG: Loaded ${eventsWithTotal.events.length} events, total in DB: ${eventsWithTotal.total}');
+      print('🔍 DEBUG: Loading events with enhanced filtering for category: $selectedCategory');
+      
+      List<Event> filteredEvents;
+      int totalCount;
+      
+      // Use enhanced filtering for specific categories to match homepage counts
+      if (selectedCategory != null && _shouldUseEnhancedFiltering(selectedCategory!)) {
+        print('📊 Using enhanced filtering for category: $selectedCategory');
         
+        // Load more events to filter from
+        final response = await _eventsService.getEventsWithTotal(
+          location: selectedLocation,
+          page: 1,
+          perPage: 200, // Get larger batch to filter from
+        );
+        
+        if (response.isSuccess && response.data != null) {
+          final allEvents = response.data!.events;
+          print('🔍 Loaded ${allEvents.length} total events to filter from');
+          
+          // Apply enhanced filtering
+          final allFilteredEvents = _applyEnhancedCategoryFiltering(allEvents, selectedCategory!);
+          print('✅ Found ${allFilteredEvents.length} events matching enhanced criteria');
+          
+          // Apply pagination to filtered results
+          final startIndex = (_currentPage - 1) * 20;
+          filteredEvents = allFilteredEvents.skip(startIndex).take(20).toList();
+          totalCount = allFilteredEvents.length;
+          
+          print('📄 Showing page $_currentPage: ${filteredEvents.length} events (${startIndex + 1}-${startIndex + filteredEvents.length} of $totalCount)');
+        } else {
+          filteredEvents = [];
+          totalCount = 0;
+          print('❌ Failed to load events for enhanced filtering');
+        }
+      } else {
+        print('📊 Using standard API filtering for category: $selectedCategory');
+        
+        // Use standard API filtering for other categories
+        final response = await _eventsService.getEventsWithTotal(
+          category: selectedCategory,
+          location: selectedLocation,
+          page: _currentPage,
+          perPage: 20,
+        );
+        
+        if (response.isSuccess && response.data != null) {
+          final eventsWithTotal = response.data!;
+          filteredEvents = eventsWithTotal.events;
+          totalCount = eventsWithTotal.total;
+          print('🔍 DEBUG: Loaded ${filteredEvents.length} events using standard filtering, total in DB: $totalCount');
+        } else {
+          filteredEvents = [];
+          totalCount = 0;
+        }
+      }
+
+      if (filteredEvents.isNotEmpty) {
         setState(() {
-          events = eventsWithTotal.events;
-          _totalEventsInDb = eventsWithTotal.total; // Store total count from DB
+          events = filteredEvents;
+          _totalEventsInDb = totalCount; // Store total count
           _isLoading = false;
-          _hasMore = eventsWithTotal.events.length >= 20;
+          _hasMore = filteredEvents.length >= 20;
           _currentPage++;
-          print('🔍 DEBUG: Total events in DB: $_totalEventsInDb');
+          print('🔍 DEBUG: Total events available: $_totalEventsInDb');
         });
         
         _animationController.forward();
       } else {
-        print('🔍 DEBUG: API Error: ${response.error}');
+        print('🔍 DEBUG: No events found matching criteria');
         setState(() {
-          errorMessage = response.error ?? 'Failed to load events';
+          errorMessage = totalCount == 0 ? 'No events found matching your criteria' : null;
           _isLoading = false;
         });
       }
@@ -1607,6 +1653,86 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
 
   String _formatDuration(Event event) {
     return '${DurationFormatter.formatForDetails(event.startDate, event.endDate)} experience';
+  }
+
+  // Enhanced filtering logic to match homepage counts
+  bool _shouldUseEnhancedFiltering(String category) {
+    // Categories that need enhanced tag-based filtering like homepage
+    const enhancedCategories = [
+      'kids_and_family',
+      'entertainment',
+      'outdoor_activities',
+      'food_and_dining',
+      'culture',
+      'indoor_activities'
+    ];
+    return enhancedCategories.contains(category);
+  }
+
+  List<Event> _applyEnhancedCategoryFiltering(List<Event> allEvents, String categoryFilter) {
+    // Get category configuration from homepage logic
+    final categoryConfig = _getCategoryConfig(categoryFilter);
+    if (categoryConfig == null) return [];
+
+    final apiCategories = List<String>.from(categoryConfig['apiCategories'] ?? []);
+    final tags = List<String>.from(categoryConfig['tags'] ?? []);
+
+    print('🏷️ DEBUG: Filtering with categories: $apiCategories, tags: $tags');
+
+    return allEvents.where((event) {
+      // Check exact category match (case-insensitive)
+      final categoryMatch = apiCategories.any((category) => 
+        event.category.toLowerCase() == category.toLowerCase()
+      );
+      
+      // Check tag match (case-insensitive partial matching)
+      final tagMatch = tags.any((tag) => 
+        event.tags.any((eventTag) => 
+          eventTag.toLowerCase().contains(tag.toLowerCase())
+        ) ||
+        event.category.toLowerCase().contains(tag.toLowerCase()) ||
+        event.title.toLowerCase().contains(tag.toLowerCase())
+      );
+      
+      final matches = categoryMatch || tagMatch;
+      if (matches) {
+        print('✅ Event "${event.title}" matches category: $categoryMatch, tags: $tagMatch');
+      }
+      
+      return matches;
+    }).toList();
+  }
+
+  Map<String, dynamic>? _getCategoryConfig(String categoryFilter) {
+    // Mirror the category configurations from InteractiveCategoryExplorer
+    const categoryConfigs = {
+      'kids_and_family': {
+        'apiCategories': ['kids_and_family', 'educational'],
+        'tags': ['kids', 'family', 'children', 'educational', 'playground', 'activities'],
+      },
+      'entertainment': {
+        'apiCategories': ['entertainment', 'music_and_concerts', 'comedy_and_shows', 'music'],
+        'tags': ['entertainment', 'music', 'concert', 'show', 'performance', 'nightlife'],
+      },
+      'outdoor_activities': {
+        'apiCategories': ['outdoor_activities', 'sports_and_fitness', 'outdoor', 'sports'],
+        'tags': ['outdoor', 'sports', 'beach', 'water', 'nature', 'park', 'hiking'],
+      },
+      'culture': {
+        'apiCategories': ['arts_and_culture', 'culture', 'arts'],
+        'tags': ['culture', 'art', 'museum', 'gallery', 'heritage', 'history'],
+      },
+      'food_and_dining': {
+        'apiCategories': ['food_and_dining', 'food'],
+        'tags': ['food', 'dining', 'restaurant', 'cuisine', 'festival', 'cooking'],
+      },
+      'indoor_activities': {
+        'apiCategories': ['indoor_activities', 'shopping_and_lifestyle', 'indoor'],
+        'tags': ['indoor', 'shopping', 'mall', 'lifestyle', 'wellness', 'spa'],
+      },
+    };
+    
+    return categoryConfigs[categoryFilter];
   }
 
   List<String> _getKeyFeatures(Event event) {
