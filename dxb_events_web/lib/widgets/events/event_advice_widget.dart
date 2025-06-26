@@ -380,23 +380,39 @@ class _EventAdviceWidgetState extends State<EventAdviceWidget>
         controller: _tabController,
         indicator: BoxDecoration(
           gradient: AppColors.oceanGradient,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.dubaiTeal.withOpacity(0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        indicatorPadding: const EdgeInsets.all(4),
+        indicatorPadding: const EdgeInsets.all(6),
+        indicatorSize: TabBarIndicatorSize.tab,
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
         labelStyle: GoogleFonts.inter(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
+          height: 1.2,
         ),
         unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w500,
+          height: 1.2,
         ),
-        labelPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         tabs: const [
-          Tab(text: 'All Advice'),
-          Tab(text: 'By Category'),
+          Tab(
+            text: 'All Advice',
+            height: 48,
+          ),
+          Tab(
+            text: 'By Category',
+            height: 48,
+          ),
         ],
       ),
     );

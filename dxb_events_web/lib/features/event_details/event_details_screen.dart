@@ -482,22 +482,20 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           labelColor: AppColors.dubaiGold,
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.dubaiGold,
-          indicatorWeight: 3.0,
+          indicatorWeight: 4.0,
           indicatorSize: TabBarIndicatorSize.tab,
-          indicator: BoxDecoration(
-            color: AppColors.dubaiGold,
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-          ),
           labelStyle: AppTypography.labelMedium.copyWith(
             fontWeight: FontWeight.bold,
+            color: AppColors.dubaiGold,
           ),
           unselectedLabelStyle: AppTypography.labelMedium.copyWith(
             fontWeight: FontWeight.normal,
+            color: AppColors.textSecondary,
           ),
-          labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          indicatorPadding: const EdgeInsets.symmetric(horizontal: 8),
+          isScrollable: false,
+          tabAlignment: TabAlignment.fill,
         ),
       ),
     );
