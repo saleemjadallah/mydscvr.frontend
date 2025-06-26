@@ -95,7 +95,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
     try {
       final apiService = AdviceApiService();
-      final advice = await apiService.getAdviceForEvent(widget.eventId);
+      final advice = await apiService.getEventAdvice(widget.eventId);
       
       setState(() {
         _adviceList = advice;

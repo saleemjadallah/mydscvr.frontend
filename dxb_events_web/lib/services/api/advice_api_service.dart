@@ -27,12 +27,14 @@ class AdviceApiService {
       }
 
       final response = await _dio.get(
-        '/advice/events/\$eventId',
+        '/advice/event/\$eventId',
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> adviceList = response.data['advice'] ?? [];
+        final List<dynamic> adviceList = response.data is List 
+            ? response.data 
+            : (response.data['advice'] ?? []);
         return adviceList
             .map((json) => EventAdvice.fromJson(json))
             .toList();
@@ -59,20 +61,23 @@ class AdviceApiService {
     try {
       final adviceData = {
         'event_id': eventId,
+        'title': 'User Advice', // Default title for now
         'content': content,
-        'category': category.name,
-        'type': type.name,
+        'category': _mapCategoryToBackend(category),
+        'advice_type': _mapTypeToBackend(type),
         'tags': tags,
+        'venue_familiarity': false,
+        'language': 'en',
       };
 
       final response = await _dio.post(
-        '/advice',
+        '/advice/',
         data: adviceData,
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return AdviceSubmissionResult.success(
-          EventAdvice.fromJson(response.data['advice']),
+          EventAdvice.fromJson(response.data),
         );
       }
       
@@ -107,6 +112,42 @@ class AdviceApiService {
     } catch (e) {
       print('Unexpected error marking advice as helpful: \$e');
       return false;
+    }
+  }
+
+  // Map frontend category enum to backend values
+  String _mapCategoryToBackend(AdviceCategory category) {
+    switch (category) {
+      case AdviceCategory.general:
+        return 'general';
+      case AdviceCategory.familyTips:
+        return 'family_tips';
+      case AdviceCategory.firstTime:
+        return 'first_time';
+      case AdviceCategory.transportation:
+        return 'transportation';
+      case AdviceCategory.budgetTips:
+        return 'budget_tips';
+      case AdviceCategory.accessibility:
+        return 'accessibility';
+      case AdviceCategory.whatToExpect:
+        return 'what_to_expect';
+      case AdviceCategory.bestTime:
+        return 'best_time';
+    }
+  }
+
+  // Map frontend type enum to backend values
+  String _mapTypeToBackend(AdviceType type) {
+    switch (type) {
+      case AdviceType.attendedThis:
+        return 'attended_this';
+      case AdviceType.attendedSimilar:
+        return 'attended_similar';
+      case AdviceType.localKnowledge:
+        return 'local_knowledge';
+      case AdviceType.expertTip:
+        return 'expert_tip';
     }
   }
 }
