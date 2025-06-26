@@ -146,9 +146,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       if (selectedCategory != null && _shouldUseEnhancedFiltering(selectedCategory!)) {
         print('📊 Using enhanced filtering for category: $selectedCategory');
         
-        // Load ALL events to filter from (SAME as homepage does)
+        // Load ALL events to filter from (EXACT same as homepage does)
         final response = await _eventsService.getEvents(
-          perPage: 500, // Use same method as homepage but get more events
+          perPage: 100, // Use EXACT same parameters as homepage
           sortBy: 'start_date',
         );
         
