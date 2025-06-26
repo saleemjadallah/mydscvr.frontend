@@ -812,6 +812,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           
           const SizedBox(height: 24),
           
+          // Map Placeholder
           CurvedContainer(
             height: 200,
             backgroundColor: AppColors.surfaceVariant,
@@ -890,6 +891,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   List<EventAdvice> _getSampleAdvice(String eventId) {
+    // Sample advice data - in real app, this would come from API
     return [
       EventAdvice(
         id: '1',
@@ -1214,6 +1216,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   void _callVenue(String phone) {
+    // TODO: Implement phone call
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Calling $phone...'),

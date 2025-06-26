@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../models/advice_models.dart';
 import '../../models/event.dart';
 import '../../services/api/advice_api_service.dart';
+import '../../services/providers/auth_provider_mongodb.dart';
+import '../common/advice_auth_prompt.dart';
 
-class AdviceSubmissionDialog extends StatefulWidget {
+class AdviceSubmissionDialog extends ConsumerStatefulWidget {
   final Event event;
   final VoidCallback? onAdviceSubmitted;
 
@@ -19,10 +23,10 @@ class AdviceSubmissionDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<AdviceSubmissionDialog> createState() => _AdviceSubmissionDialogState();
+  ConsumerState<AdviceSubmissionDialog> createState() => _AdviceSubmissionDialogState();
 }
 
-class _AdviceSubmissionDialogState extends State<AdviceSubmissionDialog> {
+class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog> {
   final _formKey = GlobalKey<FormState>();
   final _contentController = TextEditingController();
   final _adviceService = AdviceApiService();
@@ -35,6 +39,40 @@ class _AdviceSubmissionDialogState extends State<AdviceSubmissionDialog> {
   void dispose() {
     _contentController.dispose();
     super.dispose();
+  }
+
+  Widget _buildAuthPrompt() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(LucideIcons.x, color: AppColors.textSecondary),
+              ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 8),
+          
+          // Auth Prompt
+          AdviceAuthPrompt(
+            onSignInPressed: () {
+              Navigator.of(context).pop(); // Close dialog first
+              context.push('/login'); // Navigate to login
+            },
+            onSignUpPressed: () {
+              Navigator.of(context).pop(); // Close dialog first
+              context.push('/register'); // Navigate to register
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _submitAdvice() async {
@@ -122,6 +160,8 @@ class _AdviceSubmissionDialogState extends State<AdviceSubmissionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -152,14 +192,16 @@ class _AdviceSubmissionDialogState extends State<AdviceSubmissionDialog> {
             width: 1,
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(),
-            Expanded(child: _buildContent()),
-            _buildActionButtons(),
-          ],
-        ),
+        child: authState.isAuthenticated 
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(),
+                  Expanded(child: _buildContent()),
+                  _buildActionButtons(),
+                ],
+              )
+            : _buildAuthPrompt(),
       ),
     ).animate().scale(duration: 300.ms, curve: Curves.easeOut);
   }
