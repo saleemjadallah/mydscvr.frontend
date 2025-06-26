@@ -146,16 +146,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       if (selectedCategory != null && _shouldUseEnhancedFiltering(selectedCategory!)) {
         print('📊 Using enhanced filtering for category: $selectedCategory');
         
-        // Load ALL events to filter from (like homepage does)
-        final response = await _eventsService.getEventsWithTotal(
-          location: selectedLocation,
-          page: 1,
-          perPage: 1000, // Get much larger batch to ensure we have all relevant events
+        // Load ALL events to filter from (SAME as homepage does)
+        final response = await _eventsService.getEvents(
+          perPage: 500, // Use same method as homepage but get more events
+          sortBy: 'start_date',
         );
         
         if (response.isSuccess && response.data != null) {
-          final allEvents = response.data!.events;
-          print('🔍 Loaded ${allEvents.length} total events to filter from');
+          final allEvents = response.data!; // getEvents returns List<Event> directly
+          print('🔍 Loaded ${allEvents.length} total events to filter from (using same method as homepage)');
           
           // Debug: Show what categories exist in the data
           final uniqueCategories = allEvents.map((e) => e.category).toSet().toList();
