@@ -1195,14 +1195,24 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
     }
   }
 
-  void _openDirections(Venue venue) {
-    // TODO: Implement maps integration
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Maps integration coming soon!'),
-        backgroundColor: AppColors.dubaiTeal,
-      ),
-    );
+  void _openDirections(Venue venue) async {
+    final query = Uri.encodeComponent('${venue.name}, ${venue.address}');
+    final url = 'https://maps.google.com/maps?q=$query';
+    
+    try {
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalBrowser);
+      } else {
+        throw 'Could not launch maps';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open maps. Please try again.'),
+          backgroundColor: AppColors.dubaiRed,
+        ),
+      );
+    }
   }
 
   void _callVenue(String phone) {
