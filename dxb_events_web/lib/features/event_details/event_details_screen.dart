@@ -653,6 +653,11 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           
           const SizedBox(height: 24),
           
+          // Connect Section (renamed from Enhanced Information)
+          _buildConnectSection(event),
+          
+          const SizedBox(height: 24),
+          
           // Accessibility
           if (event.accessibility.isNotEmpty)
             _buildDetailSection(
@@ -661,21 +666,13 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
               event.accessibility,
             ),
           
-          const SizedBox(height: 24),
-          
-          // Social Media Links (Enhanced)
-          if (event.socialMedia != null && event.socialMedia!.hasAnyLinks)
-            _buildSocialMediaSection(event.socialMedia!),
+          // Quality Metrics (Hidden from public - kept for internal use)
+          // if (event.qualityMetrics != null)
+          //   _buildQualityMetricsSection(event.qualityMetrics!),
           
           const SizedBox(height: 24),
           
-          // Quality Metrics (Enhanced)
-          if (event.qualityMetrics != null)
-            _buildQualityMetricsSection(event.qualityMetrics!),
-          
-          const SizedBox(height: 24),
-          
-          // Enhanced Event Information
+          // Enhanced Event Information (other details)
           _buildEnhancedInfoSection(event),
           
           const SizedBox(height: 24),
@@ -1397,9 +1394,94 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
     );
   }
 
+  Widget _buildConnectSection(Event event) {
+    final hasEventUrl = event.eventUrl != null;
+    final hasSocialMedia = event.socialMedia != null && event.socialMedia!.hasAnyLinks;
+    
+    if (!hasEventUrl && !hasSocialMedia) return const SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.dubaiTeal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(LucideIcons.link, size: 20, color: AppColors.dubaiTeal),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Connect',
+              style: AppTypography.headlineSmall.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        // Event URL Button
+        if (hasEventUrl) ...[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _launchUrl(event.eventUrl!),
+              icon: const Icon(LucideIcons.externalLink, size: 18),
+              label: const Text('Visit Event Page'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.dubaiTeal,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          if (hasSocialMedia) const SizedBox(height: 16),
+        ],
+        
+        // Social Media Links
+        if (hasSocialMedia) ...[
+          Text(
+            'Follow & Share',
+            style: AppTypography.bodyLarge.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (event.socialMedia!.instagram != null) 
+                _buildSocialButton('Instagram', event.socialMedia!.instagram!, LucideIcons.instagram),
+              if (event.socialMedia!.facebook != null) 
+                _buildSocialButton('Facebook', event.socialMedia!.facebook!, LucideIcons.facebook),
+              if (event.socialMedia!.twitter != null) 
+                _buildSocialButton('Twitter', event.socialMedia!.twitter!, LucideIcons.twitter),
+              if (event.socialMedia!.tiktok != null) 
+                _buildSocialButton('TikTok', event.socialMedia!.tiktok!, LucideIcons.video),
+              if (event.socialMedia!.youtube != null) 
+                _buildSocialButton('YouTube', event.socialMedia!.youtube!, LucideIcons.youtube),
+              if (event.socialMedia!.whatsapp != null) 
+                _buildSocialButton('WhatsApp', event.socialMedia!.whatsapp!, LucideIcons.messageCircle),
+              if (event.socialMedia!.telegram != null) 
+                _buildSocialButton('Telegram', event.socialMedia!.telegram!, LucideIcons.send),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildEnhancedInfoSection(Event event) {
-    final hasAnyEnhancedInfo = event.eventUrl != null ||
-        event.venueType != null ||
+    final hasAnyEnhancedInfo = event.venueType != null ||
         event.eventType != null ||
         event.indoorOutdoor != null ||
         event.durationHours != null ||
@@ -1456,17 +1538,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           ),
           child: Column(
             children: [
-              // Event URL (clickable)
-              if (event.eventUrl != null)
-                _buildEnhancedInfoItem(
-                  'Event URL',
-                  event.eventUrl!,
-                  isUrl: true,
-                  isFirst: true,
-                ),
-              // Other enhanced info fields
+              // Other enhanced info fields (removed Event URL from here)
               if (event.venueType != null)
-                _buildEnhancedInfoItem('Venue Type', event.venueType!),
+                _buildEnhancedInfoItem('Venue Type', event.venueType!, isFirst: true),
               if (event.eventType != null)
                 _buildEnhancedInfoItem('Event Type', event.eventType!),
               if (event.indoorOutdoor != null)
