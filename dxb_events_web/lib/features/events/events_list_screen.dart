@@ -146,20 +146,30 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       if (selectedCategory != null && _shouldUseEnhancedFiltering(selectedCategory!)) {
         print('📊 Using enhanced filtering for category: $selectedCategory');
         
-        // Load more events to filter from
+        // Load ALL events to filter from (like homepage does)
         final response = await _eventsService.getEventsWithTotal(
           location: selectedLocation,
           page: 1,
-          perPage: 200, // Get larger batch to filter from
+          perPage: 1000, // Get much larger batch to ensure we have all relevant events
         );
         
         if (response.isSuccess && response.data != null) {
           final allEvents = response.data!.events;
           print('🔍 Loaded ${allEvents.length} total events to filter from');
           
+          // Debug: Show what categories exist in the data
+          final uniqueCategories = allEvents.map((e) => e.category).toSet().toList();
+          print('🏷️ Available categories in ${allEvents.length} events: $uniqueCategories');
+          
+          // Debug: Show sample event tags
+          if (allEvents.isNotEmpty) {
+            final sampleTags = allEvents.take(5).map((e) => '${e.title}: ${e.tags}').toList();
+            print('📋 Sample event tags: $sampleTags');
+          }
+          
           // Apply enhanced filtering
           final allFilteredEvents = _applyEnhancedCategoryFiltering(allEvents, selectedCategory!);
-          print('✅ Found ${allFilteredEvents.length} events matching enhanced criteria');
+          print('✅ Found ${allFilteredEvents.length} events matching enhanced criteria for $selectedCategory');
           
           // Apply pagination to filtered results
           final startIndex = (_currentPage - 1) * 20;
@@ -1679,7 +1689,14 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
 
     print('🏷️ DEBUG: Filtering with categories: $apiCategories, tags: $tags');
 
-    return allEvents.where((event) {
+    final matchedEvents = <Event>[];
+    int totalChecked = 0;
+    int categoryMatches = 0;
+    int tagMatches = 0;
+    
+    for (final event in allEvents) {
+      totalChecked++;
+      
       // Check exact category match (case-insensitive)
       final categoryMatch = apiCategories.any((category) => 
         event.category.toLowerCase() == category.toLowerCase()
@@ -1695,12 +1712,25 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       );
       
       final matches = categoryMatch || tagMatch;
-      if (matches) {
-        print('✅ Event "${event.title}" matches category: $categoryMatch, tags: $tagMatch');
-      }
       
-      return matches;
-    }).toList();
+      if (matches) {
+        matchedEvents.add(event);
+        if (categoryMatch) categoryMatches++;
+        if (tagMatch) tagMatches++;
+        
+        if (matchedEvents.length <= 5) { // Show first 5 matches for debugging
+          print('✅ MATCH #${matchedEvents.length}: "${event.title}"');
+          print('   Category: ${event.category} (match: $categoryMatch)');
+          print('   Tags: ${event.tags} (match: $tagMatch)');
+        }
+      }
+    }
+    
+    print('📊 Filtering Results: $totalChecked events checked, ${matchedEvents.length} matched');
+    print('   - Category matches: $categoryMatches');
+    print('   - Tag matches: $tagMatches');
+    
+    return matchedEvents;
   }
 
   Map<String, dynamic>? _getCategoryConfig(String categoryFilter) {
