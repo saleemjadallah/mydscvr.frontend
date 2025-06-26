@@ -1201,7 +1201,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
     
     try {
       if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalBrowser);
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       } else {
         throw 'Could not launch maps';
       }
@@ -1209,7 +1209,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Could not open maps. Please try again.'),
-          backgroundColor: AppColors.dubaiRed,
+          backgroundColor: AppColors.error,
         ),
       );
     }
