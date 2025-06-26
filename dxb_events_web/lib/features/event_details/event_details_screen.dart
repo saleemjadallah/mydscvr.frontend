@@ -6,6 +6,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../utils/duration_formatter.dart';
+
 // Core imports
 import '../../core/constants/app_colors.dart';
 import '../../core/themes/app_typography.dart';
@@ -1120,11 +1122,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   String _formatDuration(DateTime start, DateTime end) {
-    final duration = end.difference(start);
-    if (duration.inHours > 0) {
-      return '${duration.inHours}h ${duration.inMinutes % 60}m';
-    }
-    return '${duration.inMinutes}m';
+    return DurationFormatter.formatForDetails(start, end);
   }
 
   String _formatReviewDate(DateTime date) {

@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/event.dart';
+import '../../utils/duration_formatter.dart';
 import 'event_actions.dart';
 
 class EventCardEnhanced extends StatelessWidget {
@@ -653,17 +654,7 @@ class EventCardEnhanced extends StatelessWidget {
   }
 
   String _formatDuration() {
-    // Calculate duration and format it
-    final endDate = event.endDate ?? event.startDate.add(const Duration(hours: 2));
-    final duration = endDate.difference(event.startDate);
-    
-    if (duration.inHours > 6) {
-      return 'Full Day';
-    } else if (duration.inHours >= 1) {
-      return '${duration.inHours}h';
-    } else {
-      return '${duration.inMinutes}min';
-    }
+    return DurationFormatter.formatForCard(event.startDate, event.endDate);
   }
 
   List<Widget> _buildFeatureChips() {

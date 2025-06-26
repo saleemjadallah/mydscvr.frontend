@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../utils/duration_formatter.dart';
 import '../../core/widgets/dubai_app_bar.dart';
 import '../../models/event.dart';
 import '../../services/events_service.dart';
@@ -1605,21 +1606,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
   String _formatDuration(Event event) {
-    final duration = event.duration;
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes % 60;
-    
-    if (hours == 0) {
-      return '${minutes}min experience';
-    } else if (hours >= 6) {
-      return 'Full day adventure';
-    } else if (hours == 1 && minutes == 0) {
-      return 'Quick 1-hour activity';
-    } else if (minutes == 0) {
-      return '${hours}-hour experience';
-    } else {
-      return '${hours}h ${minutes}min experience';
-    }
+    return '${DurationFormatter.formatForDetails(event.startDate, event.endDate)} experience';
   }
 
   List<String> _getKeyFeatures(Event event) {

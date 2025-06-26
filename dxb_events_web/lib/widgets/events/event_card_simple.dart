@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../models/event.dart';
+import '../../utils/duration_formatter.dart';
 import 'event_actions.dart';
 
 class EventCardSimple extends StatefulWidget {
@@ -516,17 +517,7 @@ class _EventCardSimpleState extends State<EventCardSimple>
   }
   
   String _formatDuration() {
-    final endDate = widget.event.endDate ?? widget.event.startDate.add(const Duration(hours: 2));
-    final duration = endDate.difference(widget.event.startDate);
-    if (duration.inHours > 0) {
-      if (duration.inHours >= 6) {
-        return 'Full day adventure';
-      } else {
-        return '${duration.inHours}-hour experience';
-      }
-    } else {
-      return '${duration.inMinutes} min experience';
-    }
+    return '${DurationFormatter.formatForDetails(widget.event.startDate, widget.event.endDate)} experience';
   }
 
   String _getEventDescription() {
@@ -564,14 +555,6 @@ class _EventCardSimpleState extends State<EventCardSimple>
   }
   
   String _formatDurationShort() {
-    final endDate = widget.event.endDate ?? widget.event.startDate.add(const Duration(hours: 2));
-    final duration = endDate.difference(widget.event.startDate);
-    if (duration.inHours >= 6) {
-      return 'Full day';
-    } else if (duration.inHours > 0) {
-      return '${duration.inHours}h';
-    } else {
-      return '${duration.inMinutes}min';
-    }
+    return DurationFormatter.formatForCard(widget.event.startDate, widget.event.endDate);
   }
 } 
