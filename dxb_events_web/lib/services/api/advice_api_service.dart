@@ -27,7 +27,7 @@ class AdviceApiService {
       }
 
       final response = await _dio.get(
-        '/advice/event/\$eventId',
+        '/advice/event/$eventId',
         queryParameters: queryParams,
       );
 
