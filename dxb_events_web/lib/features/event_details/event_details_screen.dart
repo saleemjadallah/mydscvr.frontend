@@ -27,6 +27,7 @@ import '../../widgets/events/advice_submission_dialog.dart';
 import '../../services/providers/events_provider.dart';
 import '../../services/providers/preferences_provider.dart';
 import '../../services/providers/auth_provider_mongodb.dart';
+import '../../services/api/advice_api_service.dart';
 
 /// Detailed event screen with full information and booking options
 class EventDetailsScreen extends ConsumerStatefulWidget {
@@ -51,6 +52,12 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   bool _isAppBarCollapsed = false;
   bool _showBookingButton = true;
   
+  // Advice data management
+  List<EventAdvice> _adviceList = [];
+  AdviceStats? _adviceStats;
+  bool _isLoadingAdvice = false;
+  String? _adviceError;
+  
   @override
   void initState() {
     super.initState();
@@ -60,12 +67,110 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
     // Listen to scroll for app bar effects
     _scrollController.addListener(_onScroll);
     
+    // Listen to tab changes for lazy loading advice
+    _tabController.addListener(_onTabChanged);
+    
     // Load event details if not provided
     if (widget.event == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(eventsProvider.notifier).getEventById(widget.eventId);
       });
     }
+  }
+
+  void _onTabChanged() {
+    // Load advice data when user switches to advice tab (index 3)
+    if (_tabController.index == 3 && _adviceList.isEmpty && !_isLoadingAdvice) {
+      _loadAdviceData();
+    }
+  }
+
+  Future<void> _loadAdviceData() async {
+    if (_isLoadingAdvice) return;
+    
+    setState(() {
+      _isLoadingAdvice = true;
+      _adviceError = null;
+    });
+
+    try {
+      final apiService = AdviceApiService();
+      final advice = await apiService.getAdviceForEvent(widget.eventId);
+      
+      setState(() {
+        _adviceList = advice;
+        _adviceStats = _generateAdviceStats(advice);
+        _isLoadingAdvice = false;
+      });
+    } catch (e) {
+      setState(() {
+        _adviceError = e.toString();
+        _isLoadingAdvice = false;
+      });
+    }
+  }
+
+  AdviceStats _generateAdviceStats(List<EventAdvice> adviceList) {
+    if (adviceList.isEmpty) {
+      return AdviceStats(
+        eventId: widget.eventId,
+        totalAdvice: 0,
+        averageHelpfulness: 0.0,
+        adviceByCategory: {},
+        adviceByType: {},
+        verifiedAdviceCount: 0,
+        featuredAdviceCount: 0,
+        recentAdviceCount: 0,
+        topTags: [],
+        lastUpdated: DateTime.now(),
+      );
+    }
+
+    final Map<String, int> categoryCount = {};
+    final Map<String, int> typeCount = {};
+    final Set<String> allTags = {};
+    int verifiedCount = 0;
+    int featuredCount = 0;
+    int recentCount = 0;
+    double totalHelpfulness = 0.0;
+
+    final now = DateTime.now();
+    final dayAgo = now.subtract(const Duration(days: 1));
+
+    for (final advice in adviceList) {
+      // Category stats
+      final category = advice.category.toString().split('.').last;
+      categoryCount[category] = (categoryCount[category] ?? 0) + 1;
+
+      // Type stats
+      final type = advice.adviceType.toString().split('.').last;
+      typeCount[type] = (typeCount[type] ?? 0) + 1;
+
+      // Tags
+      allTags.addAll(advice.tags);
+
+      // Counts
+      if (advice.isVerified) verifiedCount++;
+      if (advice.isFeatured) featuredCount++;
+      if (advice.createdAt.isAfter(dayAgo)) recentCount++;
+
+      totalHelpfulness += advice.helpfulnessRating;
+    }
+
+    final topTags = allTags.toList()..sort();
+
+    return AdviceStats(
+      eventId: widget.eventId,
+      totalAdvice: adviceList.length,
+      averageHelpfulness: totalHelpfulness / adviceList.length,
+      adviceByCategory: categoryCount,
+      adviceByType: typeCount,
+      verifiedAdviceCount: verifiedCount,
+      featuredAdviceCount: featuredCount,
+      recentAdviceCount: recentCount,
+      topTags: topTags.take(5).toList(),
+      lastUpdated: now,
+    );
   }
 
   @override
@@ -377,9 +482,22 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           labelColor: AppColors.dubaiGold,
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.dubaiGold,
+          indicatorWeight: 3.0,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicator: BoxDecoration(
+            color: AppColors.dubaiGold,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
+          ),
           labelStyle: AppTypography.labelMedium.copyWith(
             fontWeight: FontWeight.bold,
           ),
+          unselectedLabelStyle: AppTypography.labelMedium.copyWith(
+            fontWeight: FontWeight.normal,
+          ),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         ),
       ),
     );
@@ -878,102 +996,83 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   Widget _buildAdviceTab(Event event) {
+    if (_isLoadingAdvice) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(40),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiGold),
+          ),
+        ),
+      );
+    }
+
+    if (_adviceError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                LucideIcons.alertCircle,
+                size: 64,
+                color: AppColors.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load advice',
+                style: AppTypography.headlineMedium.copyWith(
+                  color: AppColors.error,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _adviceError!,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _loadAdviceData,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.dubaiGold,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: EventAdviceWidget(
         eventId: event.id,
-        adviceList: _getSampleAdvice(event.id),
-        stats: _getSampleAdviceStats(event.id),
+        adviceList: _adviceList,
+        stats: _adviceStats ?? AdviceStats(
+          eventId: event.id,
+          totalAdvice: 0,
+          averageHelpfulness: 0.0,
+          adviceByCategory: {},
+          adviceByType: {},
+          verifiedAdviceCount: 0,
+          featuredAdviceCount: 0,
+          recentAdviceCount: 0,
+          topTags: [],
+          lastUpdated: DateTime.now(),
+        ),
         onAddAdvice: () => _showAddAdviceDialog(event),
       ),
     );
   }
 
-  List<EventAdvice> _getSampleAdvice(String eventId) {
-    // Sample advice data - in real app, this would come from API
-    return [
-      EventAdvice(
-        id: '1',
-        eventId: eventId,
-        userId: 'user1',
-        userName: 'Sarah Ahmed',
-        title: 'Perfect family day out - arrive early!',
-        content: 'I took my family to a similar water park event last year. My advice: arrive 30 minutes early to get good parking and avoid the initial rush. The kids (ages 5-12) had a blast! Bring extra towels and waterproof phone cases.',
-        category: AdviceCategory.familyTips,
-        adviceType: AdviceType.attendedSimilar,
-        experienceDate: DateTime.now().subtract(const Duration(days: 90)),
-        venueFamiliarity: true,
-        similarEventsAttended: 5,
-        helpfulnessRating: 4.5,
-        helpfulnessVotes: 18,
-        isVerified: true,
-        isFeatured: true,
-        tags: ['family_friendly', 'parking', 'food_tips', 'timing'],
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        updatedAt: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      EventAdvice(
-        id: '2',
-        eventId: eventId,
-        userId: 'user2',
-        userName: 'Mohammed Al-Rashid',
-        title: 'Metro and parking tips for this venue',
-        content: 'I work nearby and know this area well. The venue has limited parking, so I\'d recommend taking the Dubai Metro to DMCC station and then a short taxi ride. Much less stressful than driving!',
-        category: AdviceCategory.transportation,
-        adviceType: AdviceType.localKnowledge,
-        venueFamiliarity: true,
-        helpfulnessRating: 4.2,
-        helpfulnessVotes: 12,
-        isVerified: true,
-        tags: ['metro', 'parking', 'transportation', 'dmcc'],
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      EventAdvice(
-        id: '3',
-        eventId: eventId,
-        userId: 'user3',
-        userName: 'Emma Johnson',
-        title: 'First-timer\'s essential checklist',
-        content: 'If this is your first time at this type of event: 1) Bring swimwear even if you think you won\'t need it 2) Waterproof bag for electronics 3) Change of clothes for kids 4) Sunscreen 5) Download the venue app for maps',
-        category: AdviceCategory.firstTime,
-        adviceType: AdviceType.expertTip,
-        similarEventsAttended: 15,
-        helpfulnessRating: 4.7,
-        helpfulnessVotes: 22,
-        isVerified: true,
-        isFeatured: true,
-        tags: ['first_time', 'checklist', 'preparation', 'essentials'],
-        createdAt: DateTime.now().subtract(const Duration(hours: 12)),
-        updatedAt: DateTime.now().subtract(const Duration(hours: 12)),
-      ),
-    ];
-  }
 
-  AdviceStats _getSampleAdviceStats(String eventId) {
-    return AdviceStats(
-      eventId: eventId,
-      totalAdvice: 5,
-      averageHelpfulness: 4.3,
-      adviceByCategory: {
-        'family_tips': 2,
-        'transportation': 1,
-        'first_time': 1,
-        'budget_tips': 1,
-      },
-      adviceByType: {
-        'attended_similar': 2,
-        'local_knowledge': 1,
-        'expert_tip': 2,
-      },
-      verifiedAdviceCount: 4,
-      featuredAdviceCount: 2,
-      recentAdviceCount: 3,
-      topTags: ['family_friendly', 'parking', 'preparation', 'timing', 'metro'],
-      lastUpdated: DateTime.now(),
-    );
-  }
 
   void _showAddAdviceDialog(Event event) {
     showDialog(
@@ -981,8 +1080,8 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
       builder: (context) => AdviceSubmissionDialog(
         event: event,
         onAdviceSubmitted: () {
-          // Refresh the advice section after submission
-          setState(() {});
+          // Refresh the advice data after submission
+          _loadAdviceData();
         },
       ),
     );
