@@ -49,7 +49,7 @@ class TrendingEventsService {
         try {
           final event = events[i];
           final score = _calculateTrendingScore(event);
-          final simulatedInterested = _generateSimulatedInterestCount(score);
+          final simulatedInterested = _generateSimulatedInterestCount(event, score);
           final timeAgo = _generateSimulatedTimeAgo(event, score);
           
           scoredEvents.add(TrendingEventData(
@@ -189,15 +189,30 @@ class TrendingEventsService {
   }
 
   /// Generate realistic "interested" count based on trending score
-  int _generateSimulatedInterestCount(double trendingScore) {
+  int _generateSimulatedInterestCount(Event event, double trendingScore) {
     final weekSeed = _getWeeksSinceEpoch();
-    final random = Random(DateTime.now().millisecondsSinceEpoch + weekSeed);
+    // Use event ID hash to ensure each event gets a unique seed
+    final eventSeed = event.id.hashCode.abs();
+    final random = Random(DateTime.now().millisecondsSinceEpoch + weekSeed + eventSeed);
     
-    // Generate count between 500-900, rounded to nearest 10
-    final baseCount = random.nextInt(41) + 50; // 50-90 (will be multiplied by 10)
-    final total = baseCount * 10; // Results in 500-900
+    // Vary range based on trending score for more realistic distribution
+    int baseMin, baseMax;
+    if (trendingScore >= 0.8) {
+      // High trending: 750-1200 interested
+      baseMin = 75; baseMax = 120;
+    } else if (trendingScore >= 0.6) {
+      // Medium trending: 500-850 interested  
+      baseMin = 50; baseMax = 85;
+    } else {
+      // Lower trending: 300-650 interested
+      baseMin = 30; baseMax = 65;
+    }
     
-    return total; // Already rounded to tens (500, 510, 520, etc.)
+    final range = baseMax - baseMin;
+    final baseCount = random.nextInt(range) + baseMin;
+    final total = baseCount * 10; // Results in multiples of 10
+    
+    return total;
   }
 
   /// Generate realistic "time ago" based on event and score
