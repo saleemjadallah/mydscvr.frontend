@@ -40,7 +40,7 @@ class NotificationApiService {
         if (type != null) 'notification_type': _typeToString(type),
       };
       
-      final uri = Uri.parse('${_baseUrl}/api/notifications')
+      final uri = Uri.parse('${_baseUrl}/notifications')
           .replace(queryParameters: queryParams);
       
       final response = await http.get(uri, headers: _headers);
@@ -65,7 +65,7 @@ class NotificationApiService {
   Future<bool> markAsRead(String notificationId) async {
     try {
       final response = await http.put(
-        Uri.parse('${_baseUrl}/api/notifications/$notificationId/read'),
+        Uri.parse('${_baseUrl}/notifications/$notificationId/read'),
         headers: _headers,
       );
       
@@ -80,7 +80,7 @@ class NotificationApiService {
   Future<bool> markAllAsRead() async {
     try {
       final response = await http.put(
-        Uri.parse('${_baseUrl}/api/notifications/mark-all-read'),
+        Uri.parse('${_baseUrl}/notifications/mark-all-read'),
         headers: _headers,
       );
       
@@ -95,7 +95,7 @@ class NotificationApiService {
   Future<bool> deleteNotification(String notificationId) async {
     try {
       final response = await http.delete(
-        Uri.parse('${_baseUrl}/api/notifications/$notificationId'),
+        Uri.parse('${_baseUrl}/notifications/$notificationId'),
         headers: _headers,
       );
       
@@ -110,7 +110,7 @@ class NotificationApiService {
   Future<bool> clearAllNotifications() async {
     try {
       final response = await http.delete(
-        Uri.parse('${_baseUrl}/api/notifications'),
+        Uri.parse('${_baseUrl}/notifications'),
         headers: _headers,
       );
       
@@ -125,7 +125,7 @@ class NotificationApiService {
   Future<NotificationSettings?> getSettings() async {
     try {
       final response = await http.get(
-        Uri.parse('${_baseUrl}/api/notifications/settings'),
+        Uri.parse('${_baseUrl}/notifications/settings'),
         headers: _headers,
       );
       
@@ -160,7 +160,7 @@ class NotificationApiService {
       };
       
       final response = await http.put(
-        Uri.parse('${_baseUrl}/api/notifications/settings'),
+        Uri.parse('${_baseUrl}/notifications/settings'),
         headers: _headers,
         body: json.encode(body),
       );
@@ -176,7 +176,7 @@ class NotificationApiService {
   Future<Map<String, dynamic>?> getStats() async {
     try {
       final response = await http.get(
-        Uri.parse('${_baseUrl}/api/notifications/stats'),
+        Uri.parse('${_baseUrl}/notifications/stats'),
         headers: _headers,
       );
       
@@ -194,7 +194,7 @@ class NotificationApiService {
   Future<bool> sendTestNotification() async {
     try {
       final response = await http.post(
-        Uri.parse('${_baseUrl}/api/notifications/test'),
+        Uri.parse('${_baseUrl}/notifications/test'),
         headers: _headers,
       );
       
