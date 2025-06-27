@@ -1066,6 +1066,10 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           lastUpdated: DateTime.now(),
         ),
         onAddAdvice: () => _showAddAdviceDialog(event),
+        onAdviceUpdated: () {
+          // Refresh advice data when updated
+          _loadAdviceData();
+        },
       ),
     );
   }
@@ -1075,10 +1079,12 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   void _showAddAdviceDialog(Event event) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) => AdviceSubmissionDialog(
         event: event,
         onAdviceSubmitted: () {
           // Refresh the advice data after submission
+          print('🔄 Refreshing advice data after submission');
           _loadAdviceData();
         },
       ),

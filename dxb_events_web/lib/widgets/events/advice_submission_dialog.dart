@@ -28,15 +28,19 @@ class AdviceSubmissionDialog extends ConsumerStatefulWidget {
 
 class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog> {
   final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _adviceService = AdviceApiService();
 
   AdviceCategory _selectedCategory = AdviceCategory.general;
   AdviceType _selectedType = AdviceType.attendedSimilar;
   bool _isSubmitting = false;
+  bool _venueFamiliarity = false;
+  int? _similarEventsAttended;
 
   @override
   void dispose() {
+    _titleController.dispose();
     _contentController.dispose();
     super.dispose();
   }
@@ -83,10 +87,15 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
     try {
       final result = await _adviceService.submitAdvice(
         eventId: widget.event.id,
+        title: _titleController.text.trim().isNotEmpty 
+            ? _titleController.text.trim() 
+            : '${AdviceDisplayHelper.getCategoryDisplayName(_selectedCategory)} Advice',
         content: _contentController.text.trim(),
         category: _selectedCategory,
         type: _selectedType,
         tags: [],
+        venueFamiliarity: _venueFamiliarity,
+        similarEventsAttended: _similarEventsAttended,
       );
 
       if (result.isSuccess) {
@@ -398,6 +407,129 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
               
               const SizedBox(height: 24),
               
+              // Title Input (Optional)
+              Text(
+                'Title (Optional)',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.dubaiTeal.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                child: TextFormField(
+                  controller: _titleController,
+                  maxLength: 100,
+                  decoration: InputDecoration(
+                    hintText: 'Give your advice a title (optional)',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: AppColors.textSecondary.withOpacity(0.7),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.all(16),
+                    counterText: '',
+                  ),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Experience Details
+              Text(
+                'Experience Details',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Venue Familiarity
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.dubaiTeal.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: _venueFamiliarity,
+                      onChanged: (value) => setState(() => _venueFamiliarity = value ?? false),
+                      activeColor: AppColors.dubaiTeal,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'I\'m familiar with this venue',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Similar Events Count
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.dubaiTeal.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                child: DropdownButtonFormField<int?>(
+                  value: _similarEventsAttended,
+                  decoration: InputDecoration(
+                    labelText: 'Similar events attended',
+                    hintText: 'How many similar events have you been to?',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: AppColors.textSecondary.withOpacity(0.7),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
+                  items: [
+                    const DropdownMenuItem<int?>(value: null, child: Text('Select (optional)')),
+                    ...List.generate(10, (index) => index + 1)
+                        .map((count) => DropdownMenuItem(
+                              value: count,
+                              child: Text('$count event${count > 1 ? 's' : ''}'),
+                            )),
+                    const DropdownMenuItem(value: 11, child: Text('10+ events')),
+                  ],
+                  onChanged: (value) => setState(() => _similarEventsAttended = value),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
               // Content Input
               Text(
                 'Your Advice',
@@ -447,8 +579,8 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
                     if (value?.trim().isEmpty ?? true) {
                       return 'Please share your advice';
                     }
-                    if (value!.trim().length < 20) {
-                      return 'Please provide at least 20 characters';
+                    if (value!.trim().length < 10) {
+                      return 'Please provide at least 10 characters';
                     }
                     return null;
                   },
