@@ -78,7 +78,7 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen>
     _resendTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted && _resendCountdown > 0) {
         setState(() {
-          _resendCountdown = math.max(0, _resendCountdown - 5);
+          _resendCountdown = _resendCountdown > 5 ? _resendCountdown - 5 : 0;
         });
         if (_resendCountdown <= 0) {
           setState(() {
