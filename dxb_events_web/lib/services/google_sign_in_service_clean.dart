@@ -35,11 +35,17 @@ class GoogleSignInServiceClean {
     var attempts = 0;
     const maxAttempts = 150; // 30 seconds total
     
-    // Check if script is loaded by checking window flag
-    bool get scriptLoaded => js.context['googleScriptLoaded'] == true;
+    // Helper function to check if script is loaded
+    bool isScriptLoaded() {
+      try {
+        return js.context['googleScriptLoaded'] == true;
+      } catch (e) {
+        return false;
+      }
+    }
     
     debugPrint('🔍 Starting Google API loading check...');
-    debugPrint('   - Initial script loaded flag: $scriptLoaded');
+    debugPrint('   - Initial script loaded flag: ${isScriptLoaded()}');
     
     while (attempts < maxAttempts) {
       try {
@@ -47,13 +53,13 @@ class GoogleSignInServiceClean {
             js.context['google'] != null &&
             js.context['google']['accounts'] != null &&
             js.context['google']['accounts']['id'] != null) {
-          debugPrint('✅ Google API loaded successfully after ${attempts + 1} attempts (script loaded: $scriptLoaded)');
+          debugPrint('✅ Google API loaded successfully after ${attempts + 1} attempts (script loaded: ${isScriptLoaded()})');
           return;
         }
         
         if (attempts < 5) {
           debugPrint('⏳ Attempt ${attempts + 1}: Waiting for Google API...');
-          debugPrint('   - Script loaded flag: $scriptLoaded');
+          debugPrint('   - Script loaded flag: ${isScriptLoaded()}');
           debugPrint('   - Google object: ${js.context.hasProperty('google')}');
         } else if (attempts % 10 == 0) {
           debugPrint('⏳ Still waiting for Google API (attempt ${attempts + 1}/$maxAttempts)...');
