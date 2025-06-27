@@ -348,11 +348,6 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
     }
   }
 
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
-  }
 }
 
 /// Featured Events Service Provider
