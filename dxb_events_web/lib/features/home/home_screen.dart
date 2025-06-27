@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,12 +91,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       vsync: this,
     );
 
-    _scrollController.addListener(() {
-      final shouldShowFloatingSearch = _scrollController.offset > 200;
-      if (shouldShowFloatingSearch != _showFloatingSearch) {
-        setState(() {
-          _showFloatingSearch = shouldShowFloatingSearch;
-        });
+    _scrollController.addListener(_scrollListener);
+  }
+  
+  Timer? _scrollDebounceTimer;
+  
+  void _scrollListener() {
+    _scrollDebounceTimer?.cancel();
+    _scrollDebounceTimer = Timer(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        final shouldShowFloatingSearch = _scrollController.offset > 200;
+        if (shouldShowFloatingSearch != _showFloatingSearch) {
+          setState(() {
+            _showFloatingSearch = shouldShowFloatingSearch;
+          });
+        }
       }
     });
 
@@ -170,6 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   void dispose() {
+    _scrollDebounceTimer?.cancel();
     _scrollController.dispose();
     _heroAnimationController.dispose();
     _searchController.dispose();

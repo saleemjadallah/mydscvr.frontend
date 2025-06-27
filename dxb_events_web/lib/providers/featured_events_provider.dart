@@ -22,6 +22,12 @@ class FeaturedEventsProvider extends ChangeNotifier {
   // Peak hours: 8 AM to 10 PM
   static const int _peakHourStart = 8;
   static const int _peakHourEnd = 22;
+  
+  // Circuit breaker for API failures
+  int _consecutiveFailures = 0;
+  DateTime? _lastFailureTime;
+  static const int _maxConsecutiveFailures = 3;
+  static const Duration _backoffDuration = Duration(minutes: 15);
 
   FeaturedEventsProvider() : _featuredEventsService = FeaturedEventsService(EventsService()) {
     _initializeRefreshCycle();
@@ -71,11 +77,16 @@ class FeaturedEventsProvider extends ChangeNotifier {
       if (response.isSuccess && response.data != null) {
         _featuredEvents = response.data!;
         _lastRefresh = DateTime.now();
+        _consecutiveFailures = 0; // Reset failure count on success
         _logFeaturedEventsUpdate();
       } else {
+        _consecutiveFailures++;
+        _lastFailureTime = DateTime.now();
         _setError(response.error ?? 'Failed to load featured events');
       }
     } catch (e) {
+      _consecutiveFailures++;
+      _lastFailureTime = DateTime.now();
       _setError('Unexpected error loading featured events: $e');
     } finally {
       _setLoading(false);
@@ -204,11 +215,29 @@ class FeaturedEventsProvider extends ChangeNotifier {
   void _scheduleNextRefresh() {
     _refreshTimer?.cancel();
     
+    // Circuit breaker: Don't schedule if too many failures
+    if (_consecutiveFailures >= _maxConsecutiveFailures) {
+      print('🚫 FeaturedEventsProvider: Circuit breaker open, stopping refresh cycle');
+      return;
+    }
+    
     final interval = _isPeakHours ? _peakHoursInterval : _offPeakInterval;
     
     _refreshTimer = Timer(interval, () {
-      loadFeaturedEvents();
-      _scheduleNextRefresh(); // Schedule the next refresh
+      // Check circuit breaker before making API call
+      if (_consecutiveFailures < _maxConsecutiveFailures) {
+        loadFeaturedEvents().then((_) {
+          // Only reschedule on successful load
+          if (_consecutiveFailures == 0) {
+            _scheduleNextRefresh();
+          }
+        }).catchError((error) {
+          print('🚫 FeaturedEventsProvider: API error, incrementing failure count: $error');
+          _consecutiveFailures++;
+          _lastFailureTime = DateTime.now();
+          // Don't reschedule on error to break the loop
+        });
+      }
     });
   }
 
