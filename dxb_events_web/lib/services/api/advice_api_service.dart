@@ -4,6 +4,12 @@ import 'dio_config.dart';
 
 class AdviceApiService {
   final Dio _dio = DioConfig.createDio();
+  
+  // Circuit breaker to prevent infinite loops
+  static int _consecutiveFailures = 0;
+  static DateTime? _lastFailureTime;
+  static const int _maxConsecutiveFailures = 3;
+  static const Duration _backoffDuration = Duration(minutes: 2);
 
   // Get advice for an event
   Future<List<EventAdvice>> getEventAdvice(String eventId, {
@@ -12,6 +18,12 @@ class AdviceApiService {
     int limit = 20,
     int offset = 0,
   }) async {
+    // Circuit breaker: check if we should skip this call
+    if (_shouldSkipDueToFailures()) {
+      print('🔄 AdviceApiService: Skipping getEventAdvice due to circuit breaker ($_consecutiveFailures failures)');
+      return [];
+    }
+    
     try {
       final queryParams = <String, dynamic>{
         'limit': limit,
@@ -32,6 +44,10 @@ class AdviceApiService {
       );
 
       if (response.statusCode == 200) {
+        // Reset failure count on success
+        _consecutiveFailures = 0;
+        _lastFailureTime = null;
+        
         final List<dynamic> adviceList = response.data is List 
             ? response.data 
             : (response.data['advice'] ?? []);
@@ -40,11 +56,15 @@ class AdviceApiService {
             .toList();
       }
       
+      // Handle non-200 response as failure
+      _handleFailure();
       return [];
     } on DioException catch (e) {
+      _handleFailure();
       print('Error fetching advice: \${e.message}');
       return [];
     } catch (e) {
+      _handleFailure();
       print('Unexpected error fetching advice: \$e');
       return [];
     }
@@ -58,6 +78,12 @@ class AdviceApiService {
     required AdviceType type,
     List<String> tags = const [],
   }) async {
+    // Circuit breaker: check if we should skip this call
+    if (_shouldSkipDueToFailures()) {
+      print('🔄 AdviceApiService: Skipping submitAdvice due to circuit breaker ($_consecutiveFailures failures)');
+      return AdviceSubmissionResult.error('Service temporarily unavailable. Please try again later.');
+    }
+    
     try {
       final adviceData = {
         'event_id': eventId,
@@ -76,15 +102,22 @@ class AdviceApiService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Reset failure count on success
+        _consecutiveFailures = 0;
+        _lastFailureTime = null;
+        
         return AdviceSubmissionResult.success(
           EventAdvice.fromJson(response.data),
         );
       }
       
+      // Handle non-success response as failure
+      _handleFailure();
       return AdviceSubmissionResult.error(
         'Failed to submit advice: \${response.statusMessage}',
       );
     } on DioException catch (e) {
+      _handleFailure();
       String errorMessage = 'Failed to submit advice';
       
       if (e.response?.statusCode == 400) {
@@ -97,6 +130,7 @@ class AdviceApiService {
       
       return AdviceSubmissionResult.error(errorMessage);
     } catch (e) {
+      _handleFailure();
       return AdviceSubmissionResult.error('Unexpected error: \$e');
     }
   }
@@ -148,6 +182,30 @@ class AdviceApiService {
         return 'local_knowledge';
       case AdviceType.expertTip:
         return 'expert_tip';
+    }
+  }
+  
+  // Circuit breaker helper methods
+  static bool _shouldSkipDueToFailures() {
+    if (_consecutiveFailures < _maxConsecutiveFailures) {
+      return false;
+    }
+    
+    if (_lastFailureTime == null) {
+      return true;
+    }
+    
+    final timeSinceLastFailure = DateTime.now().difference(_lastFailureTime!);
+    return timeSinceLastFailure < _backoffDuration;
+  }
+  
+  static void _handleFailure() {
+    _consecutiveFailures++;
+    _lastFailureTime = DateTime.now();
+    print('🔄 AdviceApiService: Failure count: $_consecutiveFailures/$_maxConsecutiveFailures');
+    
+    if (_consecutiveFailures >= _maxConsecutiveFailures) {
+      print('🚫 AdviceApiService: Circuit breaker OPEN - will skip requests for ${_backoffDuration.inMinutes} minutes');
     }
   }
 }
