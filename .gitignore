@@ -122,4 +122,4 @@ monitoring/
 .incremental
 
 # Runtime files
-.lock-wscript
+.lock-wscriptmydscvrkey.pem

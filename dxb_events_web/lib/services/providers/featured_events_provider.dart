@@ -56,8 +56,12 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
   static const int _peakHourEnd = 22;
 
   FeaturedEventsNotifier(this._featuredEventsService) : super(const FeaturedEventsState()) {
-    _initializeRefreshCycle();
-    loadFeaturedEvents();
+    // Load events first, then start refresh cycle
+    loadFeaturedEvents().then((_) {
+      _initializeRefreshCycle();
+    }).catchError((error) {
+      print('🚫 FeaturedEventsProvider: Initial load failed, not starting refresh cycle: $error');
+    });
   }
 
   /// Check if current time is during peak hours
@@ -258,6 +262,12 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
   void _scheduleNextRefresh() {
     _refreshTimer?.cancel();
     
+    // Circuit breaker: If too many failures, don't schedule new refresh
+    if (_shouldSkipDueToFailures()) {
+      print('🚫 FeaturedEventsProvider: Skipping refresh due to circuit breaker');
+      return;
+    }
+    
     // If circuit breaker is open, use longer interval
     Duration interval = _isPeakHours ? _peakHoursInterval : _offPeakInterval;
     if (_consecutiveFailures >= _maxConsecutiveFailures) {
@@ -265,8 +275,18 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
     }
     
     _refreshTimer = Timer(interval, () {
-      loadFeaturedEvents();
-      _scheduleNextRefresh(); // Schedule the next refresh
+      // Check if we should still refresh before making API call
+      if (!_shouldSkipDueToFailures()) {
+        loadFeaturedEvents().then((_) {
+          // Only schedule next refresh if this call succeeded
+          if (_consecutiveFailures < _maxConsecutiveFailures) {
+            _scheduleNextRefresh();
+          }
+        }).catchError((error) {
+          print('🚫 FeaturedEventsProvider: Stopping refresh cycle due to error: $error');
+          // Don't schedule next refresh on error to break the loop
+        });
+      }
     });
   }
   
@@ -289,6 +309,15 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
     _consecutiveFailures++;
     _lastFailureTime = DateTime.now();
     print('🔄 FeaturedEventsNotifier: Failure count: $_consecutiveFailures/$_maxConsecutiveFailures');
+  }
+
+  /// Clean up resources and stop timers
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+    print('🧹 FeaturedEventsProvider: Disposed and cleaned up timers');
+    super.dispose();
   }
 
   /// Helper method to determine if an event is indoor

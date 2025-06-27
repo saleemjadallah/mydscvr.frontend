@@ -33,9 +33,12 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   @override
   void initState() {
     super.initState();
-    // Load featured events when widget is initialized
+    // Load featured events only if not already loaded to prevent infinite loops
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(featuredEventsProvider.notifier).loadFeaturedEvents();
+      final currentState = ref.read(featuredEventsProvider);
+      if (mounted && currentState.events.isEmpty && !currentState.isLoading) {
+        ref.read(featuredEventsProvider.notifier).loadFeaturedEvents();
+      }
     });
   }
   
