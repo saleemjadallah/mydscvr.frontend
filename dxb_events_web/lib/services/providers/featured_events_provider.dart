@@ -41,6 +41,12 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
   final FeaturedEventsService _featuredEventsService;
   Timer? _refreshTimer;
   
+  // Circuit breaker for preventing infinite loops
+  int _consecutiveFailures = 0;
+  static const int _maxConsecutiveFailures = 3;
+  DateTime? _lastFailureTime;
+  static const Duration _backoffDuration = Duration(minutes: 5);
+  
   // Refresh intervals
   static const Duration _peakHoursInterval = Duration(minutes: 30);
   static const Duration _offPeakInterval = Duration(hours: 2);
@@ -68,6 +74,12 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
   }) async {
     print('🎯 FeaturedEventsNotifier: loadFeaturedEvents called (forceRefresh: $forceRefresh)');
     
+    // Circuit breaker: check if we should skip this call
+    if (!forceRefresh && _shouldSkipDueToFailures()) {
+      print('🔄 FeaturedEventsNotifier: Skipping load due to circuit breaker ($_consecutiveFailures failures)');
+      return;
+    }
+    
     // Avoid frequent refreshes unless forced
     if (!forceRefresh && state.lastRefresh != null) {
       final timeSinceLastRefresh = DateTime.now().difference(state.lastRefresh!);
@@ -92,6 +104,10 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
       print('🎯 FeaturedEventsNotifier: Service response - isSuccess: ${response.isSuccess}');
       
       if (response.isSuccess && response.data != null) {
+        // Reset failure count on success
+        _consecutiveFailures = 0;
+        _lastFailureTime = null;
+        
         print('🎯 FeaturedEventsNotifier: Received ${response.data!.length} featured events');
         state = state.copyWith(
           events: response.data!,
@@ -101,6 +117,7 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
         );
         _logFeaturedEventsUpdate();
       } else {
+        _handleFailure();
         final error = response.error ?? 'Failed to load featured events';
         print('🚨 FeaturedEventsNotifier: Error loading featured events: $error');
         state = state.copyWith(
@@ -109,6 +126,7 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
         );
       }
     } catch (e) {
+      _handleFailure();
       final error = 'Unexpected error loading featured events: $e';
       print('🚨 FeaturedEventsNotifier: Exception: $error');
       state = state.copyWith(
@@ -240,12 +258,37 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
   void _scheduleNextRefresh() {
     _refreshTimer?.cancel();
     
-    final interval = _isPeakHours ? _peakHoursInterval : _offPeakInterval;
+    // If circuit breaker is open, use longer interval
+    Duration interval = _isPeakHours ? _peakHoursInterval : _offPeakInterval;
+    if (_consecutiveFailures >= _maxConsecutiveFailures) {
+      interval = Duration(minutes: interval.inMinutes * 2); // Double the interval
+    }
     
     _refreshTimer = Timer(interval, () {
       loadFeaturedEvents();
       _scheduleNextRefresh(); // Schedule the next refresh
     });
+  }
+  
+  /// Circuit breaker: check if we should skip API calls due to consecutive failures
+  bool _shouldSkipDueToFailures() {
+    if (_consecutiveFailures < _maxConsecutiveFailures) {
+      return false;
+    }
+    
+    if (_lastFailureTime == null) {
+      return true;
+    }
+    
+    final timeSinceLastFailure = DateTime.now().difference(_lastFailureTime!);
+    return timeSinceLastFailure < _backoffDuration;
+  }
+  
+  /// Handle API call failure - increment counter and set timestamp
+  void _handleFailure() {
+    _consecutiveFailures++;
+    _lastFailureTime = DateTime.now();
+    print('🔄 FeaturedEventsNotifier: Failure count: $_consecutiveFailures/$_maxConsecutiveFailures');
   }
 
   /// Helper method to determine if an event is indoor
