@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 
@@ -67,22 +66,8 @@ class GoogleSignInButton extends StatelessWidget {
   }
 
   Widget _buildGoogleLogo() {
-    // Use the official Google "G" logo
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(2),
-      ),
-      child: SvgPicture.network(
-        'https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg',
-        width: 20,
-        height: 20,
-        fit: BoxFit.contain,
-        // Fallback to a custom Google logo if network fails
-        placeholderBuilder: (context) => _buildFallbackGoogleLogo(),
-      ),
-    );
+    // Use fallback Google logo to avoid network issues
+    return _buildFallbackGoogleLogo();
   }
 
   Widget _buildFallbackGoogleLogo() {
@@ -165,12 +150,7 @@ class GoogleSignInButtonLight extends StatelessWidget {
                 ),
               ),
             )
-          : SvgPicture.network(
-              'https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg',
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
-            ),
+          : _buildFallbackGoogleLogo(),
         label: Text(
           text,
           style: GoogleFonts.roboto(
@@ -178,6 +158,37 @@ class GoogleSignInButtonLight extends StatelessWidget {
             fontWeight: FontWeight.w500,
             color: const Color(0xFF1F1F1F), // Google's recommended text color
             letterSpacing: 0.25,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackGoogleLogo() {
+    // Custom Google "G" logo as fallback
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF4285F4), // Google Blue
+            Color(0xFF34A853), // Google Green
+            Color(0xFFFBBC05), // Google Yellow
+            Color(0xFFEA4335), // Google Red
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Text(
+          'G',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

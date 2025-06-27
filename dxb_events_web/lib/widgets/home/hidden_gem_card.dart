@@ -1272,7 +1272,7 @@ class HiddenGem {
       pricing: pricing,
       familySuitability: familySuitability,
       organizerInfo: organizerInfo,
-      imageUrl: json['image_url'] ?? 'https://via.placeholder.com/800x400/E3F2FD/1976D2?text=Dubai+Event',
+      imageUrl: json['image_url'] ?? 'assets/images/mydscvr-logo.png',
       category: json['category'] ?? 'general',
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       rating: (json['rating'] ?? 1.0).toDouble(),
