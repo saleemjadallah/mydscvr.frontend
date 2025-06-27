@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -43,7 +44,7 @@ class _GlassmorphicBackgroundState extends State<GlassmorphicBackground>
       vsync: this,
     );
 
-    if (widget.animated) {
+    if (widget.animated && !kIsWeb) {
       _controller1.repeat();
       _controller2.repeat();
       _controller3.repeat();

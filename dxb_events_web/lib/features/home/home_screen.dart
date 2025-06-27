@@ -92,6 +92,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
 
     _scrollController.addListener(_scrollListener);
+    
+    // Start animations once on init
+    _heroAnimationController.forward();
+    
+    // Delay search animation
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        _searchController.forward();
+      }
+    });
+
+    // Load real data once
+    _loadEvents();
   }
   
   Timer? _scrollDebounceTimer;
@@ -108,19 +121,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         }
       }
     });
-
-    // Start hero animation
-    _heroAnimationController.forward();
-    
-    // Delay search animation
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) {
-        _searchController.forward();
-      }
-    });
-
-    // Load real data
-    _loadEvents();
   }
 
   Future<void> _loadEvents() async {
@@ -181,6 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void dispose() {
     _scrollDebounceTimer?.cancel();
+    _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     _heroAnimationController.dispose();
     _searchController.dispose();
