@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -57,6 +58,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   AdviceStats? _adviceStats;
   bool _isLoadingAdvice = false;
   String? _adviceError;
+  Timer? _adviceRefreshTimer;
   
   @override
   void initState() {
@@ -108,6 +110,18 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
         _isLoadingAdvice = false;
       });
     }
+  }
+
+  void _debounceAdviceRefresh() {
+    // Cancel any existing timer to prevent multiple rapid calls
+    _adviceRefreshTimer?.cancel();
+    
+    // Create a new timer with a 500ms delay
+    _adviceRefreshTimer = Timer(const Duration(milliseconds: 500), () {
+      if (mounted && !_isLoadingAdvice) {
+        _loadAdviceData();
+      }
+    });
   }
 
   AdviceStats _generateAdviceStats(List<EventAdvice> adviceList) {
@@ -175,6 +189,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
 
   @override
   void dispose() {
+    _adviceRefreshTimer?.cancel();
     _tabController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -1067,8 +1082,8 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
         ),
         onAddAdvice: () => _showAddAdviceDialog(event),
         onAdviceUpdated: () {
-          // Refresh advice data when updated
-          _loadAdviceData();
+          // Debounced refresh to prevent infinite loops
+          _debounceAdviceRefresh();
         },
       ),
     );
@@ -1083,9 +1098,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
       builder: (context) => AdviceSubmissionDialog(
         event: event,
         onAdviceSubmitted: () {
-          // Refresh the advice data after submission
+          // Use debounced refresh to prevent conflicts with other updates
           print('🔄 Refreshing advice data after submission');
-          _loadAdviceData();
+          _debounceAdviceRefresh();
         },
       ),
     );
