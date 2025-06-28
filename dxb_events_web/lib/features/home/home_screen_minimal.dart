@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/constants/app_colors.dart';
+// import '../../core/constants/app_colors.dart'; // REMOVED - NOT IN MINIMAL DEPS
 
 /// Minimal homepage for debugging type casting errors
 class MinimalHomeScreen extends ConsumerWidget {
@@ -11,10 +11,10 @@ class MinimalHomeScreen extends ConsumerWidget {
     print('🔍 DEBUG: MinimalHomeScreen building...');
     
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Minimal Debug Mode'),
-        backgroundColor: AppColors.dubaiTeal,
+        backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -59,7 +59,7 @@ class MinimalHomeScreen extends ConsumerWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.dubaiTeal,
+                  backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
