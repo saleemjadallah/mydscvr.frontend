@@ -154,7 +154,7 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('An error occurred: \$e'),
+          content: Text('An error occurred: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
