@@ -31,6 +31,7 @@ import '../../widgets/home/weekend_highlights.dart';
 import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/home/hidden_gem_card.dart';
 import '../../widgets/common/footer.dart';
+import '../../core/widgets/error_boundary.dart';
 
 // Provider imports
 import '../../services/providers/auth_provider_mongodb.dart';
@@ -773,18 +774,24 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
 
   Widget _buildAnimatedFeaturedEvents() {
     return FadeInSlideUp(
-      child: FeaturedEventsSection(
-        showHeader: true,
-        maxEventsToShow: 8,
-        padding: const EdgeInsets.all(24),
-        onEventTap: (event) {
-          // Navigate to event details page
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => EventDetailsScreen(eventId: event.id, event: event),
-            ),
-          );
+      child: ErrorBoundary(
+        fallbackMessage: 'Failed to load featured events',
+        onError: () {
+          print('🚨 FeaturedEventsSection error caught by ErrorBoundary');
         },
+        child: FeaturedEventsSection(
+          showHeader: true,
+          maxEventsToShow: 8,
+          padding: const EdgeInsets.all(24),
+          onEventTap: (event) {
+            // Navigate to event details page
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => EventDetailsScreen(eventId: event.id, event: event),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

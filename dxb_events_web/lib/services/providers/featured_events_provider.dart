@@ -4,6 +4,7 @@ import '../../models/event.dart';
 import '../../models/api_response.dart';
 import '../featured_events_service.dart';
 import '../events_service.dart';
+import '../../core/debug/debug_config.dart';
 
 /// State class for Featured Events
 class FeaturedEventsState {
@@ -56,12 +57,9 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
   static const int _peakHourEnd = 22;
 
   FeaturedEventsNotifier(this._featuredEventsService) : super(const FeaturedEventsState()) {
-    // Load events first, then start refresh cycle
-    loadFeaturedEvents().then((_) {
-      _initializeRefreshCycle();
-    }).catchError((error) {
-      print('🚫 FeaturedEventsProvider: Initial load failed, not starting refresh cycle: $error');
-    });
+    // DON'T auto-load in constructor to prevent race conditions
+    // Let the widget handle initial loading via explicit calls
+    print('🎯 FeaturedEventsNotifier: Constructor completed - waiting for explicit load call');
   }
 
   /// Check if current time is during peak hours
@@ -76,6 +74,7 @@ class FeaturedEventsNotifier extends StateNotifier<FeaturedEventsState> {
     EnvironmentalFactors? environmentalFactors,
     bool forceRefresh = false,
   }) async {
+    DebugConfig.logMethodCall('loadFeaturedEvents');
     print('🎯 FeaturedEventsNotifier: loadFeaturedEvents called (forceRefresh: $forceRefresh)');
     
     // Circuit breaker: check if we should skip this call

@@ -25,6 +25,8 @@ import 'features/legal/privacy_screen.dart';
 import 'features/legal/cookies_screen.dart';
 import 'features/favorites/favorites_screen.dart';
 import 'debug_events_page.dart';
+import 'core/widgets/error_boundary.dart';
+import 'core/debug/debug_config.dart';
 
 // Router configuration for clean URL routing
 final GoRouter _router = GoRouter(
@@ -224,12 +226,21 @@ final GoRouter _router = GoRouter(
 
 /// Main entry point for DXB Events Flutter Web Application
 void main() {
+  // Initialize debug configuration
+  DebugConfig.initialize();
+  
   // Configure URL strategy for clean URLs (remove # from URLs)
   usePathUrlStrategy();
   
   runApp(
-    ProviderScope(
-      child: const DXBEventsApp(),
+    ErrorBoundary(
+      fallbackMessage: 'Application crashed. Please refresh the page.',
+      onError: () {
+        print('🚨 CRITICAL: Application-level error caught by ErrorBoundary');
+      },
+      child: ProviderScope(
+        child: const DXBEventsApp(),
+      ),
     ),
   );
 }
