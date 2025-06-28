@@ -773,27 +773,52 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
 
 
   Widget _buildAnimatedFeaturedEvents() {
+    // TEMPORARILY DISABLED TO ISOLATE TYPE CASTING ERROR
     return FadeInSlideUp(
-      child: ErrorBoundary(
-        fallbackMessage: 'Failed to load featured events',
-        onError: () {
-          print('🚨 FeaturedEventsSection error caught by ErrorBoundary');
-        },
-        child: FeaturedEventsSection(
-          showHeader: true,
-          maxEventsToShow: 8,
-          padding: const EdgeInsets.all(24),
-          onEventTap: (event) {
-            // Navigate to event details page
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => EventDetailsScreen(eventId: event.id, event: event),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Text(
+              'Featured Events Section Temporarily Disabled',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange,
               ),
-            );
-          },
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Debugging type casting error...',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
+    
+    // Original code commented out:
+    // return FadeInSlideUp(
+    //   child: ErrorBoundary(
+    //     fallbackMessage: 'Failed to load featured events',
+    //     onError: () {
+    //       print('🚨 FeaturedEventsSection error caught by ErrorBoundary');
+    //     },
+    //     child: FeaturedEventsSection(
+    //       showHeader: true,
+    //       maxEventsToShow: 8,
+    //       padding: const EdgeInsets.all(24),
+    //       onEventTap: (event) {
+    //         // Navigate to event details page
+    //         Navigator.of(context).push(
+    //           MaterialPageRoute(
+    //             builder: (context) => EventDetailsScreen(eventId: event.id, event: event),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   ),
+    // );
   }
 
   Widget _buildAnimatedCategories() {
