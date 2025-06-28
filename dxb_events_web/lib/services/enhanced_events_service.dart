@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/event.dart';
 import '../core/config/api_config.dart';
+import '../core/utils/safe_event_parser.dart';
 
 /// Enhanced Events Service that utilizes all new backend filtering capabilities
 class EnhancedEventsService {
@@ -28,7 +29,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch filtered events');
@@ -65,7 +68,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch events by categories');
@@ -117,7 +122,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch high quality events');
@@ -171,7 +178,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch events by area');
@@ -216,7 +225,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch events with social media');
@@ -257,7 +268,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch trending events');
@@ -302,7 +315,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch recommended events');
@@ -409,7 +424,9 @@ class EnhancedEventsService {
         if (data['success'] == true && data['events'] != null) {
           final List<dynamic> eventsJson = data['events'];
           return eventsJson
-              .map((eventJson) => Event.fromBackendApi(eventJson))
+              .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+              .where((event) => event != null)
+              .cast<Event>()
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Failed to fetch advanced filtered events');

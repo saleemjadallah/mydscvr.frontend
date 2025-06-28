@@ -3,6 +3,7 @@ import '../models/event.dart';
 import '../models/api_response.dart';
 import '../models/event_stats.dart';
 import 'api/dio_config.dart';
+import '../core/utils/safe_event_parser.dart';
 
 /// Response model that includes both events and total count
 class EventsWithTotal {
@@ -90,9 +91,7 @@ class EventsService {
         final eventsJson = responseData['events'] as List<dynamic>;
         final total = responseData['pagination']['total'] as int;
         
-        final events = eventsJson
-            .map((eventJson) => Event.fromBackendApi(eventJson as Map<String, dynamic>))
-            .toList();
+        final events = SafeEventParser.parseEventList(eventsJson);
         
         return ApiResponse<EventsWithTotal>.success(
           EventsWithTotal(events: events, total: total),
@@ -141,9 +140,7 @@ class EventsService {
         final eventsJson = responseData['events'] as List<dynamic>;
         final total = responseData['pagination']['total'] as int;
         
-        final events = eventsJson
-            .map((eventJson) => Event.fromBackendApi(eventJson as Map<String, dynamic>))
-            .toList();
+        final events = SafeEventParser.parseEventList(eventsJson);
         
         return ApiResponse<EventsWithTotal>.success(
           EventsWithTotal(events: events, total: total),
@@ -227,11 +224,15 @@ class EventsService {
           try {
             final eventJson = eventsData[i] as Map<String, dynamic>;
             print('🔍 DEBUG EventsService: Attempting to parse event $i: ${eventJson['title']}');
-            final event = Event.fromBackendApi(eventJson);
-            events.add(event);
-            print('🔍 DEBUG EventsService: ✅ Successfully parsed event $i: ${event.title} - ${event.category}');
-            if (i == 0) {
-              print('🔍 DEBUG EventsService: First parsed event details: title=${event.title}, category=${event.category}, venue=${event.venue.name}, rating=${event.rating}');
+            final event = SafeEventParser.parseEvent(eventJson);
+            if (event != null) {
+              events.add(event);
+              print('🔍 DEBUG EventsService: ✅ Successfully parsed event $i: ${event.title} - ${event.category}');
+              if (i == 0) {
+                print('🔍 DEBUG EventsService: First parsed event details: title=${event.title}, category=${event.category}, venue=${event.venue.name}, rating=${event.rating}');
+              }
+            } else {
+              print('🔍 DEBUG EventsService: ❌ Failed to parse event $i: ${eventJson['title']}');
             }
           } catch (e, stackTrace) {
             print('🔍 DEBUG EventsService: ❌ Error parsing event $i: $e');
@@ -305,8 +306,12 @@ class EventsService {
       final response = await _dio.get('/events/$eventId');
 
       if (response.statusCode == 200) {
-        final event = Event.fromBackendApi(response.data as Map<String, dynamic>);
-        return ApiResponse.success(event);
+        final event = SafeEventParser.parseEvent(response.data);
+        if (event != null) {
+          return ApiResponse.success(event);
+        } else {
+          return ApiResponse.error('Failed to parse event data');
+        }
       } else {
         return ApiResponse.error('Failed to fetch event: ${response.statusMessage}');
       }
@@ -335,9 +340,11 @@ class EventsService {
         final data = response.data;
         final eventsData = data['results'] as List<dynamic>;
         
-        final events = eventsData.map((eventJson) => 
-          Event.fromBackendApi(eventJson as Map<String, dynamic>)
-        ).toList();
+        final events = eventsData
+            .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+            .where((event) => event != null)
+            .cast<Event>()
+            .toList();
 
         return ApiResponse.success(events);
       } else {
@@ -362,9 +369,11 @@ class EventsService {
         final data = response.data;
         final eventsData = data['events'] as List<dynamic>;
         
-        final events = eventsData.map((eventJson) => 
-          Event.fromBackendApi(eventJson as Map<String, dynamic>)
-        ).toList();
+        final events = eventsData
+            .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+            .where((event) => event != null)
+            .cast<Event>()
+            .toList();
 
         return ApiResponse.success(events);
       } else {
@@ -389,9 +398,11 @@ class EventsService {
         final data = response.data;
         final eventsData = data['events'] as List<dynamic>;
         
-        final events = eventsData.map((eventJson) => 
-          Event.fromBackendApi(eventJson as Map<String, dynamic>)
-        ).toList();
+        final events = eventsData
+            .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+            .where((event) => event != null)
+            .cast<Event>()
+            .toList();
 
         return ApiResponse.success(events);
       } else {
