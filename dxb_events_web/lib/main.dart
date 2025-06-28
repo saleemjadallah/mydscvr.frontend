@@ -9,7 +9,8 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'core/themes/app_theme.dart';
 
 // Feature imports
-import 'features/home/home_screen_animated.dart';
+// import 'features/home/home_screen_animated.dart'; // DISABLED FOR DEBUGGING
+import 'features/home/home_screen_minimal.dart';
 import 'features/events/events_list_screen.dart';
 import 'features/event_details/event_details_screen.dart';
 import 'features/search/ai_search_screen.dart';
@@ -33,11 +34,11 @@ final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const AnimatedHomeScreen(),
+      builder: (context, state) => const MinimalHomeScreen(),
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const AnimatedHomeScreen(),
+      builder: (context, state) => const MinimalHomeScreen(),
     ),
     GoRoute(
       path: '/events',

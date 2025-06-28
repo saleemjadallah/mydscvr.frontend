@@ -80,7 +80,7 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
       }
     });
     
-    _loadEvents();
+    // _loadEvents(); // COMMENTED OUT FOR DEBUGGING
   }
 
   Future<void> _loadEvents() async {
@@ -121,7 +121,7 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
             }
             
             // Select the best curated event using smart algorithm
-            _upcomingEvents = _selectBestCuratedEvents(futureEvents);
+            // _upcomingEvents = _selectBestCuratedEvents(futureEvents); // COMMENTED FOR DEBUG
             print('📊 DEBUG: Final curated events: ${_upcomingEvents.length}');
           } else {
             print('❌ DEBUG: API call failed: ${upcomingResponse.error}');
@@ -164,6 +164,49 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    // MINIMAL BUILD FOR DEBUGGING - ONLY BASIC CONTENT
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.bug_report,
+              size: 64,
+              color: Colors.orange,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Minimal Homepage Mode',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Debugging type casting errors...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                print('🔍 DEBUG: Button pressed - app is responsive');
+              },
+              child: Text('Test Responsiveness'),
+            ),
+          ],
+        ),
+      ),
+    );
+    
+    // ORIGINAL BUILD METHOD COMMENTED OUT FOR DEBUGGING:
+    /*
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -229,9 +272,10 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
   }
 
   Widget _buildAnimatedTopAppBar() {
-    final authState = ref.watch(authProvider);
-    final isAuthenticated = authState.isAuthenticated;
-    final user = authState.user;
+    // COMMENTED OUT FOR DEBUGGING - MAY BE SOURCE OF TYPE CASTING ERROR
+    // final authState = ref.watch(authProvider);
+    // final isAuthenticated = authState.isAuthenticated;
+    // final user = authState.user;
     
 
 
@@ -1832,4 +1876,5 @@ class GradientMeshPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-} 
+}
+*/ 
