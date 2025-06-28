@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 /// Debug configuration and utilities
 class DebugConfig {
@@ -113,7 +115,3 @@ class SafeWidget extends StatelessWidget {
     }
   }
 }
-
-// Import necessary packages
-import 'dart:async';
-import 'package:flutter/material.dart';
