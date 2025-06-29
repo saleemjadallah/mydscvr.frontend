@@ -35,8 +35,11 @@ dependencies:
   # GROUP 3B: Second animation library ✅ SAFE
   animate_do: ^3.1.2
   
-  # GROUP 3C: Third animation library (testing 3-way conflict)
+  # GROUP 3C: Third animation library ✅ SAFE
   lottie: ^2.7.0
+  
+  # GROUP 3D: Fourth animation library (potential culprit!)
+  flutter_staggered_animations: ^1.1.1
 
 dev_dependencies:
   flutter_test:
