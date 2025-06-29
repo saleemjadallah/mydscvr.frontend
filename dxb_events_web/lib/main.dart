@@ -5,7 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'features/home/home_screen_simple.dart';
 
-// Beautiful app router - production ready
+// Beautiful app router - production ready version
 final GoRouter _router = GoRouter(
   routes: [
     GoRoute(

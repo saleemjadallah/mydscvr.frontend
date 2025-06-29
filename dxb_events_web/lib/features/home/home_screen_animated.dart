@@ -164,49 +164,13 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    // MINIMAL BUILD FOR DEBUGGING - ONLY BASIC CONTENT
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.bug_report,
-              size: 64,
-              color: Colors.orange,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Minimal Homepage Mode',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Debugging type casting errors...',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                print('🔍 DEBUG: Button pressed - app is responsive');
-              },
-              child: Text('Test Responsiveness'),
-            ),
-          ],
-        ),
-      ),
-    );
+    // Get authentication state
+    final authState = ref.watch(authProvider);
+    final isAuthenticated = authState.user != null;
+    final user = authState.user;
     
-    // ORIGINAL BUILD METHOD COMMENTED OUT FOR DEBUGGING:
-    /*
+    // BEAUTIFUL ORIGINAL BUILD METHOD RESTORED:
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -1878,5 +1842,9 @@ class GradientMeshPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 */
+          ),
+        ],
+      ),
+    );
   }
 } 
