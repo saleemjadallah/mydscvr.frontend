@@ -32,8 +32,11 @@ dependencies:
   # GROUP 3A: Main animation library ✅ SAFE
   flutter_animate: ^4.2.0+1
   
-  # GROUP 3B: Second animation library (testing conflict)
+  # GROUP 3B: Second animation library ✅ SAFE
   animate_do: ^3.1.2
+  
+  # GROUP 3C: Third animation library (testing 3-way conflict)
+  lottie: ^2.7.0
 
 dev_dependencies:
   flutter_test:
