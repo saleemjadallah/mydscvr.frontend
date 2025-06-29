@@ -23,11 +23,14 @@ dependencies:
   shared_preferences: ^2.2.2
   json_annotation: ^4.8.1
   
-  # GROUP 2: UI basics
+  # GROUP 2: UI basics ✅
   cached_network_image: ^3.3.1
   flutter_svg: ^2.0.9
   iconsax: ^0.0.8
   lucide_icons: ^0.257.0
+  
+  # GROUP 3A: Main animation library (testing solo)
+  flutter_animate: ^4.2.0+1
 
 dev_dependencies:
   flutter_test:
