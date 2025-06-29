@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
-import 'features/home/home_screen_minimal.dart';
+import 'features/home/home_screen_animated.dart';
 
-// Ultra-minimal router for testing
+// Beautiful app router - restored with animation libraries
 final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const MinimalHomeScreen(),
+      builder: (context, state) => const AnimatedHomeScreen(),
     ),
   ],
 );
@@ -22,7 +22,7 @@ void main() {
   runApp(
     ProviderScope(
       child: MaterialApp.router(
-        title: 'Debug Mode - DXB Events',
+        title: 'MyDscvr - Discover Dubai Events',
         debugShowCheckedModeBanner: false,
         routerConfig: _router,
         theme: ThemeData(
