@@ -1124,6 +1124,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         return _buildGradualTestWidget();
       case 'combined':
         return _buildCombinedTestWidget();
+      case 'simplified_full':
+        return _buildSimplifiedFullWidget();
       default:
         return _buildTestingWidget();
     }
@@ -1242,6 +1244,14 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   _testCombinedFeatures();
                 },
                 child: const Text('Combined'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing simplified full...');
+                  _testSimplifiedFull();
+                },
+                child: const Text('Simplified Full'),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -1446,6 +1456,32 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     }
   }
   
+  /// Test simplified full widget
+  void _testSimplifiedFull() async {
+    print('🧪 Testing simplified full widget...');
+    
+    try {
+      // Ensure we have data
+      if (_upcomingEvents.isEmpty) {
+        final response = await _eventsService.getEvents();
+        if (response.isSuccess) {
+          final events = response.data ?? [];
+          _upcomingEvents = events.take(1).toList();
+        }
+      }
+      
+      setState(() {
+        _testMode = 'simplified_full';
+        _isLoading = false;
+      });
+      
+      print('✅ Switched to simplified full widget test');
+    } catch (e, stackTrace) {
+      print('❌ Simplified full widget test failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+
   /// Test combined features (all gradual steps together)
   void _testCombinedFeatures() async {
     print('🧪 Testing combined features (all gradual steps together)...');
@@ -2187,6 +2223,208 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
         ),
       ],
+    );
+  }
+  
+  /// Build simplified full widget - same visual appeal, reduced complexity
+  Widget _buildSimplifiedFullWidget() {
+    if (_upcomingEvents.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
+        child: const Text('Simplified Full - No events loaded'),
+      );
+    }
+    
+    final event = _upcomingEvents.first;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      child: FadeInSlideUp(
+        delay: const Duration(milliseconds: 200),
+        child: Container(
+          height: 380,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF17A2B8), // Teal
+                Color(0xFF6C5CE7), // Purple
+                Color(0xFF17A2B8), // Back to teal
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.dubaiTeal.withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+                spreadRadius: 5,
+              ),
+              BoxShadow(
+                color: const Color(0xFF6C5CE7).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Image section - simplified
+              Container(
+                width: 160,
+                height: 320,
+                margin: const EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.white.withOpacity(0.1),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(21),
+                  child: event.imageUrl.isNotEmpty
+                    ? Image.network(
+                        event.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.white.withOpacity(0.2),
+                          child: const Icon(Icons.event, color: Colors.white, size: 60),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.white.withOpacity(0.2),
+                        child: const Icon(Icons.event, color: Colors.white, size: 60),
+                      ),
+                ),
+              ),
+              
+              // Event details - simplified
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Header
+                      Text(
+                        'MyDscvr\'s Choice',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.9),
+                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 12),
+                      
+                      // Title - simplified animation
+                      Text(
+                        event.title,
+                        style: GoogleFonts.inter(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.3,
+                          letterSpacing: 0.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ).animate().fadeIn(duration: 600.ms),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Date and location - simplified
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.calendar,
+                            size: 14,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatEventTime(event.startDate),
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.mapPin,
+                            size: 14,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              event.venue.area,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // CTA Button - simplified
+                      ElevatedButton(
+                        onPressed: () {
+                          context.go('/event/${event.id}');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.dubaiTeal,
+                          elevation: 8,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Discover Why',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              LucideIcons.arrowRight,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
