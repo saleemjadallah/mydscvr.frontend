@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -15,15 +16,14 @@ import '../../widgets/home/hidden_gem_card.dart';
 import '../../core/animations/animations.dart';
 
 // Import header and orange section components
-import '../../core/widgets/dubai_app_bar.dart';
 import '../../core/widgets/curved_container.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/providers/auth_provider_mongodb.dart';
-import '../../widgets/common/google_sign_in_button.dart';
 import '../../models/user.dart';
 import '../../services/events_service.dart';
 import '../../models/event.dart';
 import '../../widgets/common/footer.dart';
+import '../../widgets/notifications/notification_bell.dart';
 
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
@@ -37,11 +37,18 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   late ScrollController _scrollController;
   String? _hoveredEventId;
   
-  // Real API data for MyDscvr's Choice
+  // Real API data for MyDscvr's Choice and stats
   late final EventsService _eventsService;
   List<Event> _upcomingEvents = [];
+  List<Event> _featuredEvents = [];
+  List<Event> _trendingEvents = [];
+  List<Event> _allEventsForCounting = []; // For accurate category counting
   bool _isLoading = true;
   String? _errorMessage;
+  
+  // Event stats for quick display
+  int _totalEventsCount = 0;
+  int _totalVenuesCount = 0;
   
   @override
   void initState() {
@@ -63,23 +70,14 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      // Header App Bar with Logo, Name, and Sign Up/Profile
-      appBar: _buildHeaderAppBar(context, authState),
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // Beautiful Orange Hero Section
-          _buildHeroSection(),
+          // Beautiful gradient app bar with logo
+          _buildTopAppBar(context, authState),
           
-          // Search Bar - Using actual component
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: FadeInSlideUp(
-                child: SimpleHomeSearchWidget(),
-              ),
-            ),
-          ),
+          // Beautiful Orange Hero Section with integrated search
+          _buildHeroSection(),
           
           // Featured Events - Using actual component
           SliverToBoxAdapter(
@@ -144,37 +142,43 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  /// Build the header app bar with logo, name, and sign up/profile button
-  PreferredSizeWidget _buildHeaderAppBar(BuildContext context, AuthState authState) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black12,
+  /// Build the top app bar with gradient background and logo
+  Widget _buildTopAppBar(BuildContext context, AuthState authState) {
+    return SliverAppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      pinned: true,
+      floating: true,
+      expandedHeight: 80,
+      toolbarHeight: 80,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.topRight,
+            colors: [
+              Color(0xFF0D7377),
+              Color(0xFF14A085),
+              Color(0xFF329D9C),
+            ],
+          ),
+        ),
+      ),
       title: Row(
         children: [
-          // Logo
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF6B6B), Color(0xFFFFB347)],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.explore,
-              color: Colors.white,
-              size: 24,
-            ),
+          Image.asset(
+            'assets/images/mydscvr-logo.png',
+            height: 40,
+            width: 40,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 12),
-          // App Name
           Text(
             'MyDscvr',
-            style: GoogleFonts.inter(
-              fontSize: 24,
+            style: GoogleFonts.comfortaa(
+              fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF1E293B),
+              color: Colors.white,
             ),
           ),
         ],
@@ -185,6 +189,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           _buildUserProfile(authState.user!)
         else
           _buildSignUpButton(),
+        const NotificationBell(
+          color: Colors.white,
+          size: 22,
+        ),
         const SizedBox(width: 16),
       ],
     );
@@ -198,11 +206,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: const Color(0xFFFF6B6B),
+            backgroundColor: Colors.white,
             child: Text(
               (user.firstName?.isNotEmpty == true ? user.firstName![0] : user.email[0]).toUpperCase(),
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: AppColors.dubaiTeal,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -213,7 +221,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1E293B),
+              color: Colors.white,
             ),
           ),
         ],
@@ -226,8 +234,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     return ElevatedButton(
       onPressed: () => context.push('/login'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFFF6B6B),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.dubaiTeal,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),
@@ -244,7 +252,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  /// Build beautiful orange hero section
+  /// Build sophisticated hero section with integrated search and real stats
   Widget _buildHeroSection() {
     return SliverToBoxAdapter(
       child: CurvedContainer(
@@ -260,7 +268,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ),
         curveHeight: 50,
         curvePosition: CurvePosition.bottom,
-        height: 380,
+        height: 520,
         child: Stack(
           children: [
             // Enhanced animated background orbs
@@ -275,7 +283,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     // Large floating orb
                     Positioned(
                       left: 80 - parallaxOffset * 0.3,
-                      top: 80 - parallaxOffset * 0.2,
+                      top: 120 - parallaxOffset * 0.2,
                       child: Container(
                         width: 120,
                         height: 120,
@@ -296,7 +304,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     // Medium orb
                     Positioned(
                       right: 60 - parallaxOffset * 0.2,
-                      top: 120 - parallaxOffset * 0.1,
+                      top: 200 - parallaxOffset * 0.1,
                       child: Container(
                         width: 80,
                         height: 80,
@@ -317,7 +325,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     // Small accent orbs
                     Positioned(
                       left: 200 - parallaxOffset * 0.4,
-                      top: 40 - parallaxOffset * 0.3,
+                      top: 80 - parallaxOffset * 0.3,
                       child: Container(
                         width: 40,
                         height: 40,
@@ -330,7 +338,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     
                     Positioned(
                       right: 150 - parallaxOffset * 0.2,
-                      top: 200 - parallaxOffset * 0.1,
+                      top: 320 - parallaxOffset * 0.1,
                       child: Container(
                         width: 25,
                         height: 25,
@@ -344,58 +352,147 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 );
               },
             ),
-
-            // Main content
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 60,
+            
+            // Hero content with enhanced animations
+            SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Hero text
+                    const SizedBox(height: 40),
+                    
+                    // Enhanced main heading with staggered animation
                     Text(
-                      'Discover Dubai\'s\nbest adventures',
+                      'Discover Dubai\'s',
                       style: GoogleFonts.comfortaa(
-                        fontSize: 32,
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        height: 1.2,
+                        height: 1.1,
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 8,
                             offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            color: Colors.black.withOpacity(0.1),
                           ),
                         ],
                       ),
-                    ).animate().fadeIn(duration: 800.ms).slideX(),
+                    ).animate(
+                      onPlay: (controller) => controller.forward(),
+                    ).fadeIn(
+                      duration: kIsWeb ? 100.ms : 800.ms,
+                      delay: kIsWeb ? Duration.zero : 200.ms,
+                    ).slideY(
+                      begin: 0.3,
+                      end: 0,
+                      duration: kIsWeb ? 100.ms : 800.ms,
+                      curve: Curves.easeOutExpo,
+                    ),
+                    
+                    Text(
+                      'best adventures',
+                      style: GoogleFonts.comfortaa(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.1,
+                        shadows: [
+                          Shadow(
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            color: Colors.black.withOpacity(0.1),
+                          ),
+                        ],
+                      ),
+                    ).animate(
+                      onPlay: (controller) => controller.forward(),
+                    ).fadeIn(
+                      duration: kIsWeb ? 100.ms : 800.ms,
+                      delay: kIsWeb ? Duration.zero : 400.ms,
+                    ).slideY(
+                      begin: 0.3,
+                      end: 0,
+                      duration: kIsWeb ? 100.ms : 800.ms,
+                      curve: Curves.easeOutExpo,
+                    ),
                     
                     const SizedBox(height: 16),
                     
+                    // Enhanced subtitle
                     Text(
-                      'Find family-friendly events, activities,\nand experiences across Dubai',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: Colors.white.withOpacity(0.9),
+                      'From family fun to cultural experiences,\nfind your perfect Dubai moment',
+                      style: GoogleFonts.nunito(
+                        fontSize: 18,
+                        color: Colors.white.withOpacity(0.95),
                         height: 1.4,
+                        fontWeight: FontWeight.w500,
                       ),
-                    ).animate().fadeIn(delay: 300.ms, duration: 800.ms),
+                    ).animate(
+                      onPlay: (controller) => controller.forward(),
+                    ).fadeIn(
+                      duration: kIsWeb ? 100.ms : 600.ms,
+                      delay: kIsWeb ? Duration.zero : 600.ms,
+                    ).slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: kIsWeb ? 100.ms : 600.ms,
+                    ),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // Enhanced search bar with glassmorphism
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const SimpleHomeSearchWidget(),
+                        ),
+                      ),
+                    ).animate(
+                      onPlay: (controller) => controller.forward(),
+                    ).fadeIn(
+                      duration: kIsWeb ? 100.ms : 700.ms,
+                      delay: kIsWeb ? Duration.zero : 800.ms,
+                    ).slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: kIsWeb ? 100.ms : 700.ms,
+                    ).scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1.0, 1.0),
+                      duration: kIsWeb ? 100.ms : 700.ms,
+                    ),
                     
                     const SizedBox(height: 32),
                     
-                    // Stats row
+                    // Enhanced glassmorphic stat cards with real data
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStatCard('1000+', 'Events'),
-                        const SizedBox(width: 16),
-                        _buildStatCard('50+', 'Venues'),
-                        const SizedBox(width: 16),
-                        _buildStatCard('5000+', 'Families'),
+                        _buildEnhancedStatCard(LucideIcons.calendar, _formatEventCount(_totalEventsCount), 'Events', 0),
+                        _buildEnhancedStatCard(LucideIcons.mapPin, _formatEventCount(_totalVenuesCount), 'Venues', 200),
+                        _buildEnhancedStatCard(LucideIcons.heart, '5k+', 'Families', 400),
                       ],
-                    ).animate().fadeIn(delay: 600.ms, duration: 800.ms).slideY(),
+                    ),
                   ],
                 ),
               ),
@@ -406,54 +503,107 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  /// Build glassmorphic stat card
-  Widget _buildStatCard(String number, String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        decoration: BoxDecoration(
+  /// Build enhanced glassmorphic stat card with animations
+  Widget _buildEnhancedStatCard(IconData icon, String number, String label, int delayMs) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
           color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              number,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            number,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    ).animate(
+      onPlay: (controller) => controller.forward(),
+    ).fadeIn(
+      duration: kIsWeb ? 100.ms : 600.ms,
+      delay: kIsWeb ? Duration.zero : Duration(milliseconds: 1000 + delayMs),
+    ).slideY(
+      begin: 0.3,
+      end: 0,
+      duration: kIsWeb ? 100.ms : 600.ms,
+    ).scale(
+      begin: const Offset(0.8, 0.8),
+      end: const Offset(1.0, 1.0),
+      duration: kIsWeb ? 100.ms : 600.ms,
+      curve: Curves.easeOutBack,
     );
   }
 
-  /// Load events for MyDscvr's Choice
+  /// Load events for MyDscvr's Choice and stats
   Future<void> _loadEvents() async {
     try {
-      // Load upcoming events
+      // Load total events count for stats
+      final totalCountResponse = await _eventsService.getTotalEventsCount();
+      
+      // Load featured events (reduced for homepage display)
+      final featuredResponse = await _eventsService.getEvents(
+        perPage: 10,
+        sortBy: 'start_date',
+      );
+
+      // Load upcoming events for MyDscvr's Choice
       final upcomingResponse = await _eventsService.getEvents(
         perPage: 20,
         sortBy: 'start_date',
       );
 
+      // Load trending events
+      final trendingResponse = await _eventsService.getTrendingEvents(limit: 10);
+
       if (mounted) {
         setState(() {
+          if (totalCountResponse.isSuccess) {
+            _totalEventsCount = totalCountResponse.data ?? 0;
+            // Estimate venues count (roughly 1 venue per 4 events)
+            _totalVenuesCount = (_totalEventsCount / 4).ceil();
+          }
+          if (featuredResponse.isSuccess) {
+            _featuredEvents = featuredResponse.data ?? [];
+          }
           if (upcomingResponse.isSuccess) {
             final allEvents = upcomingResponse.data ?? [];
             print('📊 DEBUG: Total events from API: ${allEvents.length}');
@@ -472,11 +622,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             
             _upcomingEvents = futureEvents;
             print('📊 DEBUG: Final curated events: ${_upcomingEvents.length}');
-          } else {
-            print('❌ DEBUG: API call failed: ${upcomingResponse.error}');
+          }
+          if (trendingResponse.isSuccess) {
+            _trendingEvents = trendingResponse.data ?? [];
           }
           _isLoading = false;
-          _errorMessage = upcomingResponse.error;
+          _errorMessage = upcomingResponse.error ?? totalCountResponse.error ?? featuredResponse.error ?? trendingResponse.error;
         });
       }
     } catch (e) {
@@ -827,5 +978,20 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     if (difference <= 7) return 'This week';
     if (difference <= 14) return 'Next week';
     return 'Later this month';
+  }
+
+  String _formatEventCount(int count) {
+    if (count == 0) return '0';
+    if (count >= 1000) {
+      final k = count / 1000;
+      return '${k.toStringAsFixed(k == k.roundToDouble() ? 0 : 1)}k+';
+    } else if (count >= 100) {
+      final hundreds = (count / 100).floor() * 100;
+      return '${hundreds}+';
+    } else if (count >= 50) {
+      return '50+';
+    } else {
+      return count.toString();
+    }
   }
 }
