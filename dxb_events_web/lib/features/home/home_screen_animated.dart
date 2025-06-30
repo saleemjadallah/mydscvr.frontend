@@ -169,8 +169,7 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
     final isAuthenticated = authState.user != null;
     final user = authState.user;
     
-    // BEAUTIFUL ORIGINAL BUILD METHOD RESTORED:
-    
+    // BEAUTIFUL ORIGINAL BUILD METHOD FULLY RESTORED:
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -236,13 +235,10 @@ class _AnimatedHomeScreenState extends ConsumerState<AnimatedHomeScreen>
   }
 
   Widget _buildAnimatedTopAppBar() {
-    // COMMENTED OUT FOR DEBUGGING - MAY BE SOURCE OF TYPE CASTING ERROR
-    // final authState = ref.watch(authProvider);
-    // final isAuthenticated = authState.isAuthenticated;
-    // final user = authState.user;
+    final authState = ref.watch(authProvider);
+    final isAuthenticated = authState.user != null;
+    final user = authState.user;
     
-
-
     return SliverAppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -1842,9 +1838,4 @@ class GradientMeshPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 */
-          ),
-        ],
-      ),
-    );
-  }
 } 

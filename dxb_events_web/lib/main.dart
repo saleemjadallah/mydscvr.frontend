@@ -5,7 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'features/home/home_screen_beautiful.dart';
 
-// Beautiful router - with fantastic animations restored!
+// Beautiful homepage with all routes!
 final GoRouter _router = GoRouter(
   routes: [
     GoRoute(

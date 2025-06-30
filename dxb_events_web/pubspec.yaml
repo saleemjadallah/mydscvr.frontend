@@ -41,17 +41,15 @@ dependencies:
   # GROUP 3D: Fourth animation library ✅ SAFE
   flutter_staggered_animations: ^1.1.1
   
-  # GROUP 4 REMOVED - Testing which causes type casting errors
-  # shimmer: ^3.0.0
-  # google_nav_bar: ^5.0.6
-  # phosphor_flutter: ^2.0.0
-  # timeago: ^3.6.0
-  # url_launcher: ^6.2.2
-  # http: ^1.4.0
+  # GROUP 4: Safe dependencies only
+  shimmer: ^3.0.0
+  timeago: ^3.6.0
+  http: ^1.4.0
   
-  # PROBLEMATIC DEPENDENCIES REMOVED
-  # share_plus: ^7.2.2
-  # flutter_secure_storage: ^9.0.0
+  # Web-safe alternatives needed
+  # TODO: Replace share_plus with web-safe sharing
+  # TODO: Replace flutter_secure_storage with web localStorage
+  # TODO: Replace url_launcher with web-safe link handling
 
 dev_dependencies:
   flutter_test:
