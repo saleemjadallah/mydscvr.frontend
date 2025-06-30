@@ -130,6 +130,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: _buildAnimatedMyDscvrChoice(),
           ),
           
+          // Explore All Events CTA Button
+          SliverToBoxAdapter(
+            child: _buildExploreAllEventsButton(),
+          ),
+          
           // Footer
           SliverToBoxAdapter(
             child: FadeInSlideUp(
@@ -1015,5 +1020,125 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     } else {
       return count.toString();
     }
+  }
+
+  /// Build the "Explore All Events" CTA button section
+  Widget _buildExploreAllEventsButton() {
+    return FadeInSlideUp(
+      delay: const Duration(milliseconds: 350),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+        child: Column(
+          children: [
+            // Section title
+            Text(
+              'Ready to discover more?',
+              style: GoogleFonts.comfortaa(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            const SizedBox(height: 12),
+            
+            Text(
+              'Explore hundreds of family-friendly events happening in Dubai',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Centered button with max width
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      print('🎯 Explore All Events button clicked!');
+                      context.go('/events');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.dubaiTeal,
+                      foregroundColor: Colors.white,
+                      elevation: 8,
+                      shadowColor: AppColors.dubaiTeal.withOpacity(0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          LucideIcons.calendar,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Explore All Events',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          LucideIcons.arrowRight,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Additional incentive text
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.dubaiTeal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.dubaiTeal.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.sparkles,
+                    size: 20,
+                    color: AppColors.dubaiTeal,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'New events added daily!',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.dubaiTeal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

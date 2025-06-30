@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:async';
 import 'dart:js' as js;
 import 'package:dio/dio.dart';
@@ -6,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'api/dio_config.dart';
 import '../core/config/environment_config.dart';
 
-/// Clean Google Sign-In service using One Tap API with fallback methods
+/// Simplified Google Sign-In service using button-based authentication
 class GoogleSignInServiceClean {
   static String get _clientId => EnvironmentConfig.googleClientId;
   
@@ -85,7 +84,7 @@ class GoogleSignInServiceClean {
     throw Exception('Google API failed to load after ${attempts} attempts. Please check your network connection, disable ad blockers, and refresh the page.');
   }
 
-  /// Improved Google Sign-In with graceful One Tap handling and fallbacks
+  /// Simplified Google Sign-In without One Tap to avoid CORS and policy issues
   Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
       if (!kIsWeb) {
@@ -94,34 +93,16 @@ class GoogleSignInServiceClean {
 
       await initialize();
 
-      // Try One Tap first, but don't fail if it doesn't work
-      debugPrint('🔍 Attempting Google One Tap...');
-      final oneTapResult = await _tryOneTap();
-      
-      if (oneTapResult != null) {
-        debugPrint('✅ One Tap successful!');
-        return await _verifyWithBackend(oneTapResult);
-      }
-
-      // If One Tap fails, try popup authentication
-      debugPrint('🔄 One Tap failed, trying popup authentication...');
-      final popupResult = await _tryPopupAuth();
-      
-      if (popupResult != null) {
-        debugPrint('✅ Popup authentication successful!');
-        return await _verifyWithBackend(popupResult);
-      }
-
-      // If popup fails, try manual button as final fallback
-      debugPrint('🔄 Popup failed, showing manual sign-in button...');
+      // Skip One Tap and popup complications, go directly to manual button
+      debugPrint('🔄 Starting Google Sign-In with button authentication...');
       final buttonResult = await signInWithButton();
       
       if (buttonResult != null) {
-        debugPrint('✅ Manual button authentication successful!');
+        debugPrint('✅ Button authentication successful!');
         return await _verifyWithBackend(buttonResult);
       }
 
-      // If all methods fail, provide helpful error
+      // If button fails, provide helpful error
       throw Exception('Google Sign-In is not available. Please check your browser settings, disable ad blockers, and try again.');
       
     } catch (e) {
@@ -134,180 +115,6 @@ class GoogleSignInServiceClean {
     }
   }
 
-  /// Try Google One Tap (silent, non-intrusive)
-  Future<String?> _tryOneTap() async {
-    try {
-      final completer = Completer<String?>();
-      final callbackName = 'googleOneTapCallback_${DateTime.now().millisecondsSinceEpoch}';
-      
-      // Set up callback function
-      js.context[callbackName] = (response) {
-        try {
-          if (response != null && response['credential'] != null) {
-            final idToken = response['credential'] as String;
-            debugPrint('✅ One Tap credential received');
-            completer.complete(idToken);
-          } else {
-            debugPrint('❌ No credential in One Tap response');
-            completer.complete(null);
-          }
-        } catch (e) {
-          debugPrint('❌ One Tap callback error: $e');
-          completer.complete(null);
-        }
-      };
-
-      // Initialize One Tap
-      js.context.callMethod('eval', ['''
-        try {
-          if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-            google.accounts.id.initialize({
-              client_id: '$_clientId',
-              callback: $callbackName,
-              auto_select: false,
-              cancel_on_tap_outside: false,
-              use_fedcm_for_prompt: false,
-              itp_support: true
-            });
-            
-            google.accounts.id.prompt((notification) => {
-              const momentType = notification.getMomentType();
-              console.log('📋 One Tap notification:', momentType);
-              
-              if (notification.isNotDisplayed()) {
-                console.log('⚠️ One Tap not displayed - reason:', notification.getNotDisplayedReason());
-                $callbackName(null);
-              } else if (notification.isSkippedMoment()) {
-                console.log('👤 User skipped One Tap');
-                $callbackName(null);
-              } else if (notification.isDismissedMoment()) {
-                console.log('❌ User dismissed One Tap');
-                $callbackName(null);
-              }
-            });
-          } else {
-            console.error('❌ Google Identity Services not available for One Tap');
-            $callbackName(null);
-          }
-        } catch (error) {
-          console.error('💥 One Tap setup error:', error);
-          $callbackName(null);
-        }
-      ''']);
-
-      // Wait for One Tap result (shorter timeout since it should be quick)
-      final result = await completer.future.timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          debugPrint('⏰ One Tap timeout');
-          return null;
-        },
-      );
-
-      // Cleanup
-      js.context.deleteProperty(callbackName);
-      return result;
-      
-    } catch (e) {
-      debugPrint('❌ One Tap attempt failed: $e');
-      return null;
-    }
-  }
-
-  /// Try popup-based authentication as fallback
-  Future<String?> _tryPopupAuth() async {
-    try {
-      final completer = Completer<String?>();
-      final callbackName = 'googlePopupCallback_${DateTime.now().millisecondsSinceEpoch}';
-      
-      // Set up callback function
-      js.context[callbackName] = (response) {
-        try {
-          if (response != null && response['credential'] != null) {
-            final idToken = response['credential'] as String;
-            debugPrint('✅ Popup credential received');
-            completer.complete(idToken);
-          } else {
-            debugPrint('❌ No credential in popup response');
-            completer.complete(null);
-          }
-        } catch (e) {
-          debugPrint('❌ Popup callback error: $e');
-          completer.complete(null);
-        }
-      };
-
-      // Try to render a hidden button and click it programmatically
-      js.context.callMethod('eval', ['''
-        try {
-          if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-            // Create a temporary container
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.visibility = 'hidden';
-            document.body.appendChild(tempContainer);
-            
-            google.accounts.id.initialize({
-              client_id: '$_clientId',
-              callback: $callbackName,
-              auto_select: false,
-              cancel_on_tap_outside: false
-            });
-            
-            google.accounts.id.renderButton(tempContainer, {
-              theme: 'outline',
-              size: 'large',
-              type: 'standard'
-            });
-            
-            // Try to trigger the button programmatically
-            setTimeout(() => {
-              const button = tempContainer.querySelector('div[role="button"]');
-              if (button) {
-                console.log('🔘 Triggering Google Sign-In button...');
-                button.click();
-              } else {
-                console.log('❌ Could not find Google Sign-In button');
-                $callbackName(null);
-              }
-              
-              // Cleanup after a delay
-              setTimeout(() => {
-                if (document.body.contains(tempContainer)) {
-                  document.body.removeChild(tempContainer);
-                }
-              }, 1000);
-            }, 100);
-            
-          } else {
-            console.error('❌ Google Identity Services not available for popup');
-            $callbackName(null);
-          }
-        } catch (error) {
-          console.error('💥 Popup setup error:', error);
-          $callbackName(null);
-        }
-      ''']);
-
-      // Wait for popup result
-      final result = await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          debugPrint('⏰ Popup authentication timeout');
-          return null;
-        },
-      );
-
-      // Cleanup
-      js.context.deleteProperty(callbackName);
-      return result;
-      
-    } catch (e) {
-      debugPrint('❌ Popup authentication failed: $e');
-      return null;
-    }
-  }
 
   /// Manual sign-in button method for when all else fails
   Future<String?> signInWithButton() async {

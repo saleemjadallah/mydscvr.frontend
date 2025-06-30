@@ -452,7 +452,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       );
       
       if (mounted && ref.read(authProvider).status == AuthStatus.authenticated) {
-        context.go('/home');
+        context.go('/');
       }
     }
   }
@@ -461,7 +461,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final success = await ref.read(authProvider.notifier).signInWithGoogle();
     
     if (mounted && success) {
-      context.go('/home');
+      context.go('/');
     }
   }
 }

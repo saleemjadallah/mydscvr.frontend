@@ -1370,27 +1370,26 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       
       // Date range filter
       if (_currentFilters.dateRange != null) {
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-        
         filtered = filtered.where((event) {
-          final eventDate = DateTime(event.startDate.year, event.startDate.month, event.startDate.day);
-          
           switch (_currentFilters.dateRange) {
             case 'Today':
+            case 'today':
               return event.isToday;
+            case 'Tomorrow':
+            case 'tomorrow':
+              return event.isTomorrow;
             case 'This Weekend':
+            case 'this_weekend':
               return event.isThisWeekend;
+            case 'This Week':
+            case 'this_week':
+              return event.isThisWeek;
             case 'Next Week':
-              final nextWeekStart = today.add(Duration(days: 7 - now.weekday + 1)); // Next Monday
-              final nextWeekEnd = nextWeekStart.add(Duration(days: 6)); // Next Sunday
-              return eventDate.isAfter(nextWeekStart.subtract(Duration(days: 1))) && 
-                     eventDate.isBefore(nextWeekEnd.add(Duration(days: 1)));
+            case 'next_week':
+              return event.isNextWeek;
             case 'This Month':
-              final monthStart = DateTime(now.year, now.month, 1);
-              final monthEnd = DateTime(now.year, now.month + 1, 0);
-              return eventDate.isAfter(monthStart.subtract(Duration(days: 1))) && 
-                     eventDate.isBefore(monthEnd.add(Duration(days: 1)));
+            case 'this_month':
+              return event.isThisMonth;
             default:
               return true;
           }

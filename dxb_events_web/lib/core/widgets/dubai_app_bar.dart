@@ -20,6 +20,7 @@ class DubaiAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final double elevation;
   final Color? backgroundColor;
   final bool automaticallyImplyLeading;
+  final bool showCurrentRoute;
 
   const DubaiAppBar({
     super.key,
@@ -32,6 +33,7 @@ class DubaiAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.elevation = 0,
     this.backgroundColor,
     this.automaticallyImplyLeading = true,
+    this.showCurrentRoute = true,
   });
 
   @override
@@ -107,6 +109,8 @@ class DubaiAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
+    final currentRoute = showCurrentRoute ? GoRouterState.of(context).matchedLocation : null;
+    
     return Column(
       crossAxisAlignment: centerTitle ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -126,6 +130,25 @@ class DubaiAppBar extends ConsumerWidget implements PreferredSizeWidget {
           end: 0,
           curve: Curves.easeOut,
         ),
+        
+        if (showCurrentRoute && currentRoute != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            currentRoute,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.7),
+              fontFamily: 'monospace',
+            ),
+            textAlign: centerTitle ? TextAlign.center : TextAlign.left,
+          ).animate().slideY(
+            delay: 250.ms,
+            duration: 400.ms,
+            begin: 1,
+            end: 0,
+            curve: Curves.easeOut,
+          ),
+        ],
         
         if (subtitle != null) ...[
           const SizedBox(height: 4),

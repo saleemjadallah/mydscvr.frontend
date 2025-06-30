@@ -414,7 +414,51 @@ class Event {
     final weekendStart = now.add(Duration(days: daysUntilWeekend));
     final weekendEnd = weekendStart.add(const Duration(days: 1)); // Sunday
     
-    return startDate.isAfter(weekendStart) && startDate.isBefore(weekendEnd);
+    // Include both Saturday and Sunday events
+    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
+    final saturdayDate = DateTime(weekendStart.year, weekendStart.month, weekendStart.day);
+    final sundayDate = DateTime(weekendEnd.year, weekendEnd.month, weekendEnd.day);
+    
+    return eventDate.isAtSameMomentAs(saturdayDate) || eventDate.isAtSameMomentAs(sundayDate);
+  }
+
+  bool get isTomorrow {
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final eventDay = DateTime(startDate.year, startDate.month, startDate.day);
+    return tomorrow == eventDay;
+  }
+
+  bool get isThisWeek {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1)); // Monday
+    final endOfWeek = startOfWeek.add(const Duration(days: 6)); // Sunday
+    
+    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
+    final weekStart = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+    final weekEnd = DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day);
+    
+    return (eventDate.isAtSameMomentAs(weekStart) || eventDate.isAfter(weekStart)) &&
+           (eventDate.isAtSameMomentAs(weekEnd) || eventDate.isBefore(weekEnd));
+  }
+
+  bool get isNextWeek {
+    final now = DateTime.now();
+    final startOfNextWeek = now.add(Duration(days: 7 - now.weekday + 1)); // Next Monday
+    final endOfNextWeek = startOfNextWeek.add(const Duration(days: 6)); // Next Sunday
+    
+    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
+    final weekStart = DateTime(startOfNextWeek.year, startOfNextWeek.month, startOfNextWeek.day);
+    final weekEnd = DateTime(endOfNextWeek.year, endOfNextWeek.month, endOfNextWeek.day);
+    
+    return (eventDate.isAtSameMomentAs(weekStart) || eventDate.isAfter(weekStart)) &&
+           (eventDate.isAtSameMomentAs(weekEnd) || eventDate.isBefore(weekEnd));
+  }
+
+  bool get isThisMonth {
+    final now = DateTime.now();
+    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
+    return eventDate.year == now.year && eventDate.month == now.month;
   }
 
   bool get isUpcoming {

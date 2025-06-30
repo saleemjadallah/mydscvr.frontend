@@ -73,7 +73,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     // Navigate to home if registration successful and verified
     ref.listen(authProvider, (previous, next) {
       if (next.isAuthenticated && !next.isLoading) {
-        context.go('/home');
+        context.go('/');
       }
       // Navigate to OTP verification if account needs verification
       else if (next.needsEmailVerification && !next.isLoading) {
@@ -767,7 +767,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     final success = await ref.read(authProvider.notifier).signInWithGoogle();
     
     if (mounted && success) {
-      context.go('/home');
+      context.go('/');
     }
   }
 } 

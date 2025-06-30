@@ -105,7 +105,7 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen>
           context.go('/onboarding');
         } else {
           print('Existing user, redirecting to home...');
-          context.go('/home');
+          context.go('/');
         }
       }
     });

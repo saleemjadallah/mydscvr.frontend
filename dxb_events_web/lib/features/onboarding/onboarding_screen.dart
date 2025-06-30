@@ -454,7 +454,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       notifier.nextStep();
     } else if (state.currentStep == 5) { // Completion screen
       // Navigate to home
-      context.go('/home');
+      context.go('/');
     } else {
       notifier.nextStep();
     }
@@ -463,6 +463,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   void _handleSkip(WidgetRef ref) {
     // Navigate to home without completing onboarding
     // User can still complete onboarding later from profile menu
-    context.go('/home');
+    context.go('/');
   }
 }

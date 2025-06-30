@@ -107,7 +107,9 @@ class _EventsFilterSidebarState extends ConsumerState<EventsFilterSidebar> {
 
   static const List<String> _dateRangeOptions = [
     'Today',
+    'Tomorrow',
     'This Weekend',
+    'This Week',
     'Next Week', 
     'This Month',
     'Custom Date'
