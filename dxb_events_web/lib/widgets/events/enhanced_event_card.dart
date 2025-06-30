@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart'; // TODO: Replace with web-safe link handling
 
 import '../../core/constants/app_colors.dart';
 import '../../models/event.dart';
@@ -656,6 +656,9 @@ class EnhancedEventCard extends StatelessWidget {
   }
 
   void _launchUrl(String url) async {
+    // TODO: Implement web-safe URL launching
+    print('Launch URL: $url');
+    /*
     String finalUrl = url;
     if (!url.startsWith('http')) {
       finalUrl = 'https://$url';
@@ -664,6 +667,7 @@ class EnhancedEventCard extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(finalUrl))) {
       await launchUrl(Uri.parse(finalUrl));
     }
+    */
   }
 
   void _showQualityInfo(BuildContext context) {

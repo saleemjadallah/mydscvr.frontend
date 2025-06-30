@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:share_plus/share_plus.dart';
+// import 'package:share_plus/share_plus.dart'; // TODO: Replace with web-safe sharing
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart'; // TODO: Replace with web-safe link handling
 
 import '../../utils/duration_formatter.dart';
 
@@ -1252,6 +1252,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   void _shareEvent(Event event) {
+    // TODO: Implement web-safe sharing
+    print('Share event: ${event.title}');
+    /*
     Share.share(
       'Check out this amazing event: ${event.title}\n\n'
       '📅 ${_formatDateTime(event.startDate)}\n'
@@ -1259,6 +1262,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
       'Discover more family activities on DXB Events!',
       subject: event.title,
     );
+    */
   }
 
   Future<void> _toggleFavorite(String eventId) async {
@@ -1755,6 +1759,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   void _launchUrl(String url) async {
+    // TODO: Implement web-safe URL launching
+    print('Launch URL: $url');
+    /*
     try {
       final uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
       // Use platform-specific URL launching
@@ -1774,6 +1781,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
         );
       }
     }
+    */
   }
 }
 
