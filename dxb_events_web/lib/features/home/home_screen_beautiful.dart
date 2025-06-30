@@ -3,6 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+// Import actual built components
+import '../../widgets/home/home_search_widget_simple.dart';
+import '../../widgets/home/interactive_category_explorer.dart';
+import '../../widgets/featured_events_section_riverpod.dart';
+import '../../widgets/home/weekend_highlights.dart';
+import '../../widgets/home/smart_trending_section.dart';
+import '../../widgets/home/hidden_gem_card.dart';
+import '../../core/animations/animations.dart';
+
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
   const BeautifulHomeScreen({super.key});
@@ -174,87 +183,67 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> {
             ),
           ),
           
-          // Categories Section with Stagger Animation
-          SliverToBoxAdapter(
+          // Search Bar - Using actual component
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Popular Categories',
-                        style: GoogleFonts.inter(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E293B),
-                        ),
-                      ).animate().fadeIn(duration: 600.ms),
-                      
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('View All'),
-                      ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.3,
-                    children: [
-                      _buildAnimatedCategoryCard(
-                        'Food & Dining',
-                        Icons.restaurant,
-                        const Color(0xFFFF6B6B),
-                        const Color(0xFFFFE66D),
-                        0,
-                      ),
-                      _buildAnimatedCategoryCard(
-                        'Entertainment',
-                        Icons.movie,
-                        const Color(0xFF845EC2),
-                        const Color(0xFFB39CD0),
-                        1,
-                      ),
-                      _buildAnimatedCategoryCard(
-                        'Sports & Fitness',
-                        Icons.sports_soccer,
-                        const Color(0xFF4ECDC4),
-                        const Color(0xFF95E1D3),
-                        2,
-                      ),
-                      _buildAnimatedCategoryCard(
-                        'Arts & Culture',
-                        Icons.palette,
-                        const Color(0xFFFF6B9D),
-                        const Color(0xFFFECA57),
-                        3,
-                      ),
-                      _buildAnimatedCategoryCard(
-                        'Music & Concerts',
-                        Icons.music_note,
-                        const Color(0xFFA8E6CF),
-                        const Color(0xFF7FD1AE),
-                        4,
-                      ),
-                      _buildAnimatedCategoryCard(
-                        'Family & Kids',
-                        Icons.family_restroom,
-                        const Color(0xFFFFD93D),
-                        const Color(0xFFF6A192),
-                        5,
-                      ),
-                    ],
-                  ),
-                ],
+              padding: EdgeInsets.all(24),
+              child: FadeInSlideUp(
+                child: SimpleHomeSearchWidget(),
               ),
+            ),
+          ),
+          
+          // Featured Events - Using actual component
+          SliverToBoxAdapter(
+            child: FadeInSlideUp(
+              delay: const Duration(milliseconds: 200),
+              child: const FeaturedEventsSection(
+                showHeader: true,
+                maxEventsToShow: 8,
+              ),
+            ),
+          ),
+          
+          // Hidden Gem - Using actual component
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: FadeInSlideUp(
+                delay: Duration(milliseconds: 400),
+                child: HiddenGemCard(),
+              ),
+            ),
+          ),
+          
+          // Categories Section - Using actual component
+          const SliverToBoxAdapter(
+            child: FadeInSlideUp(
+              delay: Duration(milliseconds: 600),
+              child: InteractiveCategoryExplorer(),
+            ),
+          ),
+          
+          // Weekend Highlights - Using actual component
+          const SliverToBoxAdapter(
+            child: FadeInSlideUp(
+              delay: Duration(milliseconds: 800),
+              child: WeekendHighlights(),
+            ),
+          ),
+          
+          // Trending Section - Using actual component
+          const SliverToBoxAdapter(
+            child: FadeInSlideUp(
+              delay: Duration(milliseconds: 1000),
+              child: SmartTrendingSection(),
+            ),
+          ),
+          
+          // MyDscvr's Choice Section
+          SliverToBoxAdapter(
+            child: FadeInSlideUp(
+              delay: const Duration(milliseconds: 1200),
+              child: _buildMyDscvrChoice(),
             ),
           ),
           
@@ -345,79 +334,62 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> {
     );
   }
   
-  Widget _buildAnimatedCategoryCard(
-    String title,
-    IconData icon,
-    Color startColor,
-    Color endColor,
-    int index,
-  ) {
+  // MyDscvr's Choice Section (Placeholder until component is built)
+  Widget _buildMyDscvrChoice() {
     return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [startColor.withOpacity(0.1), endColor.withOpacity(0.1)],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: startColor.withOpacity(0.3),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('$title category selected'),
-                backgroundColor: startColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.star, color: Colors.amber, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'MyDscvr\'s Choice',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [startColor, endColor],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 32,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1E293B),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+              const SizedBox(width: 8),
+              const Icon(Icons.star, color: Colors.amber, size: 24),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Coming Soon',
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              color: Colors.white70,
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            'Our curated picks will appear here',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: Colors.white60,
+            ),
+          ),
+        ],
       ),
-    ).animate()
-      .fadeIn(duration: 400.ms, delay: Duration(milliseconds: index * 100))
-      .scale(duration: 400.ms, delay: Duration(milliseconds: index * 100));
+    );
   }
 }
 

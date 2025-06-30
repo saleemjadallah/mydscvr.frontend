@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // TODO: Replace with web-safe storage
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/event.dart';
 import 'api/dio_config.dart';
@@ -10,7 +11,7 @@ class AuthApiService {
   static const String _authPath = '/auth';
   
   late final Dio _dio;
-  static const _storage = FlutterSecureStorage();
+  // static const _storage = FlutterSecureStorage(); // Replaced with SharedPreferences
   
   // Token storage keys
   static const String _accessTokenKey = 'access_token';

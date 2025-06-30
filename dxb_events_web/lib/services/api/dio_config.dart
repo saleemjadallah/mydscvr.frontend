@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // TODO: Replace with web-safe storage
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'api_client.dart';
 
 /// Dio HTTP client configuration for DXB Events API
@@ -88,7 +89,7 @@ class DioConfig {
 
 /// Authentication interceptor for automatic token management
 class AuthInterceptor extends Interceptor {
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  // static const FlutterSecureStorage _storage = FlutterSecureStorage(); // TODO: Replace with web-safe storage
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -98,7 +99,8 @@ class AuthInterceptor extends Interceptor {
     }
 
     try {
-      final accessToken = await _storage.read(key: 'access_token');
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
       
       if (accessToken != null) {
         options.headers['Authorization'] = 'Bearer $accessToken';
@@ -139,7 +141,8 @@ class AuthInterceptor extends Interceptor {
 
   Future<bool> _refreshToken() async {
     try {
-      final refreshToken = await _storage.read(key: 'refresh_token');
+      final prefs = await SharedPreferences.getInstance();
+      final refreshToken = prefs.getString('refresh_token');
       if (refreshToken == null) return false;
 
       final dio = Dio();
@@ -150,8 +153,9 @@ class AuthInterceptor extends Interceptor {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        await _storage.write(key: 'access_token', value: data['access_token']);
-        await _storage.write(key: 'refresh_token', value: data['refresh_token']);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', data['access_token']);
+        await prefs.setString('refresh_token', data['refresh_token']);
         return true;
       }
     } catch (e) {
@@ -163,7 +167,8 @@ class AuthInterceptor extends Interceptor {
 
   Future<Response> _retryRequest(RequestOptions requestOptions) async {
     final dio = Dio();
-    final accessToken = await _storage.read(key: 'access_token');
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('access_token');
     
     if (accessToken != null) {
       requestOptions.headers['Authorization'] = 'Bearer $accessToken';
@@ -181,8 +186,9 @@ class AuthInterceptor extends Interceptor {
   }
 
   Future<void> _clearTokens() async {
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+    await prefs.remove('refresh_token');
   }
 }
 
