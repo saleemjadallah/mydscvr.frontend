@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -12,6 +14,14 @@ import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/home/hidden_gem_card.dart';
 import '../../core/animations/animations.dart';
 
+// Import header and orange section components
+import '../../core/widgets/dubai_app_bar.dart';
+import '../../core/widgets/curved_container.dart';
+import '../../core/constants/app_colors.dart';
+import '../../services/providers/auth_provider_mongodb.dart';
+import '../../widgets/common/google_sign_in_button.dart';
+import '../../models/user.dart';
+
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
   const BeautifulHomeScreen({super.key});
@@ -20,168 +30,34 @@ class BeautifulHomeScreen extends ConsumerStatefulWidget {
   ConsumerState<BeautifulHomeScreen> createState() => _BeautifulHomeScreenState();
 }
 
-class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> {
+class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with TickerProviderStateMixin {
+  late ScrollController _scrollController;
+  
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+  
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+      // Header App Bar with Logo, Name, and Sign Up/Profile
+      appBar: _buildHeaderAppBar(context, authState),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
-          // Beautiful Animated App Bar
-          SliverAppBar(
-            expandedHeight: 260,
-            floating: false,
-            pinned: true,
-            backgroundColor: const Color(0xFF0F172A),
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'MyDscvr',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ).animate().fadeIn(duration: 1000.ms),
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF0F172A),
-                      Color(0xFF1E293B),
-                      Color(0xFF334155),
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Animated Background Pattern
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: AnimatedPatternPainter(),
-                      ),
-                    ),
-                    // Center Icon
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.explore,
-                            size: 80,
-                            color: Colors.white70,
-                          ).animate()
-                            .scale(duration: 600.ms)
-                            .then()
-                            .shimmer(duration: 1200.ms, color: Colors.white24),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Discover Amazing Events',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ).animate().fadeIn(delay: 300.ms, duration: 800.ms),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          // Hero Section with Animations
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Welcome to Dubai\'s Premier',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      color: const Color(0xFF64748B),
-                    ),
-                    textAlign: TextAlign.center,
-                  ).animate().slideX(duration: 600.ms),
-                  
-                  Text(
-                    'Event Discovery Platform',
-                    style: GoogleFonts.inter(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1E293B),
-                    ),
-                    textAlign: TextAlign.center,
-                  ).animate().slideX(duration: 600.ms, delay: 100.ms),
-                  
-                  const SizedBox(height: 24),
-                  
-                  Text(
-                    'Find concerts, exhibitions, sports events, and more happening around you',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: const Color(0xFF64748B),
-                    ),
-                    textAlign: TextAlign.center,
-                  ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Beautiful Search Button
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF0F172A).withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Search feature coming soon!'),
-                            backgroundColor: Colors.green,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.search),
-                      label: const Text('Search Events'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 20,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ).animate()
-                    .scale(duration: 400.ms, delay: 400.ms)
-                    .then()
-                    .shimmer(duration: 1200.ms, color: Colors.white24),
-                ],
-              ),
-            ),
-          ),
+          // Beautiful Orange Hero Section
+          _buildHeroSection(),
           
           // Search Bar - Using actual component
           const SliverToBoxAdapter(
@@ -243,171 +119,335 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> {
           SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: const Duration(milliseconds: 1200),
-              child: _buildMyDscvrChoice(),
-            ),
-          ),
-          
-          // Call to Action Section
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.all(24),
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'MyDscvr\'s Choice',
+                      style: GoogleFonts.inter(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const FeaturedEventsSection(
+                      showHeader: false,
+                      maxEventsToShow: 4,
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF667eea).withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    size: 48,
-                    color: Colors.white,
-                  ).animate()
-                    .scale(duration: 600.ms)
-                    .then()
-                    .shimmer(duration: 1200.ms),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Don\'t Miss Out!',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Join thousands discovering amazing events daily',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ).animate()
-              .slideY(begin: 0.3, duration: 600.ms)
-              .fadeIn(duration: 600.ms),
-          ),
-          
-          // Footer
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(32),
-              decoration: const BoxDecoration(
-                color: Color(0xFF0F172A),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'MyDscvr',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '© 2024 MyDscvr. Discover Dubai Events.',
-                    style: GoogleFonts.inter(
-                      color: Colors.white70,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
               ),
             ),
+          ),
+          
+          // Footer spacing
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 80),
           ),
         ],
       ),
     );
   }
-  
-  // MyDscvr's Choice Section (Placeholder until component is built)
-  Widget _buildMyDscvrChoice() {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
+
+  /// Build the header app bar with logo, name, and sign up/profile button
+  PreferredSizeWidget _buildHeaderAppBar(BuildContext context, AuthState authState) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black12,
+      title: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.star, color: Colors.amber, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'MyDscvr\'s Choice',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+          // Logo
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF6B6B), Color(0xFFFFB347)],
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.star, color: Colors.amber, size: 24),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Coming Soon',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              color: Colors.white70,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.explore,
+              color: Colors.white,
+              size: 24,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(width: 12),
+          // App Name
           Text(
-            'Our curated picks will appear here',
+            'MyDscvr',
             style: GoogleFonts.inter(
-              fontSize: 14,
-              color: Colors.white60,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        // Auth Button/Profile
+        if (authState.status == AuthStatus.authenticated && authState.user != null)
+          _buildUserProfile(authState.user!)
+        else
+          _buildSignUpButton(),
+        const SizedBox(width: 16),
+      ],
+    );
+  }
+
+  /// Build user profile button when authenticated
+  Widget _buildUserProfile(UserProfile user) {
+    return GestureDetector(
+      onTap: () => context.push('/profile'),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: const Color(0xFFFF6B6B),
+            child: Text(
+              (user.firstName?.isNotEmpty == true ? user.firstName![0] : user.email[0]).toUpperCase(),
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            user.firstName ?? 'Profile',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF1E293B),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-// Animated Background Pattern Painter
-class AnimatedPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
-      ..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 5; i++) {
-      final x = (size.width / 5) * i + size.width / 10;
-      final y = size.height / 2;
-      canvas.drawCircle(Offset(x, y), 30 + i * 10, paint);
-    }
+  /// Build sign up button when not authenticated
+  Widget _buildSignUpButton() {
+    return ElevatedButton(
+      onPressed: () => context.push('/login'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFF6B6B),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
+        elevation: 2,
+      ),
+      child: Text(
+        'Sign Up',
+        style: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  /// Build beautiful orange hero section
+  Widget _buildHeroSection() {
+    return SliverToBoxAdapter(
+      child: CurvedContainer(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFFF6B6B), // Coral
+            Color(0xFFFFB347), // Orange
+            Color(0xFFFF8E53), // Warm orange
+          ],
+          stops: [0.0, 0.6, 1.0],
+        ),
+        curveHeight: 50,
+        curvePosition: CurvePosition.bottom,
+        height: 380,
+        child: Stack(
+          children: [
+            // Enhanced animated background orbs
+            AnimatedBuilder(
+              animation: _scrollController,
+              builder: (context, child) {
+                final scrollOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
+                final parallaxOffset = scrollOffset * 0.5;
+                
+                return Stack(
+                  children: [
+                    // Large floating orb
+                    Positioned(
+                      left: 80 - parallaxOffset * 0.3,
+                      top: 80 - parallaxOffset * 0.2,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.2),
+                              Colors.white.withOpacity(0.1),
+                              Colors.transparent,
+                            ],
+                            stops: const [0.0, 0.7, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    // Medium orb
+                    Positioned(
+                      right: 60 - parallaxOffset * 0.2,
+                      top: 120 - parallaxOffset * 0.1,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              const Color(0xFFFFD93D).withOpacity(0.3),
+                              const Color(0xFFFFB347).withOpacity(0.2),
+                              Colors.transparent,
+                            ],
+                            stops: const [0.0, 0.6, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    // Small accent orbs
+                    Positioned(
+                      left: 200 - parallaxOffset * 0.4,
+                      top: 40 - parallaxOffset * 0.3,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.15),
+                        ),
+                      ),
+                    ),
+                    
+                    Positioned(
+                      right: 150 - parallaxOffset * 0.2,
+                      top: 200 - parallaxOffset * 0.1,
+                      child: Container(
+                        width: 25,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.2),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            // Main content
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 60,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hero text
+                    Text(
+                      'Discover Dubai\'s\nbest adventures',
+                      style: GoogleFonts.comfortaa(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.2,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(duration: 800.ms).slideX(),
+                    
+                    const SizedBox(height: 16),
+                    
+                    Text(
+                      'Find family-friendly events, activities,\nand experiences across Dubai',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.9),
+                        height: 1.4,
+                      ),
+                    ).animate().fadeIn(delay: 300.ms, duration: 800.ms),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Stats row
+                    Row(
+                      children: [
+                        _buildStatCard('1000+', 'Events'),
+                        const SizedBox(width: 16),
+                        _buildStatCard('50+', 'Venues'),
+                        const SizedBox(width: 16),
+                        _buildStatCard('5000+', 'Families'),
+                      ],
+                    ).animate().fadeIn(delay: 600.ms, duration: 800.ms).slideY(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build glassmorphic stat card
+  Widget _buildStatCard(String number, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              number,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
