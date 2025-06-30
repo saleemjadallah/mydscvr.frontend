@@ -47,7 +47,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     super.initState();
     _eventsService = EventsService();
     _scrollController = ScrollController();
-    _loadEvents();
+    // _loadEvents(); // COMMENTED OUT FOR TESTING LOOP ISSUE
   }
   
   @override
@@ -126,10 +126,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // MyDscvr's Choice Section - Real Implementation
-          SliverToBoxAdapter(
-            child: _buildAnimatedMyDscvrChoice(),
-          ),
+          // MyDscvr's Choice Section - COMMENTED OUT FOR TESTING LOOP ISSUE
+          // SliverToBoxAdapter(
+          //   child: _buildAnimatedMyDscvrChoice(),
+          // ),
           
           // Footer spacing
           const SliverToBoxAdapter(
