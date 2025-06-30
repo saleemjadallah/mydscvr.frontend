@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 
 // Core imports
 import '../../core/constants/app_colors.dart';
@@ -1338,7 +1339,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   void _navigateToLogin() {
-    // TODO: Navigate to login screen
+    context.go('/login');
   }
 
   // Helper methods for family calculations
