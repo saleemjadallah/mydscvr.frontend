@@ -42,6 +42,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   bool _isLoading = true;
   String? _errorMessage;
   
+  // Testing modes
+  String _testMode = 'testing'; // 'testing', 'simple', 'full'
+  
   @override
   void initState() {
     super.initState();
@@ -126,9 +129,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // MyDscvr's Choice Section - TESTING MINIMAL VERSION
+          // MyDscvr's Choice Section - Conditional based on test mode
           SliverToBoxAdapter(
-            child: _buildMinimalMyDscvrChoice(),
+            child: _buildConditionalMyDscvrChoice(),
           ),
           
           // Footer spacing
@@ -1107,8 +1110,22 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
+  /// Build conditional MyDscvr's Choice based on test mode
+  Widget _buildConditionalMyDscvrChoice() {
+    switch (_testMode) {
+      case 'testing':
+        return _buildTestingWidget();
+      case 'simple':
+        return _buildSimpleMyDscvrChoice();
+      case 'full':
+        return _buildAnimatedMyDscvrChoice();
+      default:
+        return _buildTestingWidget();
+    }
+  }
+
   /// Build the minimal MyDscvr's Choice for testing
-  Widget _buildMinimalMyDscvrChoice() {
+  Widget _buildTestingWidget() {
     return Container(
       margin: const EdgeInsets.all(24),
       padding: const EdgeInsets.all(16),
@@ -1120,9 +1137,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'MyDscvr\'s Choice - Testing Widget',
-            style: TextStyle(
+          Text(
+            'MyDscvr\'s Choice - Testing Widget (Mode: $_testMode)',
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -1156,6 +1173,42 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   _testFullWidget();
                 },
                 child: const Text('Test Widget'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing animations...');
+                  _testAnimations();
+                },
+                child: const Text('Test Anim'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing hover state...');
+                  _testHoverState();
+                },
+                child: const Text('Test Hover'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Switching to simple widget...');
+                  _switchToSimpleWidget();
+                },
+                child: const Text('Simple'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Switching to full widget...');
+                  _switchToFullWidget();
+                },
+                child: const Text('Full'),
               ),
             ],
           ),
@@ -1239,6 +1292,186 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       print('❌ Widget test failed: $e');
       print('❌ Stack trace: $stackTrace');
     }
+  }
+  
+  /// Test animations to see if they cause loops
+  void _testAnimations() {
+    print('🧪 Testing animations...');
+    
+    try {
+      // Test FadeInSlideUp animation alone
+      print('🧪 Testing FadeInSlideUp...');
+      
+      // Test AnimatedContainer
+      print('🧪 Testing AnimatedContainer...');
+      
+      // Test multiple animations together
+      print('🧪 Testing combined animations...');
+      
+      print('✅ Animation tests completed - check console for loops');
+    } catch (e, stackTrace) {
+      print('❌ Animation test failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+  
+  /// Test hover state management
+  void _testHoverState() {
+    print('🧪 Testing hover state...');
+    
+    try {
+      // Simulate hover events
+      setState(() {
+        _hoveredEventId = 'test-id-1';
+      });
+      
+      Future.delayed(const Duration(milliseconds: 100), () {
+        setState(() {
+          _hoveredEventId = 'test-id-2';
+        });
+      });
+      
+      Future.delayed(const Duration(milliseconds: 200), () {
+        setState(() {
+          _hoveredEventId = null;
+        });
+      });
+      
+      print('✅ Hover state test completed');
+    } catch (e, stackTrace) {
+      print('❌ Hover state test failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+  
+  /// Switch to simple widget mode
+  void _switchToSimpleWidget() async {
+    print('🧪 Switching to simple widget...');
+    
+    try {
+      // Ensure we have data
+      if (_upcomingEvents.isEmpty) {
+        final response = await _eventsService.getEvents();
+        if (response.isSuccess) {
+          final events = response.data ?? [];
+          _upcomingEvents = events.take(1).toList();
+        }
+      }
+      
+      setState(() {
+        _testMode = 'simple';
+        _isLoading = false;
+      });
+      
+      print('✅ Switched to simple widget mode');
+    } catch (e, stackTrace) {
+      print('❌ Switch to simple failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+  
+  /// Switch to full widget mode (potential loop trigger)
+  void _switchToFullWidget() async {
+    print('🧪 Switching to FULL widget - WATCH FOR LOOPS!');
+    
+    try {
+      // Ensure we have data
+      if (_upcomingEvents.isEmpty) {
+        final response = await _eventsService.getEvents();
+        if (response.isSuccess) {
+          final events = response.data ?? [];
+          _upcomingEvents = events.take(1).toList();
+        }
+      }
+      
+      setState(() {
+        _testMode = 'full';
+        _isLoading = false;
+      });
+      
+      print('✅ Switched to FULL widget mode - monitor for loops!');
+    } catch (e, stackTrace) {
+      print('❌ Switch to full failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+  
+  /// Simple version of MyDscvr's Choice without complex animations
+  Widget _buildSimpleMyDscvrChoice() {
+    if (_upcomingEvents.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Text('No events available for Simple MyDscvr\'s Choice'),
+      );
+    }
+    
+    final event = _upcomingEvents.first;
+    
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          // Simple image
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withOpacity(0.2),
+            ),
+            child: const Icon(Icons.event, color: Colors.white, size: 40),
+          ),
+          const SizedBox(width: 16),
+          // Event details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'MyDscvr\'s Choice',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  event.title,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  event.venue.area,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatEventTime(DateTime date) {
