@@ -1616,84 +1616,136 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
   
   Widget _buildStep0_BasicContainer(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text('Step 0: Basic Container - ${event.title}', 
-        style: const TextStyle(color: Colors.white)),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Step 0: Basic Container - ${event.title}', 
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('✅ This should work fine', 
+                style: TextStyle(color: Colors.white.withOpacity(0.8))),
+            ],
+          ),
+        ),
+        _buildGradualControls(),
+      ],
     );
   }
   
   Widget _buildStep1_AddGradient(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Step 1: + Gradient - ${event.title}', 
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('✅ Gradient should work fine', 
+                style: TextStyle(color: Colors.white.withOpacity(0.8))),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text('Step 1: + Gradient - ${event.title}', 
-        style: const TextStyle(color: Colors.white)),
+        _buildGradualControls(),
+      ],
     );
   }
   
   Widget _buildStep2_AddSingleShadow(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Text('Step 2: + Single Shadow - ${event.title}', 
-        style: const TextStyle(color: Colors.white)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Step 2: + Single Shadow - ${event.title}', 
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('✅ Single shadow should work', 
+                style: TextStyle(color: Colors.white.withOpacity(0.8))),
+            ],
+          ),
+        ),
+        _buildGradualControls(),
+      ],
     );
   }
   
   Widget _buildStep3_AddMultipleShadows(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF17A2B8).withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+              BoxShadow(
+                color: const Color(0xFF6C5CE7).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 40,
+                offset: const Offset(0, 25),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Step 3: + Multiple Shadows - ${event.title}', 
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('⚠️ CRITICAL TEST: Multiple shadows may cause loops!', 
+                style: TextStyle(color: Colors.yellow.shade200, fontWeight: FontWeight.bold)),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF17A2B8).withOpacity(0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
-          ),
-          BoxShadow(
-            color: const Color(0xFF6C5CE7).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 40,
-            offset: const Offset(0, 25),
-          ),
-        ],
-      ),
-      child: Text('Step 3: + Multiple Shadows - ${event.title}', 
-        style: const TextStyle(color: Colors.white)),
+        _buildGradualControls(),
+      ],
     );
   }
   
@@ -1818,7 +1870,79 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
   
   Widget _buildStep8_FullComplexity(Event event) {
-    return Text('Step 8: Full Complexity (use Full button for this)');
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Text('Step 8: Full Complexity - Use "Full (DANGER)" button for this!', 
+            style: TextStyle(color: Colors.white, fontSize: 16)),
+        ),
+        _buildGradualControls(),
+      ],
+    );
+  }
+  
+  /// Build gradual test navigation controls
+  Widget _buildGradualControls() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Text('Gradual Test Controls - Current Step: $_gradualStep'),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: _gradualStep > 0 ? () {
+                  setState(() {
+                    _gradualStep--;
+                  });
+                  print('⬅️ Previous step: $_gradualStep');
+                } : null,
+                child: const Text('Previous'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _gradualStep++;
+                  });
+                  print('➡️ Next step: $_gradualStep');
+                },
+                child: const Text('Next Step'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _testMode = 'testing';
+                  });
+                  print('🔙 Back to testing mode');
+                },
+                child: const Text('Back'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text('Watch console for loops when advancing steps!', 
+            style: TextStyle(
+              fontSize: 12, 
+              color: Colors.orange.shade700,
+              fontWeight: FontWeight.w500,
+            )),
+        ],
+      ),
+    );
   }
 
   String _formatEventTime(DateTime date) {
