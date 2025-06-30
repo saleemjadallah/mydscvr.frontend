@@ -21,6 +21,8 @@ import '../../core/constants/app_colors.dart';
 import '../../services/providers/auth_provider_mongodb.dart';
 import '../../widgets/common/google_sign_in_button.dart';
 import '../../models/user.dart';
+import '../../services/events_service.dart';
+import '../../models/event.dart';
 
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
@@ -32,11 +34,20 @@ class BeautifulHomeScreen extends ConsumerStatefulWidget {
 
 class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with TickerProviderStateMixin {
   late ScrollController _scrollController;
+  String? _hoveredEventId;
+  
+  // Real API data for MyDscvr's Choice
+  late final EventsService _eventsService;
+  List<Event> _upcomingEvents = [];
+  bool _isLoading = true;
+  String? _errorMessage;
   
   @override
   void initState() {
     super.initState();
+    _eventsService = EventsService();
     _scrollController = ScrollController();
+    _loadEvents();
   }
   
   @override
@@ -115,32 +126,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // MyDscvr's Choice Section
+          // MyDscvr's Choice Section - Real Implementation
           SliverToBoxAdapter(
-            child: FadeInSlideUp(
-              delay: const Duration(milliseconds: 1200),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'MyDscvr\'s Choice',
-                      style: GoogleFonts.inter(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E293B),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const FeaturedEventsSection(
-                      showHeader: false,
-                      maxEventsToShow: 4,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            child: _buildAnimatedMyDscvrChoice(),
           ),
           
           // Footer spacing
@@ -450,4 +438,714 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       ),
     );
   }
+
+  /// Load events for MyDscvr's Choice
+  Future<void> _loadEvents() async {
+    try {
+      // Load upcoming events
+      final upcomingResponse = await _eventsService.getEvents(
+        perPage: 20,
+        sortBy: 'start_date',
+      );
+
+      if (mounted) {
+        setState(() {
+          if (upcomingResponse.isSuccess) {
+            final allEvents = upcomingResponse.data ?? [];
+            print('📊 DEBUG: Total events from API: ${allEvents.length}');
+            
+            // First try future events
+            var futureEvents = allEvents
+                .where((e) => e.startDate.isAfter(DateTime.now()))
+                .toList();
+            print('📊 DEBUG: Future events found: ${futureEvents.length}');
+            
+            // If no future events, temporarily use all events for debugging
+            if (futureEvents.isEmpty && allEvents.isNotEmpty) {
+              print('⚠️ DEBUG: No future events found, using recent events...');
+              futureEvents = allEvents.take(10).toList();
+            }
+            
+            _upcomingEvents = futureEvents;
+            print('📊 DEBUG: Final curated events: ${_upcomingEvents.length}');
+          } else {
+            print('❌ DEBUG: API call failed: ${upcomingResponse.error}');
+          }
+          _isLoading = false;
+          _errorMessage = upcomingResponse.error;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load events: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  /// Build the actual MyDscvr's Choice widget from animated home screen
+  Widget _buildAnimatedMyDscvrChoice() {
+    print('🎯 DEBUG: Building Animated MyDscvr\'s Choice Banner - isLoading: $_isLoading, events: ${_upcomingEvents.length}');
+    
+    // Show loading state while data is being fetched
+    if (_isLoading) {
+      return _buildAnimatedMyDscvrChoiceLoading();
+    }
+    
+    // Use first available event as placeholder
+    final placeholderEvent = _upcomingEvents.isNotEmpty ? _upcomingEvents.first : null;
+    
+    if (placeholderEvent == null) {
+      return _buildAnimatedMyDscvrChoiceEmpty();
+    }
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      child: FadeInSlideUp(
+        delay: const Duration(milliseconds: 200),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.elasticOut,
+          height: 380, // 30% taller for premium real estate
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32), // Ultra-modern radius
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF17A2B8), // Teal
+                Color(0xFF6C5CE7), // Purple
+                Color(0xFF17A2B8), // Back to teal
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+            boxShadow: [
+              // Multi-layered shadow system
+              BoxShadow(
+                color: AppColors.dubaiTeal.withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+                spreadRadius: 5,
+              ),
+              BoxShadow(
+                color: const Color(0xFF6C5CE7).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+                spreadRadius: 2,
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 40,
+                offset: const Offset(0, 25),
+                spreadRadius: 10,
+              ),
+            ],
+            // Animated gradient border
+            border: Border.all(
+              width: 2,
+              color: Colors.white.withOpacity(0.3),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Stack(
+              children: [
+                // Glass morphism backdrop
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.15),
+                          Colors.white.withOpacity(0.05),
+                          Colors.white.withOpacity(0.1),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Animated floating particles
+                ...List.generate(6, (index) => _buildFloatingParticle(index)),
+                
+                // Premium gradient mesh background
+                _buildGradientMeshBackground(),
+              
+              // Premium floating algorithm badge
+              FadeInSlideUp(
+                delay: const Duration(milliseconds: 800),
+                child: Positioned(
+                  top: 20,
+                  right: 20,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFD4AF37), // Gold
+                          Color(0xFFFFD700), // Bright gold
+                          Color(0xFFD4AF37), // Gold
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFD4AF37).withOpacity(0.4),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.zap,
+                          size: 18,
+                          color: Colors.white,
+                        ).animate(onPlay: (controller) => controller.repeat())
+                            .shimmer(duration: 2000.ms, color: Colors.white.withOpacity(0.8)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'AI Choice',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                      .scale(
+                        begin: const Offset(0.95, 0.95),
+                        end: const Offset(1.05, 1.05),
+                        duration: 2000.ms,
+                        curve: Curves.easeInOut,
+                      ),
+                ),
+              ),
+              
+              // Main content
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Enhanced header with premium typography
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FadeInSlideUp(
+                          delay: const Duration(milliseconds: 300),
+                          child: ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                colors: [
+                                  Colors.white,
+                                  const Color(0xFFD4AF37), // Gold accent for "Choice"
+                                  Colors.white,
+                                ],
+                                stops: const [0.0, 0.7, 1.0],
+                              ).createShader(bounds);
+                            },
+                            child: Text(
+                              'MyDscvr\'s Choice',
+                              style: GoogleFonts.comfortaa(
+                                fontSize: 32, // Larger for premium impact
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.2, // Enhanced letter spacing
+                                height: 1.1,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ).animate()
+                              .fadeIn(duration: 600.ms, delay: 300.ms)
+                              .slideY(begin: 0.3, end: 0.0, duration: 800.ms, curve: Curves.easeOutCubic),
+                        ),
+                        
+                        const SizedBox(height: 8),
+                        
+                        FadeInSlideUp(
+                          delay: const Duration(milliseconds: 500),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.dubaiGold.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.dubaiGold.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.zap,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'AI Curated Daily',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Event content
+                    Expanded(
+                      child: Row(
+                        children: [
+                          // Premium event image with enhanced styling
+                          FadeInSlideUp(
+                            delay: const Duration(milliseconds: 700),
+                            child: MouseRegion(
+                              onEnter: (_) => setState(() => _hoveredEventId = placeholderEvent.id),
+                              onExit: (_) => setState(() => _hoveredEventId = null),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                transform: Matrix4.identity()
+                                  ..scale(_hoveredEventId == placeholderEvent.id ? 1.05 : 1.0),
+                                width: 160, // Larger premium size
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24), // Increased radius
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white.withOpacity(0.3),
+                                      Colors.white.withOpacity(0.1),
+                                      const Color(0xFFD4AF37).withOpacity(0.2), // Gold tint
+                                    ],
+                                  ),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.6), // Enhanced border
+                                    width: 3,
+                                  ),
+                                  boxShadow: [
+                                    // Multiple shadow layers for depth
+                                    BoxShadow(
+                                      color: const Color(0xFFD4AF37).withOpacity(0.3),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                      spreadRadius: 2,
+                                    ),
+                                    BoxShadow(
+                                      color: AppColors.dubaiTeal.withOpacity(0.2),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 4),
+                                      spreadRadius: 1,
+                                    ),
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.15),
+                                      blurRadius: 25,
+                                      offset: const Offset(0, 12),
+                                      spreadRadius: 3,
+                                    ),
+                                  ],
+                                ),
+                                child: Stack(
+                                  children: [
+                                    // Background icon with glow effect
+                                    Center(
+                                      child: Icon(
+                                        LucideIcons.sparkles,
+                                        color: Colors.white.withOpacity(0.9),
+                                        size: 50,
+                                      ).animate(onPlay: (controller) => controller.repeat())
+                                          .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6))
+                                          .scale(
+                                            begin: const Offset(0.9, 0.9),
+                                            end: const Offset(1.1, 1.1),
+                                            duration: 2000.ms,
+                                            curve: Curves.easeInOut,
+                                          ),
+                                    ),
+                                    // Overlay gradient for premium look
+                                    Positioned.fill(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(21),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.transparent,
+                                              const Color(0xFFD4AF37).withOpacity(0.1),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          
+                          const SizedBox(width: 20),
+                          
+                          // Event details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 900),
+                                  child: Text(
+                                    placeholderEvent.title,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 22, // Larger premium title
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      height: 1.3, // Better line height
+                                      letterSpacing: 0.3,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.4),
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 3,
+                                        ),
+                                      ],
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ).animate()
+                                      .fadeIn(duration: 600.ms, delay: 900.ms)
+                                      .slideX(begin: 0.3, end: 0.0, duration: 800.ms, curve: Curves.easeOutCubic),
+                                ),
+                                
+                                const SizedBox(height: 8),
+                                
+                                // Date and location
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1100),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        LucideIcons.calendar,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _formatEventTime(placeholderEvent.startDate),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          color: Colors.white.withOpacity(0.9),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 4),
+                                
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1200),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        LucideIcons.mapPin,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          placeholderEvent.venue.area,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            color: Colors.white.withOpacity(0.9),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 12),
+                                
+                                // Algorithm insight
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1300),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Perfect for families like yours',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                
+                                const Spacer(),
+                                
+                                // CTA Button
+                                FadeInSlideUp(
+                                  delay: const Duration(milliseconds: 1400),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      context.go('/event/${placeholderEvent.id}');
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: AppColors.dubaiTeal,
+                                      elevation: 8,
+                                      shadowColor: Colors.black.withOpacity(0.2),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Discover Why',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Icon(
+                                          LucideIcons.arrowRight,
+                                          size: 16,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ), // End Stack children
+        ), // End ClipRRect
+      ), // End AnimatedContainer  
+    ), // End FadeInSlideUp
+    ); // End Container
+  }
+
+  Widget _buildAnimatedMyDscvrChoiceLoading() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      height: 380,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey.shade300,
+            Colors.grey.shade200,
+            Colors.grey.shade300,
+          ],
+        ),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedMyDscvrChoiceEmpty() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      height: 380,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF17A2B8),
+            Color(0xFF6C5CE7),
+            Color(0xFF17A2B8),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              LucideIcons.sparkles,
+              color: Colors.white.withOpacity(0.7),
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'MyDscvr\'s Choice',
+              style: GoogleFonts.comfortaa(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Coming Soon',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingParticle(int index) {
+    final delays = [0, 500, 1000, 1500, 2000, 2500];
+    final sizes = [4.0, 6.0, 3.0, 5.0, 4.0, 7.0];
+    final positions = [
+      const Offset(50, 100),
+      const Offset(300, 80),
+      const Offset(150, 200),
+      const Offset(280, 180),
+      const Offset(80, 250),
+      const Offset(320, 220),
+    ];
+
+    return Positioned(
+      left: positions[index].dx,
+      top: positions[index].dy,
+      child: Container(
+        width: sizes[index],
+        height: sizes[index],
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withOpacity(0.6),
+        ),
+      ).animate(onPlay: (controller) => controller.repeat())
+          .moveY(
+            begin: 0,
+            end: -20,
+            duration: Duration(milliseconds: 3000 + delays[index]),
+            curve: Curves.easeInOut,
+          )
+          .then()
+          .moveY(
+            begin: -20,
+            end: 0,
+            duration: Duration(milliseconds: 3000 + delays[index]),
+            curve: Curves.easeInOut,
+          ),
+    );
+  }
+
+  Widget _buildGradientMeshBackground() {
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: GradientMeshPainter(),
+      ),
+    );
+  }
+
+  String _formatEventTime(DateTime date) {
+    final now = DateTime.now();
+    final difference = date.difference(now).inDays;
+    
+    if (difference == 0) return 'Today';
+    if (difference == 1) return 'Tomorrow';
+    if (difference <= 7) return 'This week';
+    if (difference <= 14) return 'Next week';
+    return 'Later this month';
+  }
+}
+
+class GradientMeshPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill;
+
+    // Create mesh gradient effect
+    for (int i = 0; i < 5; i++) {
+      final opacity = 0.1 - (i * 0.02);
+      paint.color = Colors.white.withOpacity(opacity);
+      
+      final path = Path();
+      path.moveTo(0, size.height * (0.2 + i * 0.15));
+      path.quadraticBezierTo(
+        size.width * 0.5,
+        size.height * (0.1 + i * 0.1),
+        size.width,
+        size.height * (0.3 + i * 0.1),
+      );
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+      
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
