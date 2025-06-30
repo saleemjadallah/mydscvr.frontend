@@ -1156,6 +1156,14 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             children: [
               ElevatedButton(
                 onPressed: () {
+                  print('🧪 Loading events...');
+                  _loadEventsForTesting();
+                },
+                child: const Text('Load Events'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
                   print('🧪 Testing API call...');
                   _testApiCallSafely();
                 },
@@ -1240,6 +1248,41 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
   
+  /// Load events for testing
+  void _loadEventsForTesting() async {
+    print('🧪 Loading events for testing...');
+    
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+      
+      final response = await _eventsService.getEvents();
+      if (response.isSuccess) {
+        final events = response.data ?? [];
+        setState(() {
+          _upcomingEvents = events.take(3).toList();
+          _isLoading = false;
+        });
+        print('✅ Loaded ${_upcomingEvents.length} events for testing');
+      } else {
+        setState(() {
+          _errorMessage = response.error;
+          _isLoading = false;
+        });
+        print('❌ Failed to load events: ${response.error}');
+      }
+    } catch (e, stackTrace) {
+      setState(() {
+        _errorMessage = 'Error: $e';
+        _isLoading = false;
+      });
+      print('❌ Event loading failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+
   /// Test API call safely to identify the loop source
   void _testApiCallSafely() async {
     print('🧪 Starting safe API test...');
@@ -1498,12 +1541,36 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
   
   /// Switch to gradual testing mode
-  void _switchToGradualTest() {
-    setState(() {
-      _testMode = 'gradual';
-      _gradualStep = 0;
-    });
-    print('✅ Switched to gradual testing mode - Step 0');
+  void _switchToGradualTest() async {
+    print('🧪 Switching to gradual test mode...');
+    
+    try {
+      // Ensure we have data first
+      if (_upcomingEvents.isEmpty) {
+        print('🧪 Loading events for gradual test...');
+        final response = await _eventsService.getEvents();
+        if (response.isSuccess) {
+          final events = response.data ?? [];
+          setState(() {
+            _upcomingEvents = events.take(1).toList();
+            _isLoading = false;
+          });
+          print('✅ Loaded ${_upcomingEvents.length} events for gradual test');
+        } else {
+          print('❌ Failed to load events: ${response.error}');
+          return;
+        }
+      }
+      
+      setState(() {
+        _testMode = 'gradual';
+        _gradualStep = 0;
+      });
+      print('✅ Switched to gradual testing mode - Step 0');
+    } catch (e, stackTrace) {
+      print('❌ Failed to switch to gradual test: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
   }
   
   /// Advance to next gradual step
