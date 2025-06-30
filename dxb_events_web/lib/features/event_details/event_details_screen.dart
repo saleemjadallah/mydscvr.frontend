@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 // import 'package:share_plus/share_plus.dart'; // TODO: Replace with web-safe sharing
 import 'package:go_router/go_router.dart';
-// import 'package:url_launcher/url_launcher.dart'; // TODO: Replace with web-safe link handling
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/duration_formatter.dart';
 

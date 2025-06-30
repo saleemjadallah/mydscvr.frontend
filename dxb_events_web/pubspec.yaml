@@ -46,10 +46,13 @@ dependencies:
   timeago: ^3.6.0
   http: ^1.4.0
   
+  # Additional required dependencies
+  glassmorphism: ^3.0.0
+  url_launcher: ^6.2.4
+  
   # Web-safe alternatives needed
   # TODO: Replace share_plus with web-safe sharing
   # TODO: Replace flutter_secure_storage with web localStorage
-  # TODO: Replace url_launcher with web-safe link handling
 
 dev_dependencies:
   flutter_test:
