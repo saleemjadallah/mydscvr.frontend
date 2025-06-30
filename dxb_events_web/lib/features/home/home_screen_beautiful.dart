@@ -126,10 +126,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // MyDscvr's Choice Section - COMMENTED OUT FOR TESTING LOOP ISSUE
-          // SliverToBoxAdapter(
-          //   child: _buildAnimatedMyDscvrChoice(),
-          // ),
+          // MyDscvr's Choice Section - TESTING MINIMAL VERSION
+          SliverToBoxAdapter(
+            child: _buildMinimalMyDscvrChoice(),
+          ),
           
           // Footer spacing
           const SliverToBoxAdapter(
@@ -1105,6 +1105,140 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         painter: GradientMeshPainter(),
       ),
     );
+  }
+
+  /// Build the minimal MyDscvr's Choice for testing
+  Widget _buildMinimalMyDscvrChoice() {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'MyDscvr\'s Choice - Testing Widget',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text('Events loaded: ${_upcomingEvents.length}'),
+          Text('Loading: $_isLoading'),
+          Text('Error: ${_errorMessage ?? 'None'}'),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing API call...');
+                  _testApiCallSafely();
+                },
+                child: const Text('Test API'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing state update...');
+                  _testStateUpdate();
+                },
+                child: const Text('Test State'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing full widget...');
+                  _testFullWidget();
+                },
+                child: const Text('Test Widget'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// Test API call safely to identify the loop source
+  void _testApiCallSafely() async {
+    print('🧪 Starting safe API test...');
+    
+    try {
+      // Test 1: Basic service instantiation
+      print('🧪 Test 1: Creating EventsService...');
+      final testService = EventsService();
+      print('✅ Test 1: EventsService created successfully');
+      
+      // Test 2: Simple API call without state changes
+      print('🧪 Test 2: Testing API call...');
+      final response = await testService.getEvents();
+      print('✅ Test 2: API call completed - Success: ${response.isSuccess}');
+      
+      if (response.isSuccess) {
+        final events = response.data ?? [];
+        print('✅ Test 2: Found ${events.length} events');
+        
+        // Test 3: Try parsing first event
+        if (events.isNotEmpty) {
+          print('🧪 Test 3: Testing event parsing...');
+          final firstEvent = events.first;
+          print('✅ Test 3: First event - ID: ${firstEvent.id}, Title: ${firstEvent.title}');
+        }
+      } else {
+        print('❌ Test 2: API call failed - ${response.error}');
+      }
+      
+    } catch (e, stackTrace) {
+      print('❌ API Test Failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+  
+  /// Test state update to see if setState is causing the loop
+  void _testStateUpdate() async {
+    print('🧪 Testing state update...');
+    
+    try {
+      setState(() {
+        _isLoading = !_isLoading;
+      });
+      print('✅ State update successful');
+    } catch (e, stackTrace) {
+      print('❌ State update failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+  
+  /// Test full widget rendering with real data
+  void _testFullWidget() async {
+    print('🧪 Testing full widget rendering...');
+    
+    try {
+      // Get data first
+      final response = await _eventsService.getEvents();
+      if (response.isSuccess) {
+        final events = response.data ?? [];
+        print('✅ Got ${events.length} events for widget test');
+        
+        setState(() {
+          _upcomingEvents = events.take(3).toList();
+          _isLoading = false;
+          _errorMessage = null;
+        });
+        
+        print('✅ Widget test - state updated successfully');
+      } else {
+        print('❌ Widget test failed: ${response.error}');
+      }
+    } catch (e, stackTrace) {
+      print('❌ Widget test failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
   }
 
   String _formatEventTime(DateTime date) {
