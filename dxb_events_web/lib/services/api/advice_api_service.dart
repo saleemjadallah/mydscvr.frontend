@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/advice_models.dart';
 import 'dio_config.dart';
 
 class AdviceApiService {
   final Dio _dio = DioConfig.createDio();
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  // static const FlutterSecureStorage _storage = FlutterSecureStorage(); // Replaced with SharedPreferences
   
   // Circuit breaker to prevent infinite loops
   static int _consecutiveFailures = 0;
@@ -105,7 +106,8 @@ class AdviceApiService {
       print('📝 Submitting advice for event: $eventId');
       
       // Verify we have an access token
-      final accessToken = await _storage.read(key: 'access_token');
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
       if (accessToken == null) {
         print('❌ No access token found');
         return AdviceSubmissionResult.error('Please log in to submit advice');
@@ -183,7 +185,8 @@ class AdviceApiService {
       print('👍 Marking advice as helpful: $adviceId');
       
       // Verify we have an access token
-      final accessToken = await _storage.read(key: 'access_token');
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
       if (accessToken == null) {
         print('❌ No access token found for helpful vote');
         return false;

@@ -54,25 +54,32 @@ class AuthApiService {
   
   // Storage methods
   Future<String?> getAccessToken() async {
-    return await _storage.read(key: _accessTokenKey);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accessTokenKey);
   }
   
   Future<String?> getSessionToken() async {
-    return await _storage.read(key: _sessionTokenKey);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_sessionTokenKey);
   }
   
   Future<void> saveTokens(String accessToken, String sessionToken) async {
-    await _storage.write(key: _accessTokenKey, value: accessToken);
-    await _storage.write(key: _sessionTokenKey, value: sessionToken);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accessTokenKey, accessToken);
+    await prefs.setString(_sessionTokenKey, sessionToken);
   }
   
   Future<void> clearTokens() async {
-    await _storage.deleteAll();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_sessionTokenKey);
+    await prefs.remove(_userDataKey);
   }
   
   Future<UserProfile?> getCachedUser() async {
     try {
-      final userData = await _storage.read(key: _userDataKey);
+      final prefs = await SharedPreferences.getInstance();
+      final userData = prefs.getString(_userDataKey);
       if (userData != null) {
         final Map<String, dynamic> userMap = jsonDecode(userData);
         return UserProfile.fromJson(userMap);
@@ -86,7 +93,8 @@ class AuthApiService {
   Future<void> cacheUser(UserProfile user) async {
     try {
       final userData = jsonEncode(user.toJson());
-      await _storage.write(key: _userDataKey, value: userData);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_userDataKey, userData);
     } catch (e) {
       print('Error caching user: $e');
     }
