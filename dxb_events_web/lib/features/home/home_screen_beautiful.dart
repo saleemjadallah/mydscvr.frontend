@@ -43,7 +43,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   String? _errorMessage;
   
   // Testing modes
-  String _testMode = 'testing'; // 'testing', 'simple', 'full'
+  String _testMode = 'testing'; // 'testing', 'simple', 'full', 'gradual'
+  int _gradualStep = 0; // For gradual feature testing
   
   @override
   void initState() {
@@ -1119,6 +1120,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         return _buildSimpleMyDscvrChoice();
       case 'full':
         return _buildAnimatedMyDscvrChoice();
+      case 'gradual':
+        return _buildGradualTestWidget();
       default:
         return _buildTestingWidget();
     }
@@ -1138,7 +1141,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'MyDscvr\'s Choice - Testing Widget (Mode: $_testMode)',
+            'MyDscvr\'s Choice - Testing Widget (Mode: $_testMode${_testMode == 'gradual' ? ' - Step $_gradualStep' : ''})',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -1205,10 +1208,30 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
+                  print('🧪 Switching to gradual test...');
+                  _switchToGradualTest();
+                },
+                child: const Text('Gradual'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Next step...');
+                  _nextGradualStep();
+                },
+                child: const Text('Next Step'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
                   print('🧪 Switching to full widget...');
                   _switchToFullWidget();
                 },
-                child: const Text('Full'),
+                child: const Text('Full (DANGER)'),
               ),
             ],
           ),
@@ -1472,6 +1495,263 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ],
       ),
     );
+  }
+  
+  /// Switch to gradual testing mode
+  void _switchToGradualTest() {
+    setState(() {
+      _testMode = 'gradual';
+      _gradualStep = 0;
+    });
+    print('✅ Switched to gradual testing mode - Step 0');
+  }
+  
+  /// Advance to next gradual step
+  void _nextGradualStep() {
+    setState(() {
+      _gradualStep++;
+    });
+    print('✅ Advanced to gradual step $_gradualStep');
+  }
+  
+  /// Build gradual test widget - incrementally add complex features
+  Widget _buildGradualTestWidget() {
+    if (_upcomingEvents.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
+        child: Text('Gradual Test - Step $_gradualStep (No events)'),
+      );
+    }
+    
+    final event = _upcomingEvents.first;
+    
+    switch (_gradualStep) {
+      case 0:
+        return _buildStep0_BasicContainer(event);
+      case 1:
+        return _buildStep1_AddGradient(event);
+      case 2:
+        return _buildStep2_AddSingleShadow(event);
+      case 3:
+        return _buildStep3_AddMultipleShadows(event);
+      case 4:
+        return _buildStep4_AddBasicAnimation(event);
+      case 5:
+        return _buildStep5_AddComplexAnimations(event);
+      case 6:
+        return _buildStep6_AddNetworkImage(event);
+      case 7:
+        return _buildStep7_AddCustomPainter(event);
+      default:
+        return _buildStep8_FullComplexity(event);
+    }
+  }
+  
+  Widget _buildStep0_BasicContainer(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text('Step 0: Basic Container - ${event.title}', 
+        style: const TextStyle(color: Colors.white)),
+    );
+  }
+  
+  Widget _buildStep1_AddGradient(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text('Step 1: + Gradient - ${event.title}', 
+        style: const TextStyle(color: Colors.white)),
+    );
+  }
+  
+  Widget _buildStep2_AddSingleShadow(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Text('Step 2: + Single Shadow - ${event.title}', 
+        style: const TextStyle(color: Colors.white)),
+    );
+  }
+  
+  Widget _buildStep3_AddMultipleShadows(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF17A2B8).withOpacity(0.4),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+          BoxShadow(
+            color: const Color(0xFF6C5CE7).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 25),
+          ),
+        ],
+      ),
+      child: Text('Step 3: + Multiple Shadows - ${event.title}', 
+        style: const TextStyle(color: Colors.white)),
+    );
+  }
+  
+  Widget _buildStep4_AddBasicAnimation(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF17A2B8).withOpacity(0.4),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Text('Step 4: + Basic Animation - ${event.title}', 
+        style: const TextStyle(color: Colors.white)),
+    ).animate().fadeIn(duration: 600.ms);
+  }
+  
+  Widget _buildStep5_AddComplexAnimations(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF17A2B8).withOpacity(0.4),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Text('Step 5: + Complex Animations - ${event.title}', 
+        style: const TextStyle(color: Colors.white)),
+    ).animate()
+      .fadeIn(duration: 600.ms, delay: 200.ms)
+      .slideX(begin: 0.3, end: 0.0, duration: 800.ms);
+  }
+  
+  Widget _buildStep6_AddNetworkImage(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      height: 200,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF17A2B8).withOpacity(0.4),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 100,
+              height: 100,
+              margin: const EdgeInsets.all(16),
+              color: Colors.white.withOpacity(0.2),
+              child: event.imageUrl.isNotEmpty 
+                ? Image.network(event.imageUrl, fit: BoxFit.cover, 
+                    errorBuilder: (_, __, ___) => const Icon(Icons.error))
+                : const Icon(Icons.event, color: Colors.white),
+            ),
+          ),
+          Expanded(
+            child: Text('Step 6: + Network Image - ${event.title}', 
+              style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    ).animate()
+      .fadeIn(duration: 600.ms, delay: 200.ms)
+      .slideX(begin: 0.3, end: 0.0, duration: 800.ms);
+  }
+  
+  Widget _buildStep7_AddCustomPainter(Event event) {
+    return Container(
+      margin: const EdgeInsets.all(24),
+      height: 200,
+      child: Stack(
+        children: [
+          // Custom painter background
+          Positioned.fill(
+            child: CustomPaint(
+              painter: GradientMeshPainter(),
+            ),
+          ),
+          // Content
+          Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Text('Step 7: + Custom Painter - ${event.title}', 
+                style: const TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    ).animate()
+      .fadeIn(duration: 600.ms, delay: 200.ms);
+  }
+  
+  Widget _buildStep8_FullComplexity(Event event) {
+    return Text('Step 8: Full Complexity (use Full button for this)');
   }
 
   String _formatEventTime(DateTime date) {
