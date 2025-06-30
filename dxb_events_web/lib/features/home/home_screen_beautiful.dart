@@ -23,6 +23,7 @@ import '../../widgets/common/google_sign_in_button.dart';
 import '../../models/user.dart';
 import '../../services/events_service.dart';
 import '../../models/event.dart';
+import '../../widgets/common/footer.dart';
 
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
@@ -131,9 +132,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: _buildAnimatedMyDscvrChoice(),
           ),
           
-          // Footer spacing
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 80),
+          // Footer
+          SliverToBoxAdapter(
+            child: FadeInSlideUp(
+              delay: const Duration(milliseconds: 1200),
+              child: const Footer(),
+            ),
           ),
         ],
       ),
