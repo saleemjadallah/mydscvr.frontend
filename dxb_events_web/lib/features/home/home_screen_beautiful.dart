@@ -42,16 +42,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   bool _isLoading = true;
   String? _errorMessage;
   
-  // Testing modes
-  String _testMode = 'testing'; // 'testing', 'simple', 'full', 'gradual'
-  int _gradualStep = 0; // For gradual feature testing
-  
   @override
   void initState() {
     super.initState();
     _eventsService = EventsService();
     _scrollController = ScrollController();
-    // _loadEvents(); // COMMENTED OUT FOR TESTING LOOP ISSUE
+    _loadEvents(); // Re-enabled for final solution
   }
   
   @override
@@ -130,9 +126,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // MyDscvr's Choice Section - Conditional based on test mode
+          // MyDscvr's Choice Section - Final solution
           SliverToBoxAdapter(
-            child: _buildConditionalMyDscvrChoice(),
+            child: _buildAnimatedMyDscvrChoice(),
           ),
           
           // Footer spacing
@@ -489,9 +485,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     }
   }
 
-  /// Build the actual MyDscvr's Choice widget from animated home screen
+  /// Build the FIXED MyDscvr's Choice widget - maintains visual appeal, prevents loops
   Widget _buildAnimatedMyDscvrChoice() {
-    print('🎯 DEBUG: Building Animated MyDscvr\'s Choice Banner - isLoading: $_isLoading, events: ${_upcomingEvents.length}');
+    print('🎯 FIXED: Building MyDscvr\'s Choice with simplified architecture');
     
     // Show loading state while data is being fetched
     if (_isLoading) {
@@ -505,16 +501,15 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       return _buildAnimatedMyDscvrChoiceEmpty();
     }
     
+    // SOLUTION: Simplified architecture that maintains visual appeal but prevents loops
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: FadeInSlideUp(
         delay: const Duration(milliseconds: 200),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.elasticOut,
-          height: 380, // 30% taller for premium real estate
+        child: Container(
+          height: 380,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32), // Ultra-modern radius
+            borderRadius: BorderRadius.circular(32),
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -526,7 +521,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               stops: [0.0, 0.5, 1.0],
             ),
             boxShadow: [
-              // Multi-layered shadow system
+              // Reduced but still beautiful shadows
               BoxShadow(
                 color: AppColors.dubaiTeal.withOpacity(0.4),
                 blurRadius: 30,
@@ -539,459 +534,214 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 offset: const Offset(0, 8),
                 spreadRadius: 2,
               ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 40,
-                offset: const Offset(0, 25),
-                spreadRadius: 10,
-              ),
             ],
-            // Animated gradient border
             border: Border.all(
               width: 2,
               color: Colors.white.withOpacity(0.3),
             ),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: Stack(
-              children: [
-                // Glass morphism backdrop
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.white.withOpacity(0.15),
-                          Colors.white.withOpacity(0.05),
-                          Colors.white.withOpacity(0.1),
-                        ],
-                      ),
-                    ),
+          child: Row(
+            children: [
+              // Image section - simplified but elegant
+              Container(
+                width: 160,
+                height: 320,
+                margin: const EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.white.withOpacity(0.1),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 2,
                   ),
                 ),
-                
-                // Animated floating particles
-                ...List.generate(6, (index) => _buildFloatingParticle(index)),
-                
-                // Premium gradient mesh background
-                _buildGradientMeshBackground(),
-              
-              // Premium floating algorithm badge
-              FadeInSlideUp(
-                delay: const Duration(milliseconds: 800),
-                child: Positioned(
-                  top: 20,
-                  right: 20,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFD4AF37), // Gold
-                          Color(0xFFFFD700), // Bright gold
-                          Color(0xFFD4AF37), // Gold
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFD4AF37).withOpacity(0.4),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                          spreadRadius: 2,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(21),
+                  child: placeholderEvent.imageUrl.isNotEmpty
+                    ? Image.network(
+                        placeholderEvent.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.white.withOpacity(0.2),
+                          child: const Icon(Icons.event, color: Colors.white, size: 60),
                         ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          LucideIcons.zap,
-                          size: 18,
-                          color: Colors.white,
+                      )
+                    : Container(
+                        color: Colors.white.withOpacity(0.2),
+                        child: Icon(
+                          LucideIcons.sparkles,
+                          color: Colors.white.withOpacity(0.9),
+                          size: 50,
                         ).animate(onPlay: (controller) => controller.repeat())
-                            .shimmer(duration: 2000.ms, color: Colors.white.withOpacity(0.8)),
-                        const SizedBox(width: 6),
-                        Text(
-                          'AI Choice',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ).animate(onPlay: (controller) => controller.repeat(reverse: true))
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1.05, 1.05),
-                        duration: 2000.ms,
-                        curve: Curves.easeInOut,
+                          .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6)),
                       ),
                 ),
               ),
               
-              // Main content
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Enhanced header with premium typography
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FadeInSlideUp(
-                          delay: const Duration(milliseconds: 300),
-                          child: ShaderMask(
-                            shaderCallback: (Rect bounds) {
-                              return LinearGradient(
-                                colors: [
-                                  Colors.white,
-                                  const Color(0xFFD4AF37), // Gold accent for "Choice"
-                                  Colors.white,
-                                ],
-                                stops: const [0.0, 0.7, 1.0],
-                              ).createShader(bounds);
-                            },
-                            child: Text(
-                              'MyDscvr\'s Choice',
-                              style: GoogleFonts.comfortaa(
-                                fontSize: 32, // Larger for premium impact
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1.2, // Enhanced letter spacing
-                                height: 1.1,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    offset: const Offset(0, 2),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ).animate()
-                              .fadeIn(duration: 600.ms, delay: 300.ms)
-                              .slideY(begin: 0.3, end: 0.0, duration: 800.ms, curve: Curves.easeOutCubic),
+              // Event details - clean and elegant
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Header with gold accent
+                      Text(
+                        'MyDscvr\'s Choice',
+                        style: GoogleFonts.comfortaa(
+                          fontSize: 18,
+                          color: const Color(0xFFD4AF37),
+                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.bold,
                         ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        FadeInSlideUp(
-                          delay: const Duration(milliseconds: 500),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.dubaiGold.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.dubaiGold.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  LucideIcons.zap,
-                                  size: 14,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'AI Curated Daily',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                      ),
+                      
+                      const SizedBox(height: 12),
+                      
+                      // Title with single clean animation
+                      Text(
+                        placeholderEvent.title,
+                        style: GoogleFonts.inter(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.3,
+                          letterSpacing: 0.3,
                         ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Event content
-                    Expanded(
-                      child: Row(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ).animate().fadeIn(duration: 600.ms),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Date and location - clean icons
+                      Row(
                         children: [
-                          // Premium event image with enhanced styling
-                          FadeInSlideUp(
-                            delay: const Duration(milliseconds: 700),
-                            child: MouseRegion(
-                              onEnter: (_) => setState(() => _hoveredEventId = placeholderEvent.id),
-                              onExit: (_) => setState(() => _hoveredEventId = null),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                transform: Matrix4.identity()
-                                  ..scale(_hoveredEventId == placeholderEvent.id ? 1.05 : 1.0),
-                                width: 160, // Larger premium size
-                                height: 160,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24), // Increased radius
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.white.withOpacity(0.3),
-                                      Colors.white.withOpacity(0.1),
-                                      const Color(0xFFD4AF37).withOpacity(0.2), // Gold tint
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.6), // Enhanced border
-                                    width: 3,
-                                  ),
-                                  boxShadow: [
-                                    // Multiple shadow layers for depth
-                                    BoxShadow(
-                                      color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 8),
-                                      spreadRadius: 2,
-                                    ),
-                                    BoxShadow(
-                                      color: AppColors.dubaiTeal.withOpacity(0.2),
-                                      blurRadius: 15,
-                                      offset: const Offset(0, 4),
-                                      spreadRadius: 1,
-                                    ),
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.15),
-                                      blurRadius: 25,
-                                      offset: const Offset(0, 12),
-                                      spreadRadius: 3,
-                                    ),
-                                  ],
-                                ),
-                                child: Stack(
-                                  children: [
-                                    // Background icon with glow effect
-                                    Center(
-                                      child: Icon(
-                                        LucideIcons.sparkles,
-                                        color: Colors.white.withOpacity(0.9),
-                                        size: 50,
-                                      ).animate(onPlay: (controller) => controller.repeat())
-                                          .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6))
-                                          .scale(
-                                            begin: const Offset(0.9, 0.9),
-                                            end: const Offset(1.1, 1.1),
-                                            duration: 2000.ms,
-                                            curve: Curves.easeInOut,
-                                          ),
-                                    ),
-                                    // Overlay gradient for premium look
-                                    Positioned.fill(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(21),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.transparent,
-                                              const Color(0xFFD4AF37).withOpacity(0.1),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          Icon(
+                            LucideIcons.calendar,
+                            size: 14,
+                            color: Colors.white.withOpacity(0.8),
                           ),
-                          
-                          const SizedBox(width: 20),
-                          
-                          // Event details
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                FadeInSlideUp(
-                                  delay: const Duration(milliseconds: 900),
-                                  child: Text(
-                                    placeholderEvent.title,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 22, // Larger premium title
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      height: 1.3, // Better line height
-                                      letterSpacing: 0.3,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black.withOpacity(0.4),
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 3,
-                                        ),
-                                      ],
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ).animate()
-                                      .fadeIn(duration: 600.ms, delay: 900.ms)
-                                      .slideX(begin: 0.3, end: 0.0, duration: 800.ms, curve: Curves.easeOutCubic),
-                                ),
-                                
-                                const SizedBox(height: 8),
-                                
-                                // Date and location
-                                FadeInSlideUp(
-                                  delay: const Duration(milliseconds: 1100),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        LucideIcons.calendar,
-                                        size: 14,
-                                        color: Colors.white.withOpacity(0.8),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        _formatEventTime(placeholderEvent.startDate),
-                                        style: GoogleFonts.inter(
-                                          fontSize: 13,
-                                          color: Colors.white.withOpacity(0.9),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                
-                                const SizedBox(height: 4),
-                                
-                                FadeInSlideUp(
-                                  delay: const Duration(milliseconds: 1200),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        LucideIcons.mapPin,
-                                        size: 14,
-                                        color: Colors.white.withOpacity(0.8),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          placeholderEvent.venue.area,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 13,
-                                            color: Colors.white.withOpacity(0.9),
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                
-                                const SizedBox(height: 12),
-                                
-                                // Algorithm insight
-                                FadeInSlideUp(
-                                  delay: const Duration(milliseconds: 1300),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.2),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Perfect for families like yours',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11,
-                                        color: Colors.white.withOpacity(0.9),
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                
-                                const Spacer(),
-                                
-                                // CTA Button
-                                FadeInSlideUp(
-                                  delay: const Duration(milliseconds: 1400),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      context.go('/event/${placeholderEvent.id}');
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: AppColors.dubaiTeal,
-                                      elevation: 8,
-                                      shadowColor: Colors.black.withOpacity(0.2),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Discover Why',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Icon(
-                                          LucideIcons.arrowRight,
-                                          size: 16,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(width: 6),
+                          Text(
+                            _formatEventTime(placeholderEvent.startDate),
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: Colors.white.withOpacity(0.9),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      
+                      const SizedBox(height: 8),
+                      
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.mapPin,
+                            size: 14,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              placeholderEvent.venue.area,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // AI insight badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              LucideIcons.zap,
+                              size: 12,
+                              color: const Color(0xFFD4AF37),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Perfect for families like yours',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.9),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // CTA Button - clean design
+                      ElevatedButton(
+                        onPressed: () {
+                          context.go('/event/${placeholderEvent.id}');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.dubaiTeal,
+                          elevation: 8,
+                          shadowColor: Colors.black.withOpacity(0.2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Discover Why',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              LucideIcons.arrowRight,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
-          ), // End Stack children
-        ), // End ClipRRect
-      ), // End AnimatedContainer  
-    ), // End FadeInSlideUp
-    ); // End Container
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildAnimatedMyDscvrChoiceLoading() {
@@ -1064,1370 +814,6 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  Widget _buildFloatingParticle(int index) {
-    final delays = [0, 500, 1000, 1500, 2000, 2500];
-    final sizes = [4.0, 6.0, 3.0, 5.0, 4.0, 7.0];
-    final positions = [
-      const Offset(50, 100),
-      const Offset(300, 80),
-      const Offset(150, 200),
-      const Offset(280, 180),
-      const Offset(80, 250),
-      const Offset(320, 220),
-    ];
-
-    return Positioned(
-      left: positions[index].dx,
-      top: positions[index].dy,
-      child: Container(
-        width: sizes[index],
-        height: sizes[index],
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.6),
-        ),
-      ).animate(onPlay: (controller) => controller.repeat())
-          .moveY(
-            begin: 0,
-            end: -20,
-            duration: Duration(milliseconds: 3000 + delays[index]),
-            curve: Curves.easeInOut,
-          )
-          .then()
-          .moveY(
-            begin: -20,
-            end: 0,
-            duration: Duration(milliseconds: 3000 + delays[index]),
-            curve: Curves.easeInOut,
-          ),
-    );
-  }
-
-  Widget _buildGradientMeshBackground() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: GradientMeshPainter(),
-      ),
-    );
-  }
-
-  /// Build conditional MyDscvr's Choice based on test mode
-  Widget _buildConditionalMyDscvrChoice() {
-    switch (_testMode) {
-      case 'testing':
-        return _buildTestingWidget();
-      case 'simple':
-        return _buildSimpleMyDscvrChoice();
-      case 'full':
-        return _buildAnimatedMyDscvrChoice();
-      case 'gradual':
-        return _buildGradualTestWidget();
-      case 'combined':
-        return _buildCombinedTestWidget();
-      case 'simplified_full':
-        return _buildSimplifiedFullWidget();
-      default:
-        return _buildTestingWidget();
-    }
-  }
-
-  /// Build the minimal MyDscvr's Choice for testing
-  Widget _buildTestingWidget() {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'MyDscvr\'s Choice - Testing Widget (Mode: $_testMode${_testMode == 'gradual' ? ' - Step $_gradualStep' : ''})',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text('Events loaded: ${_upcomingEvents.length}'),
-          Text('Loading: $_isLoading'),
-          Text('Error: ${_errorMessage ?? 'None'}'),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Loading events...');
-                  _loadEventsForTesting();
-                },
-                child: const Text('Load Events'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing API call...');
-                  _testApiCallSafely();
-                },
-                child: const Text('Test API'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing state update...');
-                  _testStateUpdate();
-                },
-                child: const Text('Test State'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing full widget...');
-                  _testFullWidget();
-                },
-                child: const Text('Test Widget'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing animations...');
-                  _testAnimations();
-                },
-                child: const Text('Test Anim'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing hover state...');
-                  _testHoverState();
-                },
-                child: const Text('Test Hover'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Switching to simple widget...');
-                  _switchToSimpleWidget();
-                },
-                child: const Text('Simple'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Switching to gradual test...');
-                  _switchToGradualTest();
-                },
-                child: const Text('Gradual'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Next step...');
-                  _nextGradualStep();
-                },
-                child: const Text('Next Step'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing combined features...');
-                  _testCombinedFeatures();
-                },
-                child: const Text('Combined'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Testing simplified full...');
-                  _testSimplifiedFull();
-                },
-                child: const Text('Simplified Full'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  print('🧪 Switching to full widget...');
-                  _switchToFullWidget();
-                },
-                child: const Text('Full (DANGER)'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  
-  /// Load events for testing
-  void _loadEventsForTesting() async {
-    print('🧪 Loading events for testing...');
-    
-    try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-      
-      final response = await _eventsService.getEvents();
-      if (response.isSuccess) {
-        final events = response.data ?? [];
-        setState(() {
-          _upcomingEvents = events.take(3).toList();
-          _isLoading = false;
-        });
-        print('✅ Loaded ${_upcomingEvents.length} events for testing');
-      } else {
-        setState(() {
-          _errorMessage = response.error;
-          _isLoading = false;
-        });
-        print('❌ Failed to load events: ${response.error}');
-      }
-    } catch (e, stackTrace) {
-      setState(() {
-        _errorMessage = 'Error: $e';
-        _isLoading = false;
-      });
-      print('❌ Event loading failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-
-  /// Test API call safely to identify the loop source
-  void _testApiCallSafely() async {
-    print('🧪 Starting safe API test...');
-    
-    try {
-      // Test 1: Basic service instantiation
-      print('🧪 Test 1: Creating EventsService...');
-      final testService = EventsService();
-      print('✅ Test 1: EventsService created successfully');
-      
-      // Test 2: Simple API call without state changes
-      print('🧪 Test 2: Testing API call...');
-      final response = await testService.getEvents();
-      print('✅ Test 2: API call completed - Success: ${response.isSuccess}');
-      
-      if (response.isSuccess) {
-        final events = response.data ?? [];
-        print('✅ Test 2: Found ${events.length} events');
-        
-        // Test 3: Try parsing first event
-        if (events.isNotEmpty) {
-          print('🧪 Test 3: Testing event parsing...');
-          final firstEvent = events.first;
-          print('✅ Test 3: First event - ID: ${firstEvent.id}, Title: ${firstEvent.title}');
-        }
-      } else {
-        print('❌ Test 2: API call failed - ${response.error}');
-      }
-      
-    } catch (e, stackTrace) {
-      print('❌ API Test Failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Test state update to see if setState is causing the loop
-  void _testStateUpdate() async {
-    print('🧪 Testing state update...');
-    
-    try {
-      setState(() {
-        _isLoading = !_isLoading;
-      });
-      print('✅ State update successful');
-    } catch (e, stackTrace) {
-      print('❌ State update failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Test full widget rendering with real data
-  void _testFullWidget() async {
-    print('🧪 Testing full widget rendering...');
-    
-    try {
-      // Get data first
-      final response = await _eventsService.getEvents();
-      if (response.isSuccess) {
-        final events = response.data ?? [];
-        print('✅ Got ${events.length} events for widget test');
-        
-        setState(() {
-          _upcomingEvents = events.take(3).toList();
-          _isLoading = false;
-          _errorMessage = null;
-        });
-        
-        print('✅ Widget test - state updated successfully');
-      } else {
-        print('❌ Widget test failed: ${response.error}');
-      }
-    } catch (e, stackTrace) {
-      print('❌ Widget test failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Test animations to see if they cause loops
-  void _testAnimations() {
-    print('🧪 Testing animations...');
-    
-    try {
-      // Test FadeInSlideUp animation alone
-      print('🧪 Testing FadeInSlideUp...');
-      
-      // Test AnimatedContainer
-      print('🧪 Testing AnimatedContainer...');
-      
-      // Test multiple animations together
-      print('🧪 Testing combined animations...');
-      
-      print('✅ Animation tests completed - check console for loops');
-    } catch (e, stackTrace) {
-      print('❌ Animation test failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Test hover state management
-  void _testHoverState() {
-    print('🧪 Testing hover state...');
-    
-    try {
-      // Simulate hover events
-      setState(() {
-        _hoveredEventId = 'test-id-1';
-      });
-      
-      Future.delayed(const Duration(milliseconds: 100), () {
-        setState(() {
-          _hoveredEventId = 'test-id-2';
-        });
-      });
-      
-      Future.delayed(const Duration(milliseconds: 200), () {
-        setState(() {
-          _hoveredEventId = null;
-        });
-      });
-      
-      print('✅ Hover state test completed');
-    } catch (e, stackTrace) {
-      print('❌ Hover state test failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Switch to simple widget mode
-  void _switchToSimpleWidget() async {
-    print('🧪 Switching to simple widget...');
-    
-    try {
-      // Ensure we have data
-      if (_upcomingEvents.isEmpty) {
-        final response = await _eventsService.getEvents();
-        if (response.isSuccess) {
-          final events = response.data ?? [];
-          _upcomingEvents = events.take(1).toList();
-        }
-      }
-      
-      setState(() {
-        _testMode = 'simple';
-        _isLoading = false;
-      });
-      
-      print('✅ Switched to simple widget mode');
-    } catch (e, stackTrace) {
-      print('❌ Switch to simple failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Test simplified full widget
-  void _testSimplifiedFull() async {
-    print('🧪 Testing simplified full widget...');
-    
-    try {
-      // Ensure we have data
-      if (_upcomingEvents.isEmpty) {
-        final response = await _eventsService.getEvents();
-        if (response.isSuccess) {
-          final events = response.data ?? [];
-          _upcomingEvents = events.take(1).toList();
-        }
-      }
-      
-      setState(() {
-        _testMode = 'simplified_full';
-        _isLoading = false;
-      });
-      
-      print('✅ Switched to simplified full widget test');
-    } catch (e, stackTrace) {
-      print('❌ Simplified full widget test failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-
-  /// Test combined features (all gradual steps together)
-  void _testCombinedFeatures() async {
-    print('🧪 Testing combined features (all gradual steps together)...');
-    
-    try {
-      // Ensure we have data
-      if (_upcomingEvents.isEmpty) {
-        final response = await _eventsService.getEvents();
-        if (response.isSuccess) {
-          final events = response.data ?? [];
-          _upcomingEvents = events.take(1).toList();
-        }
-      }
-      
-      setState(() {
-        _testMode = 'combined';
-        _isLoading = false;
-      });
-      
-      print('✅ Switched to combined features test');
-    } catch (e, stackTrace) {
-      print('❌ Combined features test failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-
-  /// Switch to full widget mode (potential loop trigger)
-  void _switchToFullWidget() async {
-    print('🧪 Switching to FULL widget - WATCH FOR LOOPS!');
-    
-    try {
-      // Ensure we have data
-      if (_upcomingEvents.isEmpty) {
-        final response = await _eventsService.getEvents();
-        if (response.isSuccess) {
-          final events = response.data ?? [];
-          _upcomingEvents = events.take(1).toList();
-        }
-      }
-      
-      setState(() {
-        _testMode = 'full';
-        _isLoading = false;
-      });
-      
-      print('✅ Switched to FULL widget mode - monitor for loops!');
-    } catch (e, stackTrace) {
-      print('❌ Switch to full failed: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Simple version of MyDscvr's Choice without complex animations
-  Widget _buildSimpleMyDscvrChoice() {
-    if (_upcomingEvents.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Text('No events available for Simple MyDscvr\'s Choice'),
-      );
-    }
-    
-    final event = _upcomingEvents.first;
-    
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          // Simple image
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.white.withOpacity(0.2),
-            ),
-            child: const Icon(Icons.event, color: Colors.white, size: 40),
-          ),
-          const SizedBox(width: 16),
-          // Event details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'MyDscvr\'s Choice',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  event.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  event.venue.area,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  /// Switch to gradual testing mode
-  void _switchToGradualTest() async {
-    print('🧪 Switching to gradual test mode...');
-    
-    try {
-      // Ensure we have data first
-      if (_upcomingEvents.isEmpty) {
-        print('🧪 Loading events for gradual test...');
-        final response = await _eventsService.getEvents();
-        if (response.isSuccess) {
-          final events = response.data ?? [];
-          setState(() {
-            _upcomingEvents = events.take(1).toList();
-            _isLoading = false;
-          });
-          print('✅ Loaded ${_upcomingEvents.length} events for gradual test');
-        } else {
-          print('❌ Failed to load events: ${response.error}');
-          return;
-        }
-      }
-      
-      setState(() {
-        _testMode = 'gradual';
-        _gradualStep = 0;
-      });
-      print('✅ Switched to gradual testing mode - Step 0');
-    } catch (e, stackTrace) {
-      print('❌ Failed to switch to gradual test: $e');
-      print('❌ Stack trace: $stackTrace');
-    }
-  }
-  
-  /// Advance to next gradual step
-  void _nextGradualStep() {
-    setState(() {
-      _gradualStep++;
-    });
-    print('✅ Advanced to gradual step $_gradualStep');
-  }
-  
-  /// Build gradual test widget - incrementally add complex features
-  Widget _buildGradualTestWidget() {
-    if (_upcomingEvents.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(16),
-        child: Text('Gradual Test - Step $_gradualStep (No events)'),
-      );
-    }
-    
-    final event = _upcomingEvents.first;
-    
-    switch (_gradualStep) {
-      case 0:
-        return _buildStep0_BasicContainer(event);
-      case 1:
-        return _buildStep1_AddGradient(event);
-      case 2:
-        return _buildStep2_AddSingleShadow(event);
-      case 3:
-        return _buildStep3_AddMultipleShadows(event);
-      case 4:
-        return _buildStep4_AddBasicAnimation(event);
-      case 5:
-        return _buildStep5_AddComplexAnimations(event);
-      case 6:
-        return _buildStep6_AddNetworkImage(event);
-      case 7:
-        return _buildStep7_AddCustomPainter(event);
-      default:
-        return _buildStep8_FullComplexity(event);
-    }
-  }
-  
-  Widget _buildStep0_BasicContainer(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Step 0: Basic Container - ${event.title}', 
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('✅ This should work fine', 
-                style: TextStyle(color: Colors.white.withOpacity(0.8))),
-            ],
-          ),
-        ),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep1_AddGradient(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Step 1: + Gradient - ${event.title}', 
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('✅ Gradient should work fine', 
-                style: TextStyle(color: Colors.white.withOpacity(0.8))),
-            ],
-          ),
-        ),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep2_AddSingleShadow(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Step 2: + Single Shadow - ${event.title}', 
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('✅ Single shadow should work', 
-                style: TextStyle(color: Colors.white.withOpacity(0.8))),
-            ],
-          ),
-        ),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep3_AddMultipleShadows(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF17A2B8).withOpacity(0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-              BoxShadow(
-                color: const Color(0xFF6C5CE7).withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 40,
-                offset: const Offset(0, 25),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Step 3: + Multiple Shadows - ${event.title}', 
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('⚠️ CRITICAL TEST: Multiple shadows may cause loops!', 
-                style: TextStyle(color: Colors.yellow.shade200, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep4_AddBasicAnimation(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF17A2B8).withOpacity(0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Step 4: + Basic Animation - ${event.title}', 
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('✅ Basic animation should work', 
-                style: TextStyle(color: Colors.white.withOpacity(0.8))),
-            ],
-          ),
-        ).animate().fadeIn(duration: 600.ms),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep5_AddComplexAnimations(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF17A2B8).withOpacity(0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Step 5: + Complex Animations - ${event.title}', 
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('⚠️ CRITICAL: Chained animations may cause loops!', 
-                style: TextStyle(color: Colors.yellow.shade200, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ).animate()
-          .fadeIn(duration: 600.ms, delay: 200.ms)
-          .slideX(begin: 0.3, end: 0.0, duration: 800.ms),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep6_AddNetworkImage(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          height: 200,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF17A2B8).withOpacity(0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  margin: const EdgeInsets.all(16),
-                  color: Colors.white.withOpacity(0.2),
-                  child: event.imageUrl.isNotEmpty 
-                    ? Image.network(event.imageUrl, fit: BoxFit.cover, 
-                        errorBuilder: (_, __, ___) => const Icon(Icons.error))
-                    : const Icon(Icons.event, color: Colors.white),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Step 6: + Network Image - ${event.title}', 
-                      style: const TextStyle(color: Colors.white, fontSize: 16)),
-                    const SizedBox(height: 8),
-                    Text('⚠️ Network image loading test', 
-                      style: TextStyle(color: Colors.white.withOpacity(0.8))),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ).animate()
-          .fadeIn(duration: 600.ms, delay: 200.ms)
-          .slideX(begin: 0.3, end: 0.0, duration: 800.ms),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep7_AddCustomPainter(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          height: 200,
-          child: Stack(
-            children: [
-              // Custom painter background
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: GradientMeshPainter(),
-                ),
-              ),
-              // Content
-              Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Step 7: + Custom Painter - ${event.title}', 
-                        style: const TextStyle(color: Colors.white, fontSize: 16)),
-                      const SizedBox(height: 8),
-                      Text('🚨 DANGER: Custom painter may cause paint cycles!', 
-                        style: TextStyle(color: Colors.red.shade200, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ).animate()
-          .fadeIn(duration: 600.ms, delay: 200.ms),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  Widget _buildStep8_FullComplexity(Event event) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Text('Step 8: Full Complexity - Use "Full (DANGER)" button for this!', 
-            style: TextStyle(color: Colors.white, fontSize: 16)),
-        ),
-        _buildGradualControls(),
-      ],
-    );
-  }
-  
-  /// Build gradual test navigation controls
-  Widget _buildGradualControls() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Text('Gradual Test Controls - Current Step: $_gradualStep'),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: _gradualStep > 0 ? () {
-                  setState(() {
-                    _gradualStep--;
-                  });
-                  print('⬅️ Previous step: $_gradualStep');
-                } : null,
-                child: const Text('Previous'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _gradualStep++;
-                  });
-                  print('➡️ Next step: $_gradualStep');
-                },
-                child: const Text('Next Step'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _testMode = 'testing';
-                  });
-                  print('🔙 Back to testing mode');
-                },
-                child: const Text('Back'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text('Watch console for loops when advancing steps!', 
-            style: TextStyle(
-              fontSize: 12, 
-              color: Colors.orange.shade700,
-              fontWeight: FontWeight.w500,
-            )),
-        ],
-      ),
-    );
-  }
-  
-  /// Build combined test widget - all gradual features together but simplified
-  Widget _buildCombinedTestWidget() {
-    if (_upcomingEvents.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(16),
-        child: const Text('Combined Test - No events loaded'),
-      );
-    }
-    
-    final event = _upcomingEvents.first;
-    
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(24),
-          height: 300,
-          child: Stack(
-            children: [
-              // Custom painter background (Step 7)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: GradientMeshPainter(),
-                ),
-              ),
-              // Main container with all features
-              Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    // Multiple shadows (Step 3)
-                    BoxShadow(
-                      color: const Color(0xFF17A2B8).withOpacity(0.4),
-                      blurRadius: 30,
-                      offset: const Offset(0, 15),
-                    ),
-                    BoxShadow(
-                      color: const Color(0xFF6C5CE7).withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    // Network image (Step 6)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        margin: const EdgeInsets.all(16),
-                        color: Colors.white.withOpacity(0.2),
-                        child: event.imageUrl.isNotEmpty 
-                          ? Image.network(event.imageUrl, fit: BoxFit.cover, 
-                              errorBuilder: (_, __, ___) => const Icon(Icons.error))
-                          : const Icon(Icons.event, color: Colors.white, size: 40),
-                      ),
-                    ),
-                    // Event details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Combined Test: All Features',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            event.title,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '✅ All gradual features combined',
-                            style: TextStyle(
-                              color: Colors.green.shade200,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ).animate() // Complex animations (Step 5)
-          .fadeIn(duration: 600.ms, delay: 200.ms)
-          .slideX(begin: 0.3, end: 0.0, duration: 800.ms),
-        
-        // Controls
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.withOpacity(0.3)),
-          ),
-          child: Column(
-            children: [
-              const Text(
-                'Combined Features Test',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text('This combines ALL gradual steps in one widget'),
-              const Text('If this works but Full mode loops, the issue is in widget structure/complexity'),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _testMode = 'testing';
-                      });
-                    },
-                    child: const Text('Back to Testing'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      print('🧪 Switching to FULL widget from combined test...');
-                      _switchToFullWidget();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade600,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Try Full (DANGER)'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-  
-  /// Build simplified full widget - same visual appeal, reduced complexity
-  Widget _buildSimplifiedFullWidget() {
-    if (_upcomingEvents.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(16),
-        child: const Text('Simplified Full - No events loaded'),
-      );
-    }
-    
-    final event = _upcomingEvents.first;
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      child: FadeInSlideUp(
-        delay: const Duration(milliseconds: 200),
-        child: Container(
-          height: 380,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF17A2B8), // Teal
-                Color(0xFF6C5CE7), // Purple
-                Color(0xFF17A2B8), // Back to teal
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.dubaiTeal.withOpacity(0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-                spreadRadius: 5,
-              ),
-              BoxShadow(
-                color: const Color(0xFF6C5CE7).withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Image section - simplified
-              Container(
-                width: 160,
-                height: 320,
-                margin: const EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  color: Colors.white.withOpacity(0.1),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(21),
-                  child: event.imageUrl.isNotEmpty
-                    ? Image.network(
-                        event.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: Colors.white.withOpacity(0.2),
-                          child: const Icon(Icons.event, color: Colors.white, size: 60),
-                        ),
-                      )
-                    : Container(
-                        color: Colors.white.withOpacity(0.2),
-                        child: const Icon(Icons.event, color: Colors.white, size: 60),
-                      ),
-                ),
-              ),
-              
-              // Event details - simplified
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Header
-                      Text(
-                        'MyDscvr\'s Choice',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.9),
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      // Title - simplified animation
-                      Text(
-                        event.title,
-                        style: GoogleFonts.inter(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.3,
-                          letterSpacing: 0.3,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ).animate().fadeIn(duration: 600.ms),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Date and location - simplified
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.calendar,
-                            size: 14,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatEventTime(event.startDate),
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.mapPin,
-                            size: 14,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              event.venue.area,
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // CTA Button - simplified
-                      ElevatedButton(
-                        onPressed: () {
-                          context.go('/event/${event.id}');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.dubaiTeal,
-                          elevation: 8,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Discover Why',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              LucideIcons.arrowRight,
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   String _formatEventTime(DateTime date) {
     final now = DateTime.now();
     final difference = date.difference(now).inDays;
@@ -2438,35 +824,4 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     if (difference <= 14) return 'Next week';
     return 'Later this month';
   }
-}
-
-class GradientMeshPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill;
-
-    // Create mesh gradient effect
-    for (int i = 0; i < 5; i++) {
-      final opacity = 0.1 - (i * 0.02);
-      paint.color = Colors.white.withOpacity(opacity);
-      
-      final path = Path();
-      path.moveTo(0, size.height * (0.2 + i * 0.15));
-      path.quadraticBezierTo(
-        size.width * 0.5,
-        size.height * (0.1 + i * 0.1),
-        size.width,
-        size.height * (0.3 + i * 0.1),
-      );
-      path.lineTo(size.width, size.height);
-      path.lineTo(0, size.height);
-      path.close();
-      
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
