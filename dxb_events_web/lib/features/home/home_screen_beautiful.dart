@@ -1122,6 +1122,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         return _buildAnimatedMyDscvrChoice();
       case 'gradual':
         return _buildGradualTestWidget();
+      case 'combined':
+        return _buildCombinedTestWidget();
       default:
         return _buildTestingWidget();
     }
@@ -1232,6 +1234,14 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   _nextGradualStep();
                 },
                 child: const Text('Next Step'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  print('🧪 Testing combined features...');
+                  _testCombinedFeatures();
+                },
+                child: const Text('Combined'),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -1436,6 +1446,32 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     }
   }
   
+  /// Test combined features (all gradual steps together)
+  void _testCombinedFeatures() async {
+    print('🧪 Testing combined features (all gradual steps together)...');
+    
+    try {
+      // Ensure we have data
+      if (_upcomingEvents.isEmpty) {
+        final response = await _eventsService.getEvents();
+        if (response.isSuccess) {
+          final events = response.data ?? [];
+          _upcomingEvents = events.take(1).toList();
+        }
+      }
+      
+      setState(() {
+        _testMode = 'combined';
+        _isLoading = false;
+      });
+      
+      print('✅ Switched to combined features test');
+    } catch (e, stackTrace) {
+      print('❌ Combined features test failed: $e');
+      print('❌ Stack trace: $stackTrace');
+    }
+  }
+
   /// Switch to full widget mode (potential loop trigger)
   void _switchToFullWidget() async {
     print('🧪 Switching to FULL widget - WATCH FOR LOOPS!');
@@ -1995,6 +2031,162 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             )),
         ],
       ),
+    );
+  }
+  
+  /// Build combined test widget - all gradual features together but simplified
+  Widget _buildCombinedTestWidget() {
+    if (_upcomingEvents.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
+        child: const Text('Combined Test - No events loaded'),
+      );
+    }
+    
+    final event = _upcomingEvents.first;
+    
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          height: 300,
+          child: Stack(
+            children: [
+              // Custom painter background (Step 7)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: GradientMeshPainter(),
+                ),
+              ),
+              // Main container with all features
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    // Multiple shadows (Step 3)
+                    BoxShadow(
+                      color: const Color(0xFF17A2B8).withOpacity(0.4),
+                      blurRadius: 30,
+                      offset: const Offset(0, 15),
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFF6C5CE7).withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Network image (Step 6)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        margin: const EdgeInsets.all(16),
+                        color: Colors.white.withOpacity(0.2),
+                        child: event.imageUrl.isNotEmpty 
+                          ? Image.network(event.imageUrl, fit: BoxFit.cover, 
+                              errorBuilder: (_, __, ___) => const Icon(Icons.error))
+                          : const Icon(Icons.event, color: Colors.white, size: 40),
+                      ),
+                    ),
+                    // Event details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Combined Test: All Features',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            event.title,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '✅ All gradual features combined',
+                            style: TextStyle(
+                              color: Colors.green.shade200,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ).animate() // Complex animations (Step 5)
+          .fadeIn(duration: 600.ms, delay: 200.ms)
+          .slideX(begin: 0.3, end: 0.0, duration: 800.ms),
+        
+        // Controls
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.orange.withOpacity(0.3)),
+          ),
+          child: Column(
+            children: [
+              const Text(
+                'Combined Features Test',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('This combines ALL gradual steps in one widget'),
+              const Text('If this works but Full mode loops, the issue is in widget structure/complexity'),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _testMode = 'testing';
+                      });
+                    },
+                    child: const Text('Back to Testing'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      print('🧪 Switching to FULL widget from combined test...');
+                      _switchToFullWidget();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade600,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Try Full (DANGER)'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
