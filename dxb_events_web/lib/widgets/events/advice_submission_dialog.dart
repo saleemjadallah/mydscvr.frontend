@@ -67,11 +67,11 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
           AdviceAuthPrompt(
             onSignInPressed: () {
               Navigator.of(context).pop(); // Close dialog first
-              context.push('/login'); // Navigate to login
+              context.go('/login'); // Navigate to login
             },
             onSignUpPressed: () {
               Navigator.of(context).pop(); // Close dialog first
-              context.push('/register'); // Navigate to register
+              context.go('/register'); // Navigate to register
             },
           ),
         ],

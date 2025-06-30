@@ -236,7 +236,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       children: [
         // Login Button
         TextButton(
-          onPressed: () => context.push('/login'),
+          onPressed: () => context.go('/login'),
           style: TextButton.styleFrom(
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -252,7 +252,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         const SizedBox(width: 8),
         // Sign Up Button
         ElevatedButton(
-          onPressed: () => context.push('/register'),
+          onPressed: () => context.go('/register'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: AppColors.dubaiTeal,
