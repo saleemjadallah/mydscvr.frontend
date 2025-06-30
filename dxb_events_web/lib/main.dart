@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
-import 'features/home/home_screen_minimal.dart';
+import 'features/home/home_screen_simple.dart';
 
-// Ultra-minimal router for debugging type casting
+// Beautiful router - safe dependencies only
 final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const MinimalHomeScreen(),
+      builder: (context, state) => const SimpleHomeScreen(),
     ),
   ],
 );
@@ -22,7 +22,7 @@ void main() {
   runApp(
     ProviderScope(
       child: MaterialApp.router(
-        title: 'Debug Mode - Type Casting Fix',
+        title: 'MyDscvr - Discover Dubai Events',
         debugShowCheckedModeBanner: false,
         routerConfig: _router,
         theme: ThemeData(
