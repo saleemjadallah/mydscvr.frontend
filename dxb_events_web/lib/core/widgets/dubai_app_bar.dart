@@ -138,7 +138,6 @@ class DubaiAppBar extends ConsumerWidget implements PreferredSizeWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               color: Colors.white.withOpacity(0.7),
-              fontFamily: 'monospace',
             ),
             textAlign: centerTitle ? TextAlign.center : TextAlign.left,
           ).animate().slideY(
