@@ -166,7 +166,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> {
                       ),
                     ),
                   ).animate()
-                    .scale(begin: 0.8, duration: 400.ms, delay: 400.ms)
+                    .scale(duration: 400.ms, delay: 400.ms)
                     .then()
                     .shimmer(duration: 1200.ms, color: Colors.white24),
                 ],
@@ -417,7 +417,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> {
       ),
     ).animate()
       .fadeIn(duration: 400.ms, delay: Duration(milliseconds: index * 100))
-      .scale(begin: 0.8, duration: 400.ms, delay: Duration(milliseconds: index * 100));
+      .scale(duration: 400.ms, delay: Duration(milliseconds: index * 100));
   }
 }
 
