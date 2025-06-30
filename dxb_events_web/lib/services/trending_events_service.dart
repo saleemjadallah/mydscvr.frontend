@@ -198,14 +198,14 @@ class TrendingEventsService {
     // Vary range based on trending score for more realistic distribution
     int baseMin, baseMax;
     if (trendingScore >= 0.8) {
-      // High trending: 750-1200 interested
-      baseMin = 75; baseMax = 120;
+      // High trending: 700-900 interested
+      baseMin = 70; baseMax = 90;
     } else if (trendingScore >= 0.6) {
-      // Medium trending: 500-850 interested  
-      baseMin = 50; baseMax = 85;
+      // Medium trending: 600-800 interested  
+      baseMin = 60; baseMax = 80;
     } else {
-      // Lower trending: 300-650 interested
-      baseMin = 30; baseMax = 65;
+      // Lower trending: 500-700 interested
+      baseMin = 50; baseMax = 70;
     }
     
     final range = baseMax - baseMin;

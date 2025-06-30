@@ -184,11 +184,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ],
       ),
       actions: [
-        // Auth Button/Profile
+        // Auth Buttons/Profile
         if (authState.status == AuthStatus.authenticated && authState.user != null)
           _buildUserProfile(authState.user!)
         else
-          _buildSignUpButton(),
+          _buildAuthButtons(),
         const NotificationBell(
           color: Colors.white,
           size: 22,
@@ -229,26 +229,48 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  /// Build sign up button when not authenticated
-  Widget _buildSignUpButton() {
-    return ElevatedButton(
-      onPressed: () => context.push('/login'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.dubaiTeal,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  /// Build both login and sign up buttons when not authenticated
+  Widget _buildAuthButtons() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Login Button
+        TextButton(
+          onPressed: () => context.push('/login'),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          child: Text(
+            'Login',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
-        elevation: 2,
-      ),
-      child: Text(
-        'Sign Up',
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+        const SizedBox(width: 8),
+        // Sign Up Button
+        ElevatedButton(
+          onPressed: () => context.push('/register'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: AppColors.dubaiTeal,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            elevation: 2,
+          ),
+          child: Text(
+            'Sign Up',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
