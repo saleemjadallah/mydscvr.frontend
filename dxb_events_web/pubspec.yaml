@@ -49,6 +49,7 @@ dependencies:
   # Additional required dependencies
   glassmorphism: ^3.0.0
   url_launcher: ^6.2.4
+  google_sign_in: ^6.2.0
   
   # Web-safe alternatives needed
   # TODO: Replace share_plus with web-safe sharing
