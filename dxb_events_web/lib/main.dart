@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
-import 'features/home/home_screen_simple.dart';
+import 'features/home/home_screen_basic.dart';
 
-// Beautiful router - safe dependencies only
+// Basic router - testing without animations
 final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const SimpleHomeScreen(),
+      builder: (context, state) => const BasicHomeScreen(),
     ),
   ],
 );

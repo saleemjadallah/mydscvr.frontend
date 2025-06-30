@@ -103,7 +103,7 @@ class SimpleHomeScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                  ).animate().scale(begin: const Offset(0.8, 0.8), duration: 400.ms, delay: 400.ms),
+                  ).animate().scale(duration: 400.ms, delay: 400.ms),
                 ],
               ),
             ),
@@ -200,6 +200,6 @@ class SimpleHomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-    ).animate().scale(begin: const Offset(0.8, 0.8), duration: 400.ms);
+    ).animate().scale(duration: 400.ms);
   }
 }
