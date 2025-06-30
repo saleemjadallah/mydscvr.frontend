@@ -1750,123 +1750,176 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
   
   Widget _buildStep4_AddBasicAnimation(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF17A2B8).withOpacity(0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF17A2B8).withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Text('Step 4: + Basic Animation - ${event.title}', 
-        style: const TextStyle(color: Colors.white)),
-    ).animate().fadeIn(duration: 600.ms);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Step 4: + Basic Animation - ${event.title}', 
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('✅ Basic animation should work', 
+                style: TextStyle(color: Colors.white.withOpacity(0.8))),
+            ],
+          ),
+        ).animate().fadeIn(duration: 600.ms),
+        _buildGradualControls(),
+      ],
+    );
   }
   
   Widget _buildStep5_AddComplexAnimations(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF17A2B8).withOpacity(0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF17A2B8).withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Text('Step 5: + Complex Animations - ${event.title}', 
-        style: const TextStyle(color: Colors.white)),
-    ).animate()
-      .fadeIn(duration: 600.ms, delay: 200.ms)
-      .slideX(begin: 0.3, end: 0.0, duration: 800.ms);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Step 5: + Complex Animations - ${event.title}', 
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('⚠️ CRITICAL: Chained animations may cause loops!', 
+                style: TextStyle(color: Colors.yellow.shade200, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ).animate()
+          .fadeIn(duration: 600.ms, delay: 200.ms)
+          .slideX(begin: 0.3, end: 0.0, duration: 800.ms),
+        _buildGradualControls(),
+      ],
+    );
   }
   
   Widget _buildStep6_AddNetworkImage(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      height: 200,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF17A2B8).withOpacity(0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 100,
-              height: 100,
-              margin: const EdgeInsets.all(16),
-              color: Colors.white.withOpacity(0.2),
-              child: event.imageUrl.isNotEmpty 
-                ? Image.network(event.imageUrl, fit: BoxFit.cover, 
-                    errorBuilder: (_, __, ___) => const Icon(Icons.error))
-                : const Icon(Icons.event, color: Colors.white),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          height: 200,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
             ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF17A2B8).withOpacity(0.4),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
           ),
-          Expanded(
-            child: Text('Step 6: + Network Image - ${event.title}', 
-              style: const TextStyle(color: Colors.white)),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  margin: const EdgeInsets.all(16),
+                  color: Colors.white.withOpacity(0.2),
+                  child: event.imageUrl.isNotEmpty 
+                    ? Image.network(event.imageUrl, fit: BoxFit.cover, 
+                        errorBuilder: (_, __, ___) => const Icon(Icons.error))
+                    : const Icon(Icons.event, color: Colors.white),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Step 6: + Network Image - ${event.title}', 
+                      style: const TextStyle(color: Colors.white, fontSize: 16)),
+                    const SizedBox(height: 8),
+                    Text('⚠️ Network image loading test', 
+                      style: TextStyle(color: Colors.white.withOpacity(0.8))),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ).animate()
-      .fadeIn(duration: 600.ms, delay: 200.ms)
-      .slideX(begin: 0.3, end: 0.0, duration: 800.ms);
+        ).animate()
+          .fadeIn(duration: 600.ms, delay: 200.ms)
+          .slideX(begin: 0.3, end: 0.0, duration: 800.ms),
+        _buildGradualControls(),
+      ],
+    );
   }
   
   Widget _buildStep7_AddCustomPainter(Event event) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      height: 200,
-      child: Stack(
-        children: [
-          // Custom painter background
-          Positioned.fill(
-            child: CustomPaint(
-              painter: GradientMeshPainter(),
-            ),
-          ),
-          // Content
-          Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(24),
+          height: 200,
+          child: Stack(
+            children: [
+              // Custom painter background
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: GradientMeshPainter(),
+                ),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: Text('Step 7: + Custom Painter - ${event.title}', 
-                style: const TextStyle(color: Colors.white)),
-            ),
+              // Content
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF17A2B8), Color(0xFF6C5CE7)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Step 7: + Custom Painter - ${event.title}', 
+                        style: const TextStyle(color: Colors.white, fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text('🚨 DANGER: Custom painter may cause paint cycles!', 
+                        style: TextStyle(color: Colors.red.shade200, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ).animate()
-      .fadeIn(duration: 600.ms, delay: 200.ms);
+        ).animate()
+          .fadeIn(duration: 600.ms, delay: 200.ms),
+        _buildGradualControls(),
+      ],
+    );
   }
   
   Widget _buildStep8_FullComplexity(Event event) {
