@@ -112,6 +112,50 @@ class EventsService {
     }
   }
 
+  /// AI-powered search using OpenAI for intelligent event discovery
+  Future<ApiResponse<EventsWithTotal>> aiSearch({
+    required String query,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'q': query,
+        'page': page,
+        'per_page': perPage,
+      };
+
+      final response = await _dio.get(
+        '/search/ai-search',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        final eventsJson = responseData['events'] as List<dynamic>;
+        final total = responseData['pagination']['total'] as int;
+        
+        final events = SafeEventParser.parseEventList(eventsJson);
+        
+        return ApiResponse<EventsWithTotal>.success(
+          EventsWithTotal(events: events, total: total),
+        );
+      } else {
+        return ApiResponse<EventsWithTotal>.error(
+          'Failed to perform AI search: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      return ApiResponse<EventsWithTotal>.error(
+        'Network error during AI search: ${e.message}',
+      );
+    } catch (e) {
+      return ApiResponse<EventsWithTotal>.error(
+        'Unexpected error during AI search: $e',
+      );
+    }
+  }
+
   /// Search with specific intent (brunch, family fun, etc.)
   Future<ApiResponse<EventsWithTotal>> searchByIntent({
     required String intent,

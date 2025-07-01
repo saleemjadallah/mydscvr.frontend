@@ -136,11 +136,70 @@ class _AISearchScreenState extends ConsumerState<AISearchScreen> {
                   color: Colors.white,
                 ),
               ),
+              const Spacer(),
+              // OpenAI toggle
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    ref.watch(aiSearchProvider.notifier).isUsingOpenAI ? 'OpenAI' : 'Regular',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                    onTap: () {
+                      ref.read(aiSearchProvider.notifier).toggleSearchMethod();
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: ref.watch(aiSearchProvider.notifier).isUsingOpenAI 
+                            ? Colors.green.withOpacity(0.8) 
+                            : Colors.white.withOpacity(0.3),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.5),
+                          width: 1,
+                        ),
+                      ),
+                      child: AnimatedAlign(
+                        duration: const Duration(milliseconds: 200),
+                        alignment: ref.watch(aiSearchProvider.notifier).isUsingOpenAI 
+                            ? Alignment.centerRight 
+                            : Alignment.centerLeft,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          margin: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: Icon(
+                            ref.watch(aiSearchProvider.notifier).isUsingOpenAI 
+                                ? Icons.psychology 
+                                : Icons.search,
+                            size: 12,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            'Ask me anything about Dubai family activities!',
+            ref.watch(aiSearchProvider.notifier).isUsingOpenAI 
+                ? 'Powered by OpenAI for intelligent event discovery!'
+                : 'Ask me anything about Dubai family activities!',
             style: GoogleFonts.inter(
               fontSize: 16,
               color: Colors.white.withOpacity(0.9),

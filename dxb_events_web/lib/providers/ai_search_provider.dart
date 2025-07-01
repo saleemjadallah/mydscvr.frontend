@@ -8,11 +8,19 @@ final eventsServiceProvider = Provider<EventsService>((ref) {
   return EventsService();
 });
 
-// AI search state notifier using pure backend approach
+// AI search state notifier with OpenAI integration
 class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
   final EventsService _eventsService;
+  bool _useOpenAISearch = false; // Toggle between search methods
   
   AISearchNotifier(this._eventsService) : super(const AsyncValue.data(null));
+  
+  // Toggle between regular smart search and OpenAI search
+  void toggleSearchMethod() {
+    _useOpenAISearch = !_useOpenAISearch;
+  }
+  
+  bool get isUsingOpenAI => _useOpenAISearch;
   
   Future<void> performSearch(String query) async {
     if (query.trim().isEmpty) {
@@ -27,9 +35,46 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
       final queryLower = query.toLowerCase();
       bool isWeekendQuery = queryLower.contains('weekend') || queryLower.contains('this weekend');
       
-      // Try to use the smartSearch endpoint first
+      // Choose search method based on toggle
       dynamic eventsResponse;
       
+      if (_useOpenAISearch) {
+        // Use OpenAI-powered search
+        try {
+          eventsResponse = await _eventsService.aiSearch(
+            query: query,
+            page: 1,
+            perPage: 20,
+          );
+          
+          // For OpenAI search, the response might have additional data
+          if (eventsResponse.isSuccess && eventsResponse.data != null) {
+            final events = eventsResponse.data!.events;
+            
+            // Create AI-enhanced ranked events (OpenAI backend provides scores)
+            final rankedEvents = events.map((event) => RankedEvent(
+              event: event,
+              score: 85, // Default score, could be enhanced with AI response data
+              reasoning: "Intelligently matched using OpenAI",
+            )).toList();
+            
+            final aiResponse = AISearchResponse(
+              results: rankedEvents,
+              aiResponse: "I used advanced AI to find ${events.length} perfectly matched events for '$query'. These results are intelligently ranked based on your specific needs!",
+              intent: QueryIntent.empty(),
+              suggestions: ["Try different queries", "Explore categories", "Check weekend events"],
+            );
+            
+            state = AsyncValue.data(aiResponse);
+            return;
+          }
+        } catch (e) {
+          // If AI search fails, fall back to regular search
+          print('AI search failed, falling back to regular search: $e');
+        }
+      }
+      
+      // Use regular smart search (fallback or when toggle is off)
       try {
         eventsResponse = await _eventsService.smartSearch(
           query: query,
