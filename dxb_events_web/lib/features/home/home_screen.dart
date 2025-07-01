@@ -46,6 +46,7 @@ import '../../widgets/home/interactive_category_explorer.dart';
 import '../../widgets/home/weekend_highlights.dart';
 import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/common/footer.dart';
+import '../../widgets/common/ad_placeholder.dart';
 
 // Add animation imports for gradual integration
 import '../../core/animations/animations.dart';
@@ -232,6 +233,91 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: _buildFeaturedEvents(),
               ),
               
+              // Ad Placeholder 1 - Between Featured Events and Categories
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  child: Column(
+                    children: [
+                      // Header text
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                        child: Text(
+                          'This is an Ad. Please scroll to proceed with content',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF666666),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      
+                      // Ad container
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.ad_units,
+                                size: 48,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Advertisement Space',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.blue[200]!),
+                                ),
+                                child: Text(
+                                  'Google AdSense - Slot: 2625901948',
+                                  style: GoogleFonts.mono(
+                                    fontSize: 10,
+                                    color: Colors.blue[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
               // Popular categories
               SliverToBoxAdapter(
                 child: _buildPopularCategories(),
@@ -242,6 +328,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: _buildWeekendHighlights(),
               ),
               
+              // Ad Placeholder 2 - Between Weekend Highlights and Trending
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                        child: Text(
+                          'This is an Ad. Please scroll to proceed with content',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF666666),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.orange[50],
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'AD SPACE 2',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
               // Trending events
               SliverToBoxAdapter(
                 child: _buildTrendingEvents(),
@@ -250,6 +384,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               // MyDscvr's Choice banner
               SliverToBoxAdapter(
                 child: _buildMyDscvrChoice(),
+              ),
+              
+              // Ad Placeholder 3 - After MyDscvr's Choice
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                        child: Text(
+                          'This is an Ad. Please scroll to proceed with content',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF666666),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'AD SPACE 3',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               
               // TEST: Add multiple test sections to debug rendering
@@ -299,6 +481,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               // Explore All Events CTA
               SliverToBoxAdapter(
                 child: _buildExploreAllEventsButton(),
+              ),
+              
+              // Ad Placeholder 4 - Before Footer
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                        child: Text(
+                          'This is an Ad. Please scroll to proceed with content',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF666666),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.purple[50],
+                          border: Border.all(color: const Color(0xFFDDDDDD)),
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'AD SPACE 4',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               
               // Footer
