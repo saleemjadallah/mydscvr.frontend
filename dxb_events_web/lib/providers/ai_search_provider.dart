@@ -23,6 +23,10 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
     state = const AsyncValue.loading();
     
     try {
+      // Check if this is a time-based query for fallback logic
+      final queryLower = query.toLowerCase();
+      bool isWeekendQuery = queryLower.contains('weekend') || queryLower.contains('this weekend');
+      
       // Try to use the smartSearch endpoint first
       dynamic eventsResponse;
       
@@ -34,7 +38,6 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         );
       } catch (e) {
         // If smart search fails, fall back to regular events with enhanced filtering
-        final queryLower = query.toLowerCase();
         String? category;
         
         // Handle time-based queries
@@ -47,7 +50,13 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
           dateToObj = DateTime(today.year, today.month, today.day, 23, 59, 59);
         } else if (queryLower.contains('this weekend') || (queryLower.contains('weekend') && (queryLower.contains('this') || queryLower.contains('happening')))) {
           final now = DateTime.now();
-          final daysUntilSaturday = (6 - now.weekday) % 7;
+          // In Dart, weekday: Monday=1, Tuesday=2, ..., Saturday=6, Sunday=7
+          // Calculate days until Saturday (weekday 6)
+          int daysUntilSaturday = (6 - now.weekday) % 7;
+          if (daysUntilSaturday == 0 && now.hour >= 18) {
+            // If it's Saturday evening, look at next weekend
+            daysUntilSaturday = 7;
+          }
           final saturday = now.add(Duration(days: daysUntilSaturday));
           final sunday = saturday.add(const Duration(days: 1));
           dateFromObj = DateTime(saturday.year, saturday.month, saturday.day);
@@ -134,6 +143,33 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         
         state = AsyncValue.data(searchResponse);
       } else {
+        // If no events found with date filtering, try again without date filters for weekend queries
+        if (isWeekendQuery) {
+          try {
+            final fallbackResponse = await _eventsService.getEventsWithTotal(
+              page: 1,
+              perPage: 20,
+            );
+            
+            if (fallbackResponse.isSuccess && fallbackResponse.data!.events.isNotEmpty) {
+              final weekendSuggestionResponse = AISearchResponse(
+                results: fallbackResponse.data!.events.take(10).map((event) => RankedEvent(
+                  event: event,
+                  score: 75,
+                  reasoning: "Great activity for your weekend plans",
+                )).toList(),
+                aiResponse: "I couldn't find events specifically for this weekend, but here are some amazing activities you might enjoy! Many events in Dubai are ongoing or have flexible scheduling.",
+                intent: QueryIntent.empty(),
+                suggestions: ["Next week's events", "Indoor activities", "Family-friendly events", "Free events in Dubai"],
+              );
+              state = AsyncValue.data(weekendSuggestionResponse);
+              return;
+            }
+          } catch (e) {
+            // Continue to fallback message if this also fails
+          }
+        }
+        
         // Create fallback response
         final fallbackResponse = AISearchResponse(
           results: const [],
@@ -349,6 +385,16 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
   }
   
   String _createFallbackMessage(String query) {
+    final lowerQuery = query.toLowerCase();
+    
+    if (lowerQuery.contains('today') || lowerQuery.contains('happening today')) {
+      return "I couldn't find events specifically for today, but there are many exciting activities coming up this week! Try searching for 'this week' or explore our categories like 'indoor activities' or 'family events'.";
+    } else if (lowerQuery.contains('weekend') || lowerQuery.contains('this weekend')) {
+      return "I couldn't find events specifically for this weekend, but there are many great activities available! Try searching for 'this week', 'next week', or explore categories like 'brunch events', 'family activities', or 'indoor experiences'.";
+    } else if (lowerQuery.contains('this week')) {
+      return "I couldn't find events specifically for this week, but Dubai has many ongoing activities! Try searching for 'next week' or explore categories like 'indoor activities', 'outdoor adventures', or 'cultural experiences'.";
+    }
+    
     return "I couldn't find specific events matching '$query', but Dubai has many amazing activities to explore! Try searching for categories like 'indoor activities', 'family events', or 'weekend brunch'.";
   }
   
