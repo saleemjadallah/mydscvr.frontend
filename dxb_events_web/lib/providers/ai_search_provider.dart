@@ -36,33 +36,34 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         // If smart search fails, fall back to regular events with enhanced filtering
         final queryLower = query.toLowerCase();
         String? category;
-        String? dateFrom;
-        String? dateTo;
         
         // Handle time-based queries
+        DateTime? dateFromObj;
+        DateTime? dateToObj;
+        
         if (queryLower.contains('today') || queryLower.contains('happening today')) {
           final today = DateTime.now();
-          dateFrom = today.toIso8601String().split('T')[0];
-          dateTo = dateFrom;
+          dateFromObj = DateTime(today.year, today.month, today.day);
+          dateToObj = DateTime(today.year, today.month, today.day, 23, 59, 59);
         } else if (queryLower.contains('this weekend') || queryLower.contains('weekend')) {
           final now = DateTime.now();
           final daysUntilSaturday = (6 - now.weekday) % 7;
           final saturday = now.add(Duration(days: daysUntilSaturday));
           final sunday = saturday.add(const Duration(days: 1));
-          dateFrom = saturday.toIso8601String().split('T')[0];
-          dateTo = sunday.toIso8601String().split('T')[0];
+          dateFromObj = DateTime(saturday.year, saturday.month, saturday.day);
+          dateToObj = DateTime(sunday.year, sunday.month, sunday.day, 23, 59, 59);
         } else if (queryLower.contains('this week')) {
           final now = DateTime.now();
           final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
           final endOfWeek = startOfWeek.add(const Duration(days: 6));
-          dateFrom = startOfWeek.toIso8601String().split('T')[0];
-          dateTo = endOfWeek.toIso8601String().split('T')[0];
+          dateFromObj = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+          dateToObj = DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
         } else if (queryLower.contains('next week')) {
           final now = DateTime.now();
           final startOfNextWeek = now.add(Duration(days: 8 - now.weekday));
           final endOfNextWeek = startOfNextWeek.add(const Duration(days: 6));
-          dateFrom = startOfNextWeek.toIso8601String().split('T')[0];
-          dateTo = endOfNextWeek.toIso8601String().split('T')[0];
+          dateFromObj = DateTime(startOfNextWeek.year, startOfNextWeek.month, startOfNextWeek.day);
+          dateToObj = DateTime(endOfNextWeek.year, endOfNextWeek.month, endOfNextWeek.day, 23, 59, 59);
         }
         
         // Try to detect category from query
@@ -80,8 +81,8 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         
         eventsResponse = await _eventsService.getEventsWithTotal(
           category: category,
-          dateFrom: dateFrom,
-          dateTo: dateTo,
+          dateFrom: dateFromObj,
+          dateTo: dateToObj,
           page: 1,
           perPage: 50, // Get more events to filter locally
         );
