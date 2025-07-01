@@ -63,7 +63,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _scrollController = ScrollController();
     
     // Listen to scroll for app bar effects
@@ -492,7 +492,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
             Tab(text: 'Overview'),
             Tab(text: 'Details'),
             Tab(text: 'Location'),
-            // Tab(text: 'Advice'),
+            Tab(text: 'Advice'),
           ],
           labelColor: AppColors.dubaiGold,
           unselectedLabelColor: AppColors.textSecondary,
@@ -526,7 +526,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
           _buildOverviewTab(event),
           _buildDetailsTab(event),
           _buildLocationTab(event),
-          // _buildAdviceTab(event),
+          _buildAdviceTab(event),
         ],
       ),
     );
