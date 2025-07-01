@@ -126,7 +126,7 @@ class EventsService {
       };
 
       final response = await _dio.get(
-        '/search/ai-search',
+        '/ai-search',
         queryParameters: queryParams,
       );
 
