@@ -24,7 +24,6 @@ import '../../services/events_service.dart';
 import '../../models/event.dart';
 import '../../widgets/common/footer.dart';
 import '../../widgets/notifications/notification_bell.dart';
-import '../../widgets/common/ad_placeholder.dart';
 
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
