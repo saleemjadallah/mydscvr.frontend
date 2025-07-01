@@ -282,14 +282,23 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
 
   /// Build AdSense ad container with header for events page
   Widget _buildAdSenseContainer(String identifier, [Color? backgroundColor]) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 800;
+    
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      margin: EdgeInsets.symmetric(
+        vertical: isMobile ? 8 : 16, 
+        horizontal: isMobile ? 16 : 24
+      ),
       child: Column(
         children: [
           // Header text
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            padding: EdgeInsets.symmetric(
+              vertical: isMobile ? 6 : 8, 
+              horizontal: isMobile ? 12 : 16
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFF0F0F0),
               border: Border.all(color: const Color(0xFFDDDDDD)),
@@ -299,17 +308,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
               'This is an Ad. Please scroll to proceed with content',
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 12,
+                fontSize: isMobile ? 10 : 12,
                 color: const Color(0xFF666666),
                 fontWeight: FontWeight.w400,
               ),
             ),
           ),
           
-          // AdSense container 
+          // AdSense container - Much shorter on mobile to save space for content
           Container(
             width: double.infinity,
-            height: 250,
+            height: isMobile ? 120 : 250, // Dramatically reduced mobile height
             decoration: BoxDecoration(
               color: backgroundColor ?? Colors.grey[50],
               border: Border.all(color: const Color(0xFFDDDDDD)),
@@ -328,52 +337,54 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                 children: [
                   Icon(
                     Icons.ad_units,
-                    size: 48,
+                    size: isMobile ? 24 : 48,
                     color: Colors.grey[600],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: isMobile ? 8 : 16),
                   Text(
                     'Google AdSense Ad',
                     style: GoogleFonts.inter(
-                      fontSize: 18,
+                      fontSize: isMobile ? 12 : 18,
                       color: Colors.grey[700],
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.blue[200]!),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Publisher: ca-pub-2361005033053502',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
+                  if (!isMobile) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.blue[200]!),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Publisher: ca-pub-2361005033053502',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: Colors.blue[700],
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Slot: 2625901948',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
+                          Text(
+                            'Slot: 2625901948',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: Colors.blue[700],
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
+                  ],
                   Text(
                     'Events Page - Ad Space $identifier',
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: isMobile ? 10 : 12,
                       color: Colors.grey[600],
                       fontStyle: FontStyle.italic,
                     ),
@@ -1173,9 +1184,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           ),
         ),
         
-        // Horizontal carousel
+        // Horizontal carousel - Much bigger height for better mobile experience
         SizedBox(
-          height: 360, // Increased height for better mobile viewing
+          height: 480, // Increased from 360 to 480 for much bigger cards
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const ClampingScrollPhysics(),
@@ -1185,7 +1196,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
               if (index == filteredEvents.length) {
                 // Show loading indicator
                 return Container(
-                  width: 280,
+                  width: 320, // Slightly wider cards
                   margin: const EdgeInsets.only(right: 16),
                   child: Center(
                     child: CircularProgressIndicator(
@@ -1197,7 +1208,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
               
               final event = filteredEvents[index];
               return Container(
-                width: 280, // Fixed width for carousel items
+                width: 320, // Increased width from 280 to 320 for more content space
                 margin: const EdgeInsets.only(right: 16),
                 child: _buildMobileEventCard(event)
                     .animate()
@@ -2996,9 +3007,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Large image section for mobile
+            // Larger image section for enhanced mobile viewing
             Container(
-              height: 180, // Generous height for mobile viewing
+              height: 220, // Increased from 180 to 220 for bigger visual impact
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 color: Colors.grey[200],
@@ -3012,7 +3023,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       child: CachedNetworkImage(
                         imageUrl: event.imageUrl,
                         width: double.infinity,
-                        height: 180,
+                        height: 220, // Match container height
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: AppColors.dubaiTeal.withOpacity(0.1),
@@ -3049,10 +3060,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Slightly bigger padding
                       decoration: BoxDecoration(
                         color: event.isFree ? AppColors.dubaiTeal : AppColors.dubaiGold,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(18), // Slightly more rounded
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
@@ -3064,7 +3075,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       child: Text(
                         event.displayPrice,
                         style: GoogleFonts.inter(
-                          fontSize: 12,
+                          fontSize: 13, // Slightly bigger font
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -3077,15 +3088,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), // Bigger padding
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14), // More rounded
                       ),
                       child: Text(
                         _formatCategoryName(event.category),
                         style: GoogleFonts.inter(
-                          fontSize: 10,
+                          fontSize: 11, // Slightly bigger font
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
@@ -3099,39 +3110,39 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             // Content section with generous padding
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18), // Increased padding from 16 to 18
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Event title
+                    // Event title with more space
                     Text(
                       event.title,
                       style: GoogleFonts.comfortaa(
-                        fontSize: 16,
+                        fontSize: 17, // Increased from 16 to 17
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
-                        height: 1.2,
+                        height: 1.3,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12), // Increased from 8 to 12
                     
-                    // Date and time
+                    // Date and time with improved spacing
                     Row(
                       children: [
                         Icon(
                           LucideIcons.calendar,
-                          size: 14,
+                          size: 16, // Slightly bigger icon
                           color: AppColors.dubaiTeal,
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8), // Increased spacing
                         Expanded(
                           child: Text(
                             _formatEventDateTime(event, true),
                             style: GoogleFonts.inter(
-                              fontSize: 12,
+                              fontSize: 13, // Slightly bigger font
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
@@ -3142,22 +3153,22 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       ],
                     ),
                     
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     
-                    // Location
+                    // Location with improved spacing
                     Row(
                       children: [
                         Icon(
                           LucideIcons.mapPin,
-                          size: 14,
+                          size: 16, // Bigger icon
                           color: AppColors.dubaiCoral,
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8), // More spacing
                         Expanded(
                           child: Text(
                             '${event.venue.name} • ${event.venue.area}',
                             style: GoogleFonts.inter(
-                              fontSize: 12,
+                              fontSize: 13, // Bigger font
                               color: AppColors.textSecondary,
                             ),
                             maxLines: 1,
@@ -3167,62 +3178,97 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       ],
                     ),
                     
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12), // More spacing
                     
-                    // Description
+                    // Description with more lines for better content display
                     Expanded(
                       child: Text(
                         _getDisplayDescription(event),
                         style: GoogleFonts.inter(
-                          fontSize: 13,
+                          fontSize: 13, // Bigger font
                           color: AppColors.textSecondary,
                           height: 1.4,
                         ),
-                        maxLines: 3,
+                        maxLines: 4, // Increased from 3 to 4 lines
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     
                     const SizedBox(height: 12),
                     
-                    // Bottom row with rating and family score
+                    // Enhanced bottom section with better visual hierarchy
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Rating
-                        Row(
-                          children: [
-                            Icon(
-                              LucideIcons.star,
-                              size: 14,
-                              color: AppColors.dubaiGold,
+                        // Age range with icon
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.dubaiTeal.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              event.rating.toStringAsFixed(1),
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.users,
+                                  size: 12,
+                                  color: AppColors.dubaiTeal,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    event.ageRange,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: AppColors.dubaiTeal,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                         
-                        // Age range
+                        const SizedBox(width: 8),
+                        
+                        // View details button - more prominent
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Bigger padding
                           decoration: BoxDecoration(
-                            color: AppColors.dubaiTeal.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            event.ageRange,
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.dubaiTeal,
+                            gradient: LinearGradient(
+                              colors: [AppColors.dubaiTeal, AppColors.dubaiTeal.withOpacity(0.8)],
                             ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.dubaiTeal.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                LucideIcons.eye,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'View',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
