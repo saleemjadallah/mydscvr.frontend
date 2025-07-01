@@ -82,7 +82,7 @@ class EventsService {
       }
 
       final response = await _dio.get(
-        '/search/',
+        '/search/smart-search',
         queryParameters: queryParams,
       );
 
