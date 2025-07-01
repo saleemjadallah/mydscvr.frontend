@@ -1579,7 +1579,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -1823,347 +1823,533 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (placeholderEvent == null) {
       return _buildMyDscvrChoiceLoading();
     }
-    
-    return Container(
-      margin: const EdgeInsets.all(24),
-      height: 280,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: AppColors.oceanGradient,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.dubaiTeal.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isMobile = screenWidth <= 600;
+        final isTablet = screenWidth > 600 && screenWidth <= 900;
+        
+        // Responsive dimensions
+        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
+        final verticalMargin = isMobile ? 16.0 : 24.0;
+        final borderRadius = isMobile ? 16.0 : 24.0;
+        final contentPadding = isMobile ? 16.0 : 24.0;
+        
+        // Responsive heights
+        final containerHeight = isMobile ? null : (isTablet ? 240.0 : 280.0);
+        
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: horizontalMargin,
+            vertical: verticalMargin,
           ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Background pattern bubbles
-          Positioned(
-            top: 20,
-            right: 60,
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+          height: containerHeight,
+          constraints: isMobile ? const BoxConstraints(minHeight: 200) : null,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gradient: AppColors.oceanGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.dubaiTeal.withOpacity(0.3),
+                blurRadius: isMobile ? 12 : 20,
+                offset: Offset(0, isMobile ? 6 : 10),
               ),
-            ),
+            ],
           ),
-          Positioned(
-            bottom: 40,
-            left: 30,
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.08),
-              ),
-            ),
-          ),
-          
-          // MyDscvr Logo/Badge
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1,
+          child: Stack(
+            children: [
+              // Background pattern bubbles - adjusted for mobile
+              if (!isMobile) ...[
+                Positioned(
+                  top: 20,
+                  right: 60,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                  ),
                 ),
+                Positioned(
+                  bottom: 40,
+                  left: 30,
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.08),
+                    ),
+                  ),
+                ),
+              ],
+              
+              // MyDscvr Logo/Badge
+              Positioned(
+                top: isMobile ? 12 : 16,
+                right: isMobile ? 12 : 16,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 8 : 12,
+                    vertical: isMobile ? 4 : 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.sparkles,
+                        size: isMobile ? 12 : 16,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: isMobile ? 2 : 4),
+                      Text(
+                        'Choice',
+                        style: GoogleFonts.inter(
+                          fontSize: isMobile ? 10 : 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ).animate().fadeIn(delay: 600.ms),
+              
+              // Main content - responsive layout
+              Padding(
+                padding: EdgeInsets.all(contentPadding),
+                child: isMobile 
+                  ? _buildMobileLayout(placeholderEvent)
+                  : _buildDesktopLayout(placeholderEvent, isTablet),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Mobile-optimized vertical layout
+  Widget _buildMobileLayout(Event placeholderEvent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header section
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'MyDscvr\'s Choice',
+              style: GoogleFonts.comfortaa(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ).animate().fadeIn(delay: 200.ms),
+            
+            const SizedBox(height: 6),
+            
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.dubaiGold.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.dubaiGold.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    LucideIcons.sparkles,
-                    size: 16,
+                    LucideIcons.zap,
+                    size: 12,
                     color: Colors.white,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 3),
                   Text(
-                    'Choice',
+                    'AI Curated Daily',
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: 9,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
                   ),
                 ],
               ),
-            ),
-          ).animate().fadeIn(delay: 600.ms),
-          
-          // Main content
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with algorithm badge
-                Column(
+            ).animate().fadeIn(delay: 400.ms),
+          ],
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Event content - mobile row layout with smaller image
+        Expanded(
+          child: Row(
+            children: [
+              // Compact event image
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withOpacity(0.2),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  LucideIcons.calendar,
+                  color: Colors.white.withOpacity(0.8),
+                  size: 28,
+                ),
+              ).animate().scale(delay: 600.ms),
+              
+              const SizedBox(width: 12),
+              
+              // Event details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      placeholderEvent.title,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ).animate().fadeIn(delay: 700.ms),
+                    
+                    const SizedBox(height: 6),
+                    
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.calendar,
+                          size: 12,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            _formatEventTime(placeholderEvent.startDate),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 4),
+                    
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.mapPin,
+                          size: 12,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            placeholderEvent.venue.area,
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Desktop/tablet layout (existing row layout with responsive adjustments)
+  Widget _buildDesktopLayout(Event placeholderEvent, bool isTablet) {
+    final imageSize = isTablet ? 100.0 : 120.0;
+    final titleFontSize = isTablet ? 16.0 : 18.0;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header with algorithm badge
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'MyDscvr\'s Choice',
+              style: GoogleFonts.comfortaa(
+                fontSize: isTablet ? 20 : 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ).animate().fadeIn(delay: 200.ms),
+            
+            const SizedBox(height: 8),
+            
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.dubaiGold.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.dubaiGold.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.zap,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'AI Curated Daily',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 400.ms),
+          ],
+        ),
+        
+        const SizedBox(height: isTablet ? 16 : 24),
+        
+        // Event content
+        Expanded(
+          child: Row(
+            children: [
+              // Event image placeholder
+              Container(
+                width: imageSize,
+                height: imageSize,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white.withOpacity(0.2),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  LucideIcons.calendar,
+                  color: Colors.white.withOpacity(0.8),
+                  size: isTablet ? 32 : 40,
+                ),
+              ).animate().scale(delay: 600.ms),
+              
+              SizedBox(width: isTablet ? 16 : 20),
+              
+              // Event details
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'MyDscvr\'s Choice',
-                      style: GoogleFonts.comfortaa(
-                        fontSize: 24,
+                      placeholderEvent.title,
+                      style: GoogleFonts.inter(
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        height: 1.2,
                       ),
-                    ).animate().fadeIn(delay: 200.ms),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ).animate().fadeIn(delay: 700.ms),
                     
-                    const SizedBox(height: 8),
+                    SizedBox(height: isTablet ? 8 : 12),
                     
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.dubaiGold.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.dubaiGold.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            LucideIcons.zap,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'AI Curated Daily',
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.calendar,
+                          size: isTablet ? 14 : 16,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                        SizedBox(width: isTablet ? 6 : 8),
+                        Expanded(
+                          child: Text(
+                            _formatEventTime(placeholderEvent.startDate),
                             style: GoogleFonts.inter(
-                              fontSize: 11,
+                              fontSize: isTablet ? 12 : 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    SizedBox(height: isTablet ? 4 : 8),
+                    
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.mapPin,
+                          size: isTablet ? 14 : 16,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                        SizedBox(width: isTablet ? 6 : 8),
+                        Expanded(
+                          child: Text(
+                            placeholderEvent.venue.area,
+                            style: GoogleFonts.inter(
+                              fontSize: isTablet ? 12 : 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    if (!isTablet) ...[
+                      const SizedBox(height: 16),
+                      
+                      // Action row
+                      Row(
+                        children: [
+                          Text(
+                            'Perfect for families',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.dubaiGold,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            LucideIcons.sparkles,
+                            size: 14,
+                            color: AppColors.dubaiGold,
+                          ),
                         ],
-                      ),
-                    ).animate().fadeIn(delay: 400.ms),
+                      ).animate().fadeIn(delay: 900.ms),
+                    ],
                   ],
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Event content
-                Expanded(
-                  child: Row(
-                    children: [
-                      // Event image placeholder
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: Colors.white.withOpacity(0.2),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          LucideIcons.calendar,
-                          color: Colors.white.withOpacity(0.8),
-                          size: 40,
-                        ),
-                      ).animate().scale(delay: 600.ms),
-                      
-                      const SizedBox(width: 20),
-                      
-                      // Event details
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              placeholderEvent.title,
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                height: 1.2,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ).animate().fadeIn(delay: 700.ms),
-                            
-                            const SizedBox(height: 8),
-                            
-                            // Date and location
-                            Row(
-                              children: [
-                                Icon(
-                                  LucideIcons.calendar,
-                                  size: 14,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _formatEventTime(placeholderEvent.startDate),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    color: Colors.white.withOpacity(0.9),
-                                  ),
-                                ),
-                              ],
-                            ).animate().fadeIn(delay: 800.ms),
-                            
-                            const SizedBox(height: 4),
-                            
-                            Row(
-                              children: [
-                                Icon(
-                                  LucideIcons.mapPin,
-                                  size: 14,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    placeholderEvent.venue.area,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      color: Colors.white.withOpacity(0.9),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ).animate().fadeIn(delay: 900.ms),
-                            
-                            const SizedBox(height: 12),
-                            
-                            // Algorithm insight
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                'Perfect for families like yours',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ).animate().fadeIn(delay: 1000.ms),
-                            
-                            const Spacer(),
-                            
-                            // CTA Button
-                            ElevatedButton(
-                              onPressed: () {
-                                context.go('/event/${placeholderEvent.id}');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: AppColors.dubaiTeal,
-                                elevation: 8,
-                                shadowColor: Colors.black.withOpacity(0.2),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Discover Why',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    LucideIcons.arrowRight,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ).animate().scale(delay: 1100.ms),
-                          ],
-                        ),
-                      ),
-                    ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildMyDscvrChoiceLoading() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isMobile = screenWidth <= 600;
+        final isTablet = screenWidth > 600 && screenWidth <= 900;
+        
+        // Responsive dimensions
+        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
+        final verticalMargin = isMobile ? 16.0 : 24.0;
+        final borderRadius = isMobile ? 16.0 : 24.0;
+        
+        // Responsive heights
+        final containerHeight = isMobile ? 180.0 : (isTablet ? 220.0 : 280.0);
+        
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: horizontalMargin,
+            vertical: verticalMargin,
+          ),
+          height: containerHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
+                  strokeWidth: 2,
+                ),
+                SizedBox(height: isMobile ? 12 : 16),
+                Text(
+                  'Curating today\'s perfect choice...',
+                  style: GoogleFonts.inter(
+                    fontSize: isMobile ? 12 : 14,
+                    color: AppColors.textSecondary,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 800.ms);
-  }
-  
-  Widget _buildMyDscvrChoiceLoading() {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      height: 280,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
-              strokeWidth: 2,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Curating today\'s perfect choice...',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -2453,5 +2639,4 @@ class ShimmerEventCard extends StatelessWidget {
         ],
       ),
     );
-  }
-} 
+  } 

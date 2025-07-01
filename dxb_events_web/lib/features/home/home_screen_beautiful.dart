@@ -809,155 +809,166 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     if (placeholderEvent == null) {
       return _buildAnimatedMyDscvrChoiceEmpty();
     }
-    
-    // SOLUTION: Simplified architecture that maintains visual appeal but prevents loops
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      child: FadeInSlideUp(
-        delay: const Duration(milliseconds: 200),
-        child: Container(
-          height: 380,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF17A2B8), // Teal
-                Color(0xFF6C5CE7), // Purple
-                Color(0xFF17A2B8), // Back to teal
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ),
-            boxShadow: [
-              // Reduced but still beautiful shadows
-              BoxShadow(
-                color: AppColors.dubaiTeal.withOpacity(0.4),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-                spreadRadius: 5,
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isMobile = screenWidth <= 600;
+        final isTablet = screenWidth > 600 && screenWidth <= 900;
+        
+        // Responsive dimensions
+        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
+        final verticalMargin = isMobile ? 16.0 : 32.0;
+        final borderRadius = isMobile ? 20.0 : 32.0;
+        
+        // Responsive heights
+        final containerHeight = isMobile ? null : (isTablet ? 300.0 : 380.0);
+        
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
+          height: containerHeight,
+          constraints: isMobile ? const BoxConstraints(minHeight: 220) : null,
+          child: FadeInSlideUp(
+            delay: const Duration(milliseconds: 200),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(borderRadius),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF17A2B8), // Teal
+                    Color(0xFF6C5CE7), // Purple
+                    Color(0xFF17A2B8), // Back to teal
+                  ],
+                  stops: [0.0, 0.5, 1.0],
+                ),
+                boxShadow: [
+                  // Reduced but still beautiful shadows
+                  BoxShadow(
+                    color: AppColors.dubaiTeal.withOpacity(0.4),
+                    blurRadius: isMobile ? 20 : 30,
+                    offset: Offset(0, isMobile ? 8 : 15),
+                    spreadRadius: isMobile ? 2 : 5,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF6C5CE7).withOpacity(0.3),
+                    blurRadius: isMobile ? 12 : 20,
+                    offset: Offset(0, isMobile ? 4 : 8),
+                    spreadRadius: isMobile ? 1 : 2,
+                  ),
+                ],
+                border: Border.all(
+                  width: 2,
+                  color: Colors.white.withOpacity(0.3),
+                ),
               ),
-              BoxShadow(
-                color: const Color(0xFF6C5CE7).withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-                spreadRadius: 2,
-              ),
-            ],
-            border: Border.all(
-              width: 2,
-              color: Colors.white.withOpacity(0.3),
+              child: isMobile 
+                ? _buildMobileContent(placeholderEvent)
+                : _buildDesktopContent(placeholderEvent, isTablet),
             ),
           ),
-          child: Row(
-            children: [
-              // Image section - simplified but elegant
-              Container(
-                width: 160,
-                height: 320,
-                margin: const EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  color: Colors.white.withOpacity(0.1),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 2,
+        );
+      },
+    );
+  }
+
+  // Mobile-optimized layout
+  Widget _buildMobileContent(Event placeholderEvent) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with gold accent
+          Text(
+            'MyDscvr\'s Choice',
+            style: GoogleFonts.comfortaa(
+              fontSize: 16,
+              color: const Color(0xFFD4AF37),
+              letterSpacing: 1.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Event content - mobile row layout
+          Expanded(
+            child: Row(
+              children: [
+                // Compact event image
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white.withOpacity(0.1),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: placeholderEvent.imageUrl.isNotEmpty
+                      ? Image.network(
+                          placeholderEvent.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.white.withOpacity(0.2),
+                            child: const Icon(Icons.event, color: Colors.white, size: 30),
+                          ),
+                        )
+                      : Container(
+                          color: Colors.white.withOpacity(0.2),
+                          child: Icon(
+                            LucideIcons.sparkles,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 30,
+                          ),
+                        ),
                   ),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(21),
-                  child: placeholderEvent.imageUrl.isNotEmpty
-                    ? Image.network(
-                        placeholderEvent.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: Colors.white.withOpacity(0.2),
-                          child: const Icon(Icons.event, color: Colors.white, size: 60),
-                        ),
-                      )
-                    : Container(
-                        color: Colors.white.withOpacity(0.2),
-                        child: Icon(
-                          LucideIcons.sparkles,
-                          color: Colors.white.withOpacity(0.9),
-                          size: 50,
-                        ).animate(onPlay: (controller) => controller.repeat())
-                          .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6)),
-                      ),
-                ),
-              ),
-              
-              // Event details - clean and elegant
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(30),
+                
+                const SizedBox(width: 16),
+                
+                // Event details - clean and elegant
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Header with gold accent
-                      Text(
-                        'MyDscvr\'s Choice',
-                        style: GoogleFonts.comfortaa(
-                          fontSize: 18,
-                          color: const Color(0xFFD4AF37),
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
                       // Title with single clean animation
                       Text(
                         placeholderEvent.title,
                         style: GoogleFonts.inter(
-                          fontSize: 22,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           height: 1.3,
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.2,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ).animate().fadeIn(duration: 600.ms),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       
                       // Date and location - clean icons
                       Row(
                         children: [
                           Icon(
                             LucideIcons.calendar,
-                            size: 14,
+                            size: 12,
                             color: Colors.white.withOpacity(0.8),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _formatEventTime(placeholderEvent.startDate),
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.mapPin,
-                            size: 14,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              placeholderEvent.venue.area,
+                              _formatEventTime(placeholderEvent.startDate),
                               style: GoogleFonts.inter(
-                                fontSize: 13,
+                                fontSize: 11,
                                 color: Colors.white.withOpacity(0.9),
                               ),
                               maxLines: 1,
@@ -967,17 +978,41 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                         ],
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 4),
                       
-                      // AI insight badge
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.mapPin,
+                            size: 12,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              placeholderEvent.venue.area,
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      // AI insight badge - mobile version
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.2),
                             width: 1,
@@ -988,56 +1023,17 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                           children: [
                             Icon(
                               LucideIcons.zap,
-                              size: 12,
+                              size: 10,
                               color: const Color(0xFFD4AF37),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 3),
                             Text(
-                              'Perfect for families like yours',
+                              'AI Curated',
                               style: GoogleFonts.inter(
-                                fontSize: 11,
+                                fontSize: 9,
                                 color: Colors.white.withOpacity(0.9),
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // CTA Button - clean design
-                      ElevatedButton(
-                        onPressed: () {
-                          context.go('/event/${placeholderEvent.id}');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.dubaiTeal,
-                          elevation: 8,
-                          shadowColor: Colors.black.withOpacity(0.2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Discover Why',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              LucideIcons.arrowRight,
-                              size: 16,
                             ),
                           ],
                         ),
@@ -1045,81 +1041,298 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Desktop/tablet content (existing layout with responsive adjustments)
+  Widget _buildDesktopContent(Event placeholderEvent, bool isTablet) {
+    final imageWidth = isTablet ? 140.0 : 160.0;
+    final imageHeight = isTablet ? 240.0 : 320.0;
+    final contentPadding = isTablet ? 24.0 : 30.0;
+    
+    return Row(
+      children: [
+        // Image section - simplified but elegant
+        Container(
+          width: imageWidth,
+          height: imageHeight,
+          margin: EdgeInsets.all(contentPadding),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Colors.white.withOpacity(0.1),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 2,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(21),
+            child: placeholderEvent.imageUrl.isNotEmpty
+              ? Image.network(
+                  placeholderEvent.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.white.withOpacity(0.2),
+                    child: Icon(Icons.event, color: Colors.white, size: isTablet ? 50 : 60),
+                  ),
+                )
+              : Container(
+                  color: Colors.white.withOpacity(0.2),
+                  child: Icon(
+                    LucideIcons.sparkles,
+                    color: Colors.white.withOpacity(0.9),
+                    size: isTablet ? 40 : 50,
+                  ).animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6)),
+                ),
           ),
         ),
-      ),
+        
+        // Event details - clean and elegant
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(contentPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Header with gold accent
+                Text(
+                  'MyDscvr\'s Choice',
+                  style: GoogleFonts.comfortaa(
+                    fontSize: isTablet ? 16 : 18,
+                    color: const Color(0xFFD4AF37),
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                
+                SizedBox(height: isTablet ? 8 : 12),
+                
+                // Title with single clean animation
+                Text(
+                  placeholderEvent.title,
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 18 : 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.3,
+                    letterSpacing: 0.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ).animate().fadeIn(duration: 600.ms),
+                
+                SizedBox(height: isTablet ? 12 : 16),
+                
+                // Date and location - clean icons
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.calendar,
+                      size: isTablet ? 12 : 14,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                    SizedBox(width: isTablet ? 4 : 6),
+                    Text(
+                      _formatEventTime(placeholderEvent.startDate),
+                      style: GoogleFonts.inter(
+                        fontSize: isTablet ? 11 : 13,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: isTablet ? 6 : 8),
+                
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.mapPin,
+                      size: isTablet ? 12 : 14,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                    SizedBox(width: isTablet ? 4 : 6),
+                    Expanded(
+                      child: Text(
+                        placeholderEvent.venue.area,
+                        style: GoogleFonts.inter(
+                          fontSize: isTablet ? 11 : 13,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: isTablet ? 12 : 16),
+                
+                // AI insight badge
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 10 : 12,
+                    vertical: isTablet ? 6 : 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.zap,
+                        size: isTablet ? 10 : 12,
+                        color: const Color(0xFFD4AF37),
+                      ),
+                      SizedBox(width: isTablet ? 3 : 4),
+                      Text(
+                        'AI Curated',
+                        style: GoogleFonts.inter(
+                          fontSize: isTablet ? 10 : 11,
+                          color: Colors.white.withOpacity(0.9),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildAnimatedMyDscvrChoiceLoading() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      height: 380,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.grey.shade300,
-            Colors.grey.shade200,
-            Colors.grey.shade300,
-          ],
-        ),
-      ),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isMobile = screenWidth <= 600;
+        final isTablet = screenWidth > 600 && screenWidth <= 900;
+        
+        // Responsive dimensions
+        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
+        final verticalMargin = isMobile ? 16.0 : 32.0;
+        final borderRadius = isMobile ? 20.0 : 32.0;
+        
+        // Responsive heights
+        final containerHeight = isMobile ? 180.0 : (isTablet ? 260.0 : 380.0);
+        
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
+          height: containerHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.grey.shade300,
+                Colors.grey.shade200,
+                Colors.grey.shade300,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
+                  strokeWidth: 2,
+                ),
+                SizedBox(height: isMobile ? 12 : 16),
+                Text(
+                  'Curating today\'s perfect choice...',
+                  style: GoogleFonts.inter(
+                    fontSize: isMobile ? 12 : 14,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildAnimatedMyDscvrChoiceEmpty() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      height: 380,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF17A2B8),
-            Color(0xFF6C5CE7),
-            Color(0xFF17A2B8),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LucideIcons.sparkles,
-              color: Colors.white.withOpacity(0.7),
-              size: 48,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isMobile = screenWidth <= 600;
+        final isTablet = screenWidth > 600 && screenWidth <= 900;
+        
+        // Responsive dimensions
+        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
+        final verticalMargin = isMobile ? 16.0 : 32.0;
+        final borderRadius = isMobile ? 20.0 : 32.0;
+        
+        // Responsive heights
+        final containerHeight = isMobile ? 180.0 : (isTablet ? 260.0 : 380.0);
+        
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
+          height: containerHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF17A2B8),
+                Color(0xFF6C5CE7),
+                Color(0xFF17A2B8),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'MyDscvr\'s Choice',
-              style: GoogleFonts.comfortaa(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.sparkles,
+                  color: Colors.white.withOpacity(0.7),
+                  size: isMobile ? 32 : 48,
+                ),
+                SizedBox(height: isMobile ? 12 : 16),
+                Text(
+                  'MyDscvr\'s Choice',
+                  style: GoogleFonts.comfortaa(
+                    fontSize: isMobile ? 18 : 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 6 : 8),
+                Text(
+                  'Coming Soon',
+                  style: GoogleFonts.inter(
+                    fontSize: isMobile ? 12 : 16,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Coming Soon',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
