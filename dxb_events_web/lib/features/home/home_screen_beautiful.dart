@@ -64,6 +64,113 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     super.dispose();
   }
 
+  /// Build AdSense ad container with header
+  Widget _buildAdSenseContainer(String identifier, [Color? backgroundColor]) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      child: Column(
+        children: [
+          // Header text
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F0F0),
+              border: Border.all(color: const Color(0xFFDDDDDD)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            ),
+            child: Text(
+              'This is an Ad. Please scroll to proceed with content',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: const Color(0xFF666666),
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          
+          // AdSense container - Placeholder that will show test ads when AdSense is approved
+          Container(
+            width: double.infinity,
+            height: 250,
+            decoration: BoxDecoration(
+              color: backgroundColor ?? Colors.grey[50],
+              border: Border.all(color: const Color(0xFFDDDDDD)),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.ad_units,
+                    size: 48,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Google AdSense Ad',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Publisher: ca-pub-2361005033053502',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          'Slot: 2625901948',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Test ads will appear here once approved',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -92,50 +199,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 1 - Between Featured Events and Hidden Gem
           SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0),
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    ),
-                    child: Text(
-                      'This is an Ad. Please scroll to proceed with content',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF666666),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'AD SPACE 1 - Featured/Hidden Gem',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: _buildAdSenseContainer('1', Colors.grey[100]),
           ),
           
           // Hidden Gem - Using actual component
@@ -151,50 +215,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 2 - Between Hidden Gem and Categories
           SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0),
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    ),
-                    child: Text(
-                      'This is an Ad. Please scroll to proceed with content',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF666666),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.orange[50],
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'AD SPACE 2 - Hidden Gem/Categories',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange[700],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: _buildAdSenseContainer('2', Colors.orange[50]),
           ),
           
           // Categories Section - Using actual component
@@ -223,50 +244,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
           SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0),
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    ),
-                    child: Text(
-                      'This is an Ad. Please scroll to proceed with content',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF666666),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.green[50],
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'AD SPACE 3 - Trending/MyDscvr Choice',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[700],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: _buildAdSenseContainer('3', Colors.green[50]),
           ),
           
           // MyDscvr's Choice Section - Final solution
@@ -281,50 +259,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 4 - Between Explore All Events and Footer
           SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0),
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    ),
-                    child: Text(
-                      'This is an Ad. Please scroll to proceed with content',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF666666),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.purple[50],
-                      border: Border.all(color: const Color(0xFFDDDDDD)),
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'AD SPACE 4 - Explore All/Footer',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple[700],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: _buildAdSenseContainer('4', Colors.purple[50]),
           ),
           
           // Footer
@@ -1334,3 +1269,4 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 }
+
