@@ -1099,8 +1099,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       return _buildMobileCarousel(filteredEvents);
     }
     
-    // Desktop/tablet grid view
-    int crossAxisCount = screenWidth > 1200 ? 3 : 2;
+    // Improved responsive grid with better tablet experience
+    int crossAxisCount;
+    if (screenWidth > 1400) {
+      crossAxisCount = 4; // Large desktop: 4 cards
+    } else if (screenWidth > 1100) {
+      crossAxisCount = 3; // Wide screen: 3 cards (only for very wide displays)
+    } else {
+      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards (skip cramped 3-card layout)
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16),

@@ -590,12 +590,22 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildTabletGrid(BuildContext context, List<Event> events) {
+    // Use improved responsive logic instead of fixed 3-column
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount;
+    
+    if (screenWidth > 1100) {
+      crossAxisCount = 3; // Only use 3 columns on very wide tablets
+    } else {
+      crossAxisCount = 2; // Better spacing with 2 columns for most tablets
+    }
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Changed from 2 to 3 for better tablet experience
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         childAspectRatio: 0.85,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
@@ -609,12 +619,16 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildDesktopGrid(BuildContext context, List<Event> events) {
+    // Use improved responsive logic for desktop
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount = screenWidth > 1400 ? 4 : 3; // 4 columns only on very large screens
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         childAspectRatio: 0.85,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,

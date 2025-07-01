@@ -468,18 +468,21 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
     int crossAxisCount;
     double childAspectRatio;
     
-    if (isDesktop) {
-      crossAxisCount = 4;
+    // Improved responsive breakpoints to avoid cramped 3-card layout
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    if (screenWidth > 1400) {
+      crossAxisCount = 4; // Large desktop: 4 cards
       childAspectRatio = 0.85;
-    } else if (isTablet) {
-      crossAxisCount = 3;
+    } else if (screenWidth > 1100) {
+      crossAxisCount = 3; // Wide screen: 3 cards (only for very wide displays)
       childAspectRatio = 0.9;
     } else {
-      crossAxisCount = 2;
+      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards (better spacing)
       childAspectRatio = 0.85;
     }
 
-    print('🔍 DEBUG: Grid config - columns: $crossAxisCount, aspectRatio: $childAspectRatio');
+    print('🔍 DEBUG: Grid config - columns: $crossAxisCount, aspectRatio: $childAspectRatio, screenWidth: $screenWidth');
 
     return Container(
       constraints: const BoxConstraints(minHeight: 400),
