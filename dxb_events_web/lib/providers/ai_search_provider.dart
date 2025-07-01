@@ -33,9 +33,37 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
           perPage: 20,
         );
       } catch (e) {
-        // If smart search fails, fall back to regular events with category/tag filtering
+        // If smart search fails, fall back to regular events with enhanced filtering
         final queryLower = query.toLowerCase();
         String? category;
+        String? dateFrom;
+        String? dateTo;
+        
+        // Handle time-based queries
+        if (queryLower.contains('today') || queryLower.contains('happening today')) {
+          final today = DateTime.now();
+          dateFrom = today.toIso8601String().split('T')[0];
+          dateTo = dateFrom;
+        } else if (queryLower.contains('this weekend') || queryLower.contains('weekend')) {
+          final now = DateTime.now();
+          final daysUntilSaturday = (6 - now.weekday) % 7;
+          final saturday = now.add(Duration(days: daysUntilSaturday));
+          final sunday = saturday.add(const Duration(days: 1));
+          dateFrom = saturday.toIso8601String().split('T')[0];
+          dateTo = sunday.toIso8601String().split('T')[0];
+        } else if (queryLower.contains('this week')) {
+          final now = DateTime.now();
+          final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+          final endOfWeek = startOfWeek.add(const Duration(days: 6));
+          dateFrom = startOfWeek.toIso8601String().split('T')[0];
+          dateTo = endOfWeek.toIso8601String().split('T')[0];
+        } else if (queryLower.contains('next week')) {
+          final now = DateTime.now();
+          final startOfNextWeek = now.add(Duration(days: 8 - now.weekday));
+          final endOfNextWeek = startOfNextWeek.add(const Duration(days: 6));
+          dateFrom = startOfNextWeek.toIso8601String().split('T')[0];
+          dateTo = endOfNextWeek.toIso8601String().split('T')[0];
+        }
         
         // Try to detect category from query
         if (queryLower.contains('food') || queryLower.contains('brunch') || queryLower.contains('dining')) {
@@ -52,6 +80,8 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         
         eventsResponse = await _eventsService.getEventsWithTotal(
           category: category,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
           page: 1,
           perPage: 50, // Get more events to filter locally
         );
@@ -126,7 +156,15 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
     final eventCount = events.length;
     
     // Generate contextual response based on query type
-    if (lowerQuery.contains('brunch')) {
+    if (lowerQuery.contains('today') || lowerQuery.contains('happening today')) {
+      return "Perfect timing! I found $eventCount exciting events happening today in Dubai. From cultural experiences to family fun, there's something happening right now!";
+    } else if (lowerQuery.contains('this weekend') || lowerQuery.contains('weekend')) {
+      return "Weekend sorted! I found $eventCount events perfect for your weekend plans. Make the most of your time off!";
+    } else if (lowerQuery.contains('this week')) {
+      return "Your week just got better! I discovered $eventCount events happening this week in Dubai. Plan your perfect weekday adventures!";
+    } else if (lowerQuery.contains('next week')) {
+      return "Planning ahead! I found $eventCount events happening next week. Book your spot for these upcoming amazing experiences!";
+    } else if (lowerQuery.contains('brunch')) {
       return "I found $eventCount amazing brunch experiences in Dubai! From beachfront venues to rooftop brunches, Dubai offers incredible dining experiences for every taste and budget.";
     } else if (lowerQuery.contains('family') || lowerQuery.contains('kids')) {
       return "Perfect! I discovered $eventCount family-friendly activities. These events are designed to create wonderful memories for both kids and adults.";
@@ -136,8 +174,6 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
       return "Stay cool! I found $eventCount indoor activities perfect for escaping Dubai's heat while having amazing experiences.";
     } else if (lowerQuery.contains('outdoor')) {
       return "Adventure awaits! I discovered $eventCount outdoor activities. Dubai's weather is perfect for these exciting experiences.";
-    } else if (lowerQuery.contains('weekend')) {
-      return "Weekend sorted! I found $eventCount events perfect for your weekend plans. Make the most of your time off!";
     } else {
       return "I found $eventCount events matching '$query'. Dubai offers incredible experiences for every interest!";
     }
@@ -260,27 +296,52 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
       suggestions.add("Events in $area");
     }
     
+    // Add time-based suggestions (prioritize these)
+    if (!queryLower.contains('today')) {
+      suggestions.add("Events happening today");
+    }
+    
+    if (!queryLower.contains('weekend') && !queryLower.contains('this weekend')) {
+      suggestions.add("This weekend's activities");
+    }
+    
+    if (!queryLower.contains('this week')) {
+      suggestions.add("Events this week");
+    }
+    
+    if (!queryLower.contains('next week')) {
+      suggestions.add("Next week's events");
+    }
+    
     // Add price-based suggestions
     if (!queryLower.contains('free') && events.any((e) => e.isFree)) {
       suggestions.add("Free events in Dubai");
     }
     
-    // Add time-based suggestions
-    if (!queryLower.contains('weekend')) {
-      suggestions.add("Weekend family activities");
+    if (!queryLower.contains('budget') && !queryLower.contains('cheap')) {
+      suggestions.add("Budget-friendly activities");
     }
     
-    if (!queryLower.contains('today')) {
-      suggestions.add("Events happening today");
+    // Add family and age-specific suggestions
+    if (!queryLower.contains('family') && !queryLower.contains('kids')) {
+      suggestions.add("Family-friendly events");
     }
     
-    // Add popular searches
-    suggestions.addAll([
-      "Indoor activities",
-      "Outdoor adventures",
-      "Kids workshops",
-      "Beach activities",
-    ]);
+    // Add popular searches based on context
+    if (queryLower.contains('indoor') || queryLower.contains('outdoor')) {
+      suggestions.addAll([
+        queryLower.contains('indoor') ? "Outdoor adventures" : "Indoor activities",
+        "Beach activities",
+        "Cultural experiences",
+      ]);
+    } else {
+      suggestions.addAll([
+        "Indoor activities",
+        "Outdoor adventures", 
+        "Kids workshops",
+        "Cultural experiences",
+      ]);
+    }
     
     // Remove duplicates and limit
     return suggestions.toSet().take(6).toList();
@@ -292,12 +353,14 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
   
   List<String> _getPopularSearches() {
     return [
-      "Weekend brunch deals",
+      "Events happening today",
+      "This weekend's activities", 
       "Free family events",
       "Indoor kids activities",
+      "Weekend brunch deals",
       "Beach and water sports",
       "Cultural experiences",
-      "Adventure activities",
+      "Budget-friendly activities",
     ];
   }
   
