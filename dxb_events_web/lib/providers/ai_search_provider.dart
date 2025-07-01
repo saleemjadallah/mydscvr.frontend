@@ -172,34 +172,64 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         
         state = AsyncValue.data(searchResponse);
       } else {
-        // If no events found with date filtering, try again without date filters for weekend queries
-        if (isWeekendQuery) {
-          try {
-            final fallbackResponse = await _eventsService.getEventsWithTotal(
-              page: 1,
-              perPage: 20,
-            );
+        // If smart search returned no events, try a broader fallback approach
+        try {
+          // For time-based queries, try without strict date filtering first
+          final fallbackResponse = await _eventsService.getEventsWithTotal(
+            page: 1,
+            perPage: 20,
+            sortBy: 'start_date', // Show upcoming events
+          );
+          
+          if (fallbackResponse.isSuccess && fallbackResponse.data!.events.isNotEmpty) {
+            var fallbackEvents = fallbackResponse.data!.events;
             
-            if (fallbackResponse.isSuccess && fallbackResponse.data!.events.isNotEmpty) {
+            // For weekend queries, prioritize weekend-friendly events
+            if (isWeekendQuery) {
+              // Filter for family-friendly or weekend-suitable events
+              fallbackEvents = fallbackEvents.where((event) {
+                final title = event.title.toLowerCase();
+                final category = event.category?.toLowerCase() ?? '';
+                final tags = event.tags.map((t) => t.toLowerCase()).toList();
+                
+                return event.familyScore != null && event.familyScore! > 60 ||
+                       tags.any((tag) => ['family', 'weekend', 'kids', 'outdoor', 'brunch'].contains(tag)) ||
+                       category.contains('family') ||
+                       title.contains('family') ||
+                       title.contains('brunch') ||
+                       title.contains('weekend');
+              }).take(10).toList();
+            }
+            
+            // If we have some relevant events, show them with explanation
+            if (fallbackEvents.isNotEmpty) {
+              final responseMessage = isWeekendQuery 
+                ? "I couldn't find events specifically for this weekend, but here are some great upcoming activities that would be perfect for your weekend plans!"
+                : "I found ${fallbackEvents.length} great upcoming events in Dubai! Here are some amazing activities to explore.";
+                
               final weekendSuggestionResponse = AISearchResponse(
-                results: fallbackResponse.data!.events.take(10).map((event) => RankedEvent(
+                results: fallbackEvents.map((event) => RankedEvent(
                   event: event,
                   score: 75,
-                  reasoning: "Great activity for your weekend plans",
+                  reasoning: isWeekendQuery 
+                    ? "Great activity for your weekend plans" 
+                    : "Upcoming event you might enjoy",
                 )).toList(),
-                aiResponse: "I couldn't find events specifically for this weekend, but here are some amazing activities you might enjoy! Many events in Dubai are ongoing or have flexible scheduling.",
+                aiResponse: responseMessage,
                 intent: QueryIntent.empty(),
-                suggestions: ["Next week's events", "Indoor activities", "Family-friendly events", "Free events in Dubai"],
+                suggestions: isWeekendQuery 
+                  ? ["Next week's events", "Indoor activities", "Family-friendly events", "Free events in Dubai"]
+                  : ["Indoor activities", "Outdoor adventures", "Family events", "This weekend's activities"],
               );
               state = AsyncValue.data(weekendSuggestionResponse);
               return;
             }
-          } catch (e) {
-            // Continue to fallback message if this also fails
           }
+        } catch (e) {
+          // Continue to fallback message if this also fails
         }
         
-        // Create fallback response
+        // Create final fallback response
         final fallbackResponse = AISearchResponse(
           results: const [],
           aiResponse: _createFallbackMessage(query),
