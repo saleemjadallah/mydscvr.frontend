@@ -44,35 +44,64 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
         DateTime? dateFromObj;
         DateTime? dateToObj;
         
+        // Enhanced time-based query detection
+        final now = DateTime.now();
+        
         if (queryLower.contains('today') || queryLower.contains('happening today')) {
-          final today = DateTime.now();
-          dateFromObj = DateTime(today.year, today.month, today.day);
-          dateToObj = DateTime(today.year, today.month, today.day, 23, 59, 59);
+          dateFromObj = DateTime(now.year, now.month, now.day);
+          dateToObj = DateTime(now.year, now.month, now.day, 23, 59, 59);
+        } else if (queryLower.contains('tomorrow') || queryLower.contains('happening tomorrow')) {
+          final tomorrow = now.add(const Duration(days: 1));
+          dateFromObj = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+          dateToObj = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59);
         } else if (queryLower.contains('this weekend') || (queryLower.contains('weekend') && (queryLower.contains('this') || queryLower.contains('happening')))) {
-          final now = DateTime.now();
-          // In Dart, weekday: Monday=1, Tuesday=2, ..., Saturday=6, Sunday=7
           // Calculate days until Saturday (weekday 6)
           int daysUntilSaturday = (6 - now.weekday) % 7;
           if (daysUntilSaturday == 0 && now.hour >= 18) {
-            // If it's Saturday evening, look at next weekend
             daysUntilSaturday = 7;
           }
           final saturday = now.add(Duration(days: daysUntilSaturday));
           final sunday = saturday.add(const Duration(days: 1));
           dateFromObj = DateTime(saturday.year, saturday.month, saturday.day);
           dateToObj = DateTime(sunday.year, sunday.month, sunday.day, 23, 59, 59);
-        } else if (queryLower.contains('this week')) {
-          final now = DateTime.now();
+        } else if (queryLower.contains('next weekend')) {
+          int daysUntilSaturday = (6 - now.weekday) % 7;
+          if (daysUntilSaturday <= 1) daysUntilSaturday += 7; // Next weekend
+          final saturday = now.add(Duration(days: daysUntilSaturday));
+          final sunday = saturday.add(const Duration(days: 1));
+          dateFromObj = DateTime(saturday.year, saturday.month, saturday.day);
+          dateToObj = DateTime(sunday.year, sunday.month, sunday.day, 23, 59, 59);
+        } else if (queryLower.contains('this week') || (queryLower.contains('week') && queryLower.contains('this'))) {
           final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
           final endOfWeek = startOfWeek.add(const Duration(days: 6));
           dateFromObj = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
           dateToObj = DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
-        } else if (queryLower.contains('next week')) {
-          final now = DateTime.now();
+        } else if (queryLower.contains('next week') || (queryLower.contains('week') && queryLower.contains('next'))) {
           final startOfNextWeek = now.add(Duration(days: 8 - now.weekday));
           final endOfNextWeek = startOfNextWeek.add(const Duration(days: 6));
           dateFromObj = DateTime(startOfNextWeek.year, startOfNextWeek.month, startOfNextWeek.day);
           dateToObj = DateTime(endOfNextWeek.year, endOfNextWeek.month, endOfNextWeek.day, 23, 59, 59);
+        } else if (queryLower.contains('this month') || (queryLower.contains('month') && queryLower.contains('this'))) {
+          dateFromObj = DateTime(now.year, now.month, 1);
+          final nextMonth = now.month == 12 ? DateTime(now.year + 1, 1, 1) : DateTime(now.year, now.month + 1, 1);
+          dateToObj = nextMonth.subtract(const Duration(days: 1)).add(const Duration(hours: 23, minutes: 59, seconds: 59));
+        } else if (queryLower.contains('next month') || (queryLower.contains('month') && queryLower.contains('next'))) {
+          final nextMonth = now.month == 12 ? DateTime(now.year + 1, 1, 1) : DateTime(now.year, now.month + 1, 1);
+          dateFromObj = nextMonth;
+          final monthAfter = nextMonth.month == 12 ? DateTime(nextMonth.year + 1, 1, 1) : DateTime(nextMonth.year, nextMonth.month + 1, 1);
+          dateToObj = monthAfter.subtract(const Duration(days: 1)).add(const Duration(hours: 23, minutes: 59, seconds: 59));
+        } else if (queryLower.contains('next few days') || queryLower.contains('coming days') || queryLower.contains('upcoming days')) {
+          dateFromObj = DateTime(now.year, now.month, now.day);
+          final nextFewDays = now.add(const Duration(days: 5));
+          dateToObj = DateTime(nextFewDays.year, nextFewDays.month, nextFewDays.day, 23, 59, 59);
+        } else if (queryLower.contains('coming up') || queryLower.contains('happening soon') || queryLower.contains('upcoming')) {
+          dateFromObj = DateTime(now.year, now.month, now.day);
+          final nextWeek = now.add(const Duration(days: 7));
+          dateToObj = DateTime(nextWeek.year, nextWeek.month, nextWeek.day, 23, 59, 59);
+        } else if (_isSpecificDayQuery(queryLower)) {
+          final dayRange = _calculateSpecificDayRange(queryLower, now);
+          dateFromObj = dayRange['from'];
+          dateToObj = dayRange['to'];
         }
         
         // Try to detect category from query
@@ -195,12 +224,27 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
     // Generate contextual response based on query type
     if (lowerQuery.contains('today') || lowerQuery.contains('happening today')) {
       return "Perfect timing! I found $eventCount exciting events happening today in Dubai. From cultural experiences to family fun, there's something happening right now!";
+    } else if (lowerQuery.contains('tomorrow') || lowerQuery.contains('happening tomorrow')) {
+      return "Tomorrow looks exciting! I found $eventCount events happening tomorrow in Dubai. Perfect for planning your next day adventure!";
     } else if (lowerQuery.contains('this weekend') || (lowerQuery.contains('weekend') && (lowerQuery.contains('this') || lowerQuery.contains('happening')))) {
       return "Weekend sorted! I found $eventCount events perfect for your weekend plans. Make the most of your time off!";
+    } else if (lowerQuery.contains('next weekend')) {
+      return "Planning ahead for next weekend! I found $eventCount events that will make your future weekend absolutely amazing!";
     } else if (lowerQuery.contains('this week')) {
       return "Your week just got better! I discovered $eventCount events happening this week in Dubai. Plan your perfect weekday adventures!";
     } else if (lowerQuery.contains('next week')) {
       return "Planning ahead! I found $eventCount events happening next week. Book your spot for these upcoming amazing experiences!";
+    } else if (lowerQuery.contains('this month')) {
+      return "This month is packed with excitement! I found $eventCount events happening throughout this month. So many amazing experiences await!";
+    } else if (lowerQuery.contains('next month')) {
+      return "Next month looks incredible! I found $eventCount events to look forward to. Start planning your amazing experiences!";
+    } else if (lowerQuery.contains('next few days') || lowerQuery.contains('coming days') || lowerQuery.contains('upcoming days')) {
+      return "The next few days are full of possibilities! I found $eventCount events coming up soon. Your perfect activity is just around the corner!";
+    } else if (lowerQuery.contains('coming up') || lowerQuery.contains('happening soon') || lowerQuery.contains('upcoming')) {
+      return "Exciting times ahead! I found $eventCount upcoming events in Dubai. Get ready for some amazing experiences!";
+    } else if (_isSpecificDayQuery(lowerQuery)) {
+      final dayName = _extractDayName(lowerQuery);
+      return "Perfect for $dayName! I found $eventCount events happening that day. Make it a day to remember!";
     } else if (lowerQuery.contains('brunch')) {
       return "I found $eventCount amazing brunch experiences in Dubai! From beachfront venues to rooftop brunches, Dubai offers incredible dining experiences for every taste and budget.";
     } else if (lowerQuery.contains('family') || lowerQuery.contains('kids')) {
@@ -412,6 +456,50 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
   }
   
   List<String> getPopularSearches() => _getPopularSearches();
+  
+  // Helper function to detect specific day queries
+  bool _isSpecificDayQuery(String query) {
+    final dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    return dayNames.any((day) => query.contains(day)) || 
+           query.contains('friday') || query.contains('saturday') || query.contains('sunday');
+  }
+  
+  // Helper function to calculate date range for specific days
+  Map<String, DateTime?> _calculateSpecificDayRange(String query, DateTime now) {
+    final dayMap = {
+      'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4,
+      'friday': 5, 'saturday': 6, 'sunday': 7
+    };
+    
+    for (final entry in dayMap.entries) {
+      if (query.contains(entry.key)) {
+        final targetDay = entry.value;
+        int daysUntilTarget = (targetDay - now.weekday) % 7;
+        if (daysUntilTarget == 0) daysUntilTarget = 7; // Next occurrence if today
+        
+        final targetDate = now.add(Duration(days: daysUntilTarget));
+        return {
+          'from': DateTime(targetDate.year, targetDate.month, targetDate.day),
+          'to': DateTime(targetDate.year, targetDate.month, targetDate.day, 23, 59, 59),
+        };
+      }
+    }
+    
+    return {'from': null, 'to': null};
+  }
+  
+  // Helper function to extract day name from query
+  String _extractDayName(String query) {
+    final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final dayNamesLower = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    for (int i = 0; i < dayNamesLower.length; i++) {
+      if (query.contains(dayNamesLower[i])) {
+        return dayNames[i];
+      }
+    }
+    return 'that day';
+  }
 }
 
 // AI search provider
