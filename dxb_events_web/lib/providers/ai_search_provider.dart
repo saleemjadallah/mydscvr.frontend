@@ -45,7 +45,7 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
           final today = DateTime.now();
           dateFromObj = DateTime(today.year, today.month, today.day);
           dateToObj = DateTime(today.year, today.month, today.day, 23, 59, 59);
-        } else if (queryLower.contains('this weekend') || queryLower.contains('weekend')) {
+        } else if (queryLower.contains('this weekend') || (queryLower.contains('weekend') && (queryLower.contains('this') || queryLower.contains('happening')))) {
           final now = DateTime.now();
           final daysUntilSaturday = (6 - now.weekday) % 7;
           final saturday = now.add(Duration(days: daysUntilSaturday));
@@ -159,7 +159,7 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
     // Generate contextual response based on query type
     if (lowerQuery.contains('today') || lowerQuery.contains('happening today')) {
       return "Perfect timing! I found $eventCount exciting events happening today in Dubai. From cultural experiences to family fun, there's something happening right now!";
-    } else if (lowerQuery.contains('this weekend') || lowerQuery.contains('weekend')) {
+    } else if (lowerQuery.contains('this weekend') || (lowerQuery.contains('weekend') && (lowerQuery.contains('this') || lowerQuery.contains('happening')))) {
       return "Weekend sorted! I found $eventCount events perfect for your weekend plans. Make the most of your time off!";
     } else if (lowerQuery.contains('this week')) {
       return "Your week just got better! I discovered $eventCount events happening this week in Dubai. Plan your perfect weekday adventures!";
