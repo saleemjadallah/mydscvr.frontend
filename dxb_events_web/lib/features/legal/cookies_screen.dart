@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 
 class CookiesScreen extends StatefulWidget {
   const CookiesScreen({Key? key}) : super(key: key);
