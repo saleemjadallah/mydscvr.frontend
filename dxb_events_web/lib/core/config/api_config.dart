@@ -6,12 +6,12 @@ class ApiConfig {
   static const String apiVersion = 'v1';
   
   // Enhanced API endpoints for new features
-  static const String eventsFilteredSearch = '/api/events/search/filtered';
-  static const String eventsAdvanced = '/api/events/advanced';
-  static const String eventsQuality = '/api/events/quality';
-  static const String eventsSocial = '/api/events/social';
-  static const String eventsTrending = '/api/events/trending';
-  static const String eventsRecommendations = '/api/events/recommendations';
-  static const String eventsExtract = '/api/events/extract';
-  static const String eventsQualityStats = '/api/events/quality/stats';
+  static const String eventsFilteredSearch = '/events/search/filtered';
+  static const String eventsAdvanced = '/events/advanced';
+  static const String eventsQuality = '/events/quality';
+  static const String eventsSocial = '/events/social';
+  static const String eventsTrending = '/events/trending';
+  static const String eventsRecommendations = '/events/recommendations';
+  static const String eventsExtract = '/events/extract';
+  static const String eventsQualityStats = '/events/quality/stats';
 }

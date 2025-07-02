@@ -9,7 +9,7 @@ import '../core/config/environment_config.dart';
 /// Google Sign-In service for web authentication
 class GoogleSignInService {
   static String get _clientId => EnvironmentConfig.googleClientId;
-  static String get _baseUrl => '${EnvironmentConfig.getApiBaseUrl()}/api';
+  static String get _baseUrl => EnvironmentConfig.getApiBaseUrl();
   
   late final Dio _dio;
   bool _isInitialized = false;

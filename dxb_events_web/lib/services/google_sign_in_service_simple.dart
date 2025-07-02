@@ -8,7 +8,7 @@ import '../core/config/environment_config.dart';
 /// Simplified Google Sign-In service using pure client-side flow
 class GoogleSignInServiceSimple {
   static String get _clientId => EnvironmentConfig.googleClientId;
-  static String get _baseUrl => '${EnvironmentConfig.getApiBaseUrl()}/api';
+  static String get _baseUrl => EnvironmentConfig.getApiBaseUrl();
   
   late final Dio _dio;
   bool _isInitialized = false;

@@ -149,7 +149,7 @@ class EventsService {
 
       // Use the new AI search endpoint
       final response = await _dio.get(
-        '/api/ai-search',  // Updated to use the new AI search endpoint
+        '/ai-search',  // Fixed: Remove /api prefix since base URL already includes it
         queryParameters: queryParams,
       );
 
