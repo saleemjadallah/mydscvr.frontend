@@ -109,6 +109,14 @@ class Event {
   @JsonKey(name: 'special_occasion')
   final String? specialOccasion;
 
+  // AI Search fields
+  @JsonKey(name: 'ai_score')
+  final double? aiScore;
+  @JsonKey(name: 'ai_reasoning')
+  final String? aiReasoning;
+  @JsonKey(name: 'ai_highlights')
+  final List<String>? aiHighlights;
+
   const Event({
     required this.id,
     required this.title,
@@ -168,6 +176,11 @@ class Event {
     this.eventType,
     this.indoorOutdoor,
     this.specialOccasion,
+    
+    // AI Search fields
+    this.aiScore,
+    this.aiReasoning,
+    this.aiHighlights,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
@@ -397,6 +410,11 @@ class Event {
       eventType: json['event_type'],
       indoorOutdoor: json['indoor_outdoor'],
       specialOccasion: json['special_occasion'],
+      
+      // AI Search fields
+      aiScore: json['ai_score']?.toDouble(),
+      aiReasoning: json['ai_reasoning'],
+      aiHighlights: (json['ai_highlights'] as List<dynamic>?)?.cast<String>(),
     );
   }
 

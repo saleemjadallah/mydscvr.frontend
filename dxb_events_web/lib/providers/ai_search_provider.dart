@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/events_service.dart';
 import '../models/ai_search.dart';
+import '../models/ai_search_response.dart';
 import '../models/event.dart';
 
 // Events service provider
@@ -47,22 +48,23 @@ class AISearchNotifier extends StateNotifier<AsyncValue<AISearchResponse?>> {
             perPage: 20,
           );
           
-          // For OpenAI search, the response might have additional data
+          // For OpenAI search, the response has rich AI data
           if (eventsResponse.isSuccess && eventsResponse.data != null) {
-            final events = eventsResponse.data!.events;
+            final aiSearchResult = eventsResponse.data!;
+            final events = aiSearchResult.events;
             
-            // Create AI-enhanced ranked events (OpenAI backend provides scores)
+            // Create AI-enhanced ranked events using backend AI scores
             final rankedEvents = events.map((event) => RankedEvent(
               event: event,
-              score: 85, // Default score, could be enhanced with AI response data
-              reasoning: "Intelligently matched using OpenAI",
+              score: (event.aiScore ?? 75.0).toInt(),
+              reasoning: event.aiReasoning ?? "Intelligently matched using OpenAI",
             )).toList();
             
             final aiResponse = AISearchResponse(
               results: rankedEvents,
-              aiResponse: "I used advanced AI to find ${events.length} perfectly matched events for '$query'. These results are intelligently ranked based on your specific needs!",
-              intent: QueryIntent.empty(),
-              suggestions: ["Try different queries", "Explore categories", "Check weekend events"],
+              aiResponse: aiSearchResult.aiResponse,
+              intent: QueryIntent.empty(), // Could map from queryAnalysis if needed
+              suggestions: aiSearchResult.suggestions,
             );
             
             state = AsyncValue.data(aiResponse);

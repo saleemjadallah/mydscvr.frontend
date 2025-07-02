@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../models/event.dart';
 import '../models/api_response.dart';
 import '../models/event_stats.dart';
+import '../models/ai_search_response.dart';
 import 'api/dio_config.dart';
 import '../core/utils/safe_event_parser.dart';
 
@@ -13,6 +14,27 @@ class EventsWithTotal {
   const EventsWithTotal({
     required this.events,
     required this.total,
+  });
+}
+
+/// AI Search response with additional AI-generated content
+class AISearchResult {
+  final List<Event> events;
+  final int total;
+  final String aiResponse;
+  final List<String> suggestions;
+  final QueryAnalysis queryAnalysis;
+  final int processingTimeMs;
+  final bool aiEnabled;
+  
+  const AISearchResult({
+    required this.events,
+    required this.total,
+    required this.aiResponse,
+    required this.suggestions,
+    required this.queryAnalysis,
+    required this.processingTimeMs,
+    required this.aiEnabled,
   });
 }
 
@@ -113,7 +135,7 @@ class EventsService {
   }
 
   /// AI-powered search using OpenAI for intelligent event discovery
-  Future<ApiResponse<EventsWithTotal>> aiSearch({
+  Future<ApiResponse<AISearchResult>> aiSearch({
     required String query,
     int page = 1,
     int perPage = 20,
@@ -125,32 +147,46 @@ class EventsService {
         'per_page': perPage,
       };
 
+      // Use the new AI search endpoint
       final response = await _dio.get(
-        '/ai-search',
+        '/api/ai-search',  // Updated to use the new AI search endpoint
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        final eventsJson = responseData['events'] as List<dynamic>;
-        final total = responseData['pagination']['total'] as int;
         
-        final events = SafeEventParser.parseEventList(eventsJson);
+        // Parse the AI search response
+        final aiSearchResponse = AISearchResponse.fromJson(responseData);
         
-        return ApiResponse<EventsWithTotal>.success(
-          EventsWithTotal(events: events, total: total),
+        // Parse events with AI fields
+        final events = aiSearchResponse.events.map((eventJson) {
+          // Events are already parsed by the fromJson method
+          return eventJson;
+        }).toList();
+        
+        return ApiResponse<AISearchResult>.success(
+          AISearchResult(
+            events: events,
+            total: aiSearchResponse.pagination.total,
+            aiResponse: aiSearchResponse.aiResponse,
+            suggestions: aiSearchResponse.suggestions,
+            queryAnalysis: aiSearchResponse.queryAnalysis,
+            processingTimeMs: aiSearchResponse.processingTimeMs,
+            aiEnabled: aiSearchResponse.aiEnabled,
+          ),
         );
       } else {
-        return ApiResponse<EventsWithTotal>.error(
+        return ApiResponse<AISearchResult>.error(
           'Failed to perform AI search: ${response.statusCode}',
         );
       }
     } on DioException catch (e) {
-      return ApiResponse<EventsWithTotal>.error(
+      return ApiResponse<AISearchResult>.error(
         'Network error during AI search: ${e.message}',
       );
     } catch (e) {
-      return ApiResponse<EventsWithTotal>.error(
+      return ApiResponse<AISearchResult>.error(
         'Unexpected error during AI search: $e',
       );
     }
