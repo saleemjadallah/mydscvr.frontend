@@ -147,10 +147,14 @@ class EventsService {
         'per_page': perPage,
       };
 
-      // Use the new AI search endpoint
+      // Use the new AI search endpoint with extended timeout
       final response = await _dio.get(
-        '/ai-search',  // Fixed: Remove /api prefix since base URL already includes it
+        '/ai-search',  // Correct path since base URL already includes /api
         queryParameters: queryParams,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 60), // Extended timeout for AI processing
+          sendTimeout: const Duration(seconds: 60),
+        ),
       );
 
       if (response.statusCode == 200) {
