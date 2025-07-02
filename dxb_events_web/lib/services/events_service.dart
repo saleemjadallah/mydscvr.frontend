@@ -147,12 +147,12 @@ class EventsService {
         'per_page': perPage,
       };
 
-      // Use the new AI search endpoint with extended timeout
+      // Use the optimized AI search endpoint with reduced timeout
       final response = await _dio.get(
-        '/ai-search',  // Correct path since base URL already includes /api
+        '/ai-search-v2',  // Optimized endpoint with single OpenAI call
         queryParameters: queryParams,
         options: Options(
-          receiveTimeout: const Duration(seconds: 90), // Increased for 504 gateway timeout issues
+          receiveTimeout: const Duration(seconds: 90), // Keep generous timeout but expect 10-15s response
           sendTimeout: const Duration(seconds: 90),
         ),
       );
