@@ -1867,28 +1867,40 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     // Mirror the category configurations from InteractiveCategoryExplorer
     const categoryConfigs = {
       'kids_and_family': {
-        'apiCategories': ['kids_and_family', 'educational'],
+        'apiCategories': ['family_activities', 'educational', 'kids_activities'],
         'tags': ['kids', 'family', 'children', 'educational', 'playground', 'activities'],
       },
       'entertainment': {
-        'apiCategories': ['entertainment', 'music_and_concerts', 'comedy_and_shows', 'music'],
+        'apiCategories': ['entertainment', 'music', 'nightlife'],
         'tags': ['entertainment', 'music', 'concert', 'show', 'performance', 'nightlife'],
       },
       'outdoor_activities': {
-        'apiCategories': ['outdoor_activities', 'sports_and_fitness', 'outdoor', 'sports'],
-        'tags': ['outdoor', 'sports', 'beach', 'water', 'nature', 'park', 'hiking'],
+        'apiCategories': ['outdoor_activities', 'sports', 'adventure', 'beach', 'water_sports'],
+        'tags': ['outdoor', 'sports', 'beach', 'water', 'nature', 'park', 'hiking', 'adventure'],
       },
-      'culture': {
-        'apiCategories': ['arts_and_culture', 'culture', 'arts'],
-        'tags': ['culture', 'art', 'museum', 'gallery', 'heritage', 'history'],
+      'cultural': {
+        'apiCategories': ['cultural', 'arts'],
+        'tags': ['culture', 'art', 'museum', 'gallery', 'heritage', 'history', 'cultural'],
       },
       'food_and_dining': {
-        'apiCategories': ['food_and_dining', 'food'],
-        'tags': ['food', 'dining', 'restaurant', 'cuisine', 'festival', 'cooking'],
+        'apiCategories': ['dining', 'nightlife'],
+        'tags': ['food', 'dining', 'restaurant', 'cuisine', 'cooking', 'brunch', 'lunch', 'dinner'],
       },
       'indoor_activities': {
-        'apiCategories': ['indoor_activities', 'shopping_and_lifestyle', 'indoor'],
-        'tags': ['indoor', 'shopping', 'mall', 'lifestyle', 'wellness', 'spa'],
+        'apiCategories': ['shopping', 'educational', 'workshops'],
+        'tags': ['indoor', 'mall', 'lifestyle', 'wellness', 'spa', 'workshop', 'class'],
+      },
+      'festivals_and_celebrations': {
+        'apiCategories': ['festivals', 'seasonal'],
+        'tags': ['festival', 'celebration', 'event', 'seasonal', 'special'],
+      },
+      'tours_and_sightseeing': {
+        'apiCategories': ['tours', 'tourism'],
+        'tags': ['tour', 'sightseeing', 'tourism', 'guide', 'excursion'],
+      },
+      'business_and_networking': {
+        'apiCategories': ['business', 'networking'],
+        'tags': ['business', 'networking', 'conference', 'professional', 'meeting'],
       },
     };
     
