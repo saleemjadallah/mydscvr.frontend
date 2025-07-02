@@ -59,7 +59,7 @@ class EventsService {
       };
 
       final response = await _dio.get(
-        '/events/search-titles/',
+        '/events/search-titles',  // Fixed: Remove trailing slash to match backend
         queryParameters: queryParams,
       );
 
@@ -152,8 +152,9 @@ class EventsService {
         '/ai-search',  // Correct path since base URL already includes /api
         queryParameters: queryParams,
         options: Options(
-          receiveTimeout: const Duration(seconds: 60), // Extended timeout for AI processing
-          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 90), // Increased for 504 gateway timeout issues
+          sendTimeout: const Duration(seconds: 90),
+          connectTimeout: const Duration(seconds: 30),
         ),
       );
 
@@ -215,7 +216,7 @@ class EventsService {
       }
 
       final response = await _dio.get(
-        '/search/smart-search/',
+        '/search/smart-search',  // Fixed: Remove trailing slash
         queryParameters: queryParams,
       );
 
@@ -285,7 +286,7 @@ class EventsService {
       if (radiusKm != null) queryParams['radius_km'] = radiusKm;
 
       final response = await _dio.get(
-        '/events/',
+        '/events',
         queryParameters: queryParams,
       );
 
@@ -413,7 +414,7 @@ class EventsService {
   }) async {
     try {
       final response = await _dio.get(
-        '/search/',
+        '/search',
         queryParameters: {
           'q': query,
           if (filters != null) 'filters': filters,
@@ -445,7 +446,7 @@ class EventsService {
   Future<ApiResponse<List<Event>>> getTrendingEvents({int limit = 10}) async {
     try {
       final response = await _dio.get(
-        '/events/trending/list/',
+        '/events/trending/list',
         queryParameters: {'limit': limit},
       );
 
@@ -474,7 +475,7 @@ class EventsService {
   Future<ApiResponse<List<Event>>> getFamilyRecommendations({int limit = 10}) async {
     try {
       final response = await _dio.get(
-        '/events/recommendations/family/',
+        '/events/recommendations/family',
         queryParameters: {'limit': limit},
       );
 
