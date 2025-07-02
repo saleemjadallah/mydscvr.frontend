@@ -285,7 +285,7 @@ class EventsService {
       if (radiusKm != null) queryParams['radius_km'] = radiusKm;
 
       final response = await _dio.get(
-        '/events',
+        '/events/',  // Backend requires trailing slash for main events endpoint
         queryParameters: queryParams,
       );
 
@@ -413,7 +413,7 @@ class EventsService {
   }) async {
     try {
       final response = await _dio.get(
-        '/search',
+        '/search/',  // Backend requires trailing slash for search endpoint
         queryParameters: {
           'q': query,
           if (filters != null) 'filters': filters,
