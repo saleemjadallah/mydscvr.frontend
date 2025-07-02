@@ -84,52 +84,30 @@ class EventsService {
     }
   }
 
-  /// Smart search for events using backend AI search
+  /// Smart search for events using AI search (redirects to aiSearch)
   Future<ApiResponse<EventsWithTotal>> smartSearch({
     required String query,
     String? area,
     int page = 1,
     int perPage = 20,
   }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'q': query,
-        'page': page,
-        'per_page': perPage,
-        'sort_by': 'relevance',
-      };
-
-      if (area != null) {
-        queryParams['area'] = area;
-      }
-
-      final response = await _dio.get(
-        '/search/smart-search',
-        queryParameters: queryParams,
+    // Redirect to AI search since we're removing smart search
+    final aiResult = await aiSearch(
+      query: query,
+      page: page,
+      perPage: perPage,
+    );
+    
+    if (aiResult.isSuccess) {
+      return ApiResponse<EventsWithTotal>.success(
+        EventsWithTotal(
+          events: aiResult.data!.events,
+          total: aiResult.data!.total,
+        ),
       );
-
-      if (response.statusCode == 200) {
-        final responseData = response.data;
-        final eventsJson = responseData['events'] as List<dynamic>;
-        final total = responseData['pagination']['total'] as int;
-        
-        final events = SafeEventParser.parseEventList(eventsJson);
-        
-        return ApiResponse<EventsWithTotal>.success(
-          EventsWithTotal(events: events, total: total),
-        );
-      } else {
-        return ApiResponse<EventsWithTotal>.error(
-          'Failed to search events: ${response.statusCode}',
-        );
-      }
-    } on DioException catch (e) {
+    } else {
       return ApiResponse<EventsWithTotal>.error(
-        'Network error searching events: ${e.message}',
-      );
-    } catch (e) {
-      return ApiResponse<EventsWithTotal>.error(
-        'Unexpected error searching events: $e',
+        aiResult.error ?? 'AI search failed',
       );
     }
   }
@@ -196,51 +174,35 @@ class EventsService {
     }
   }
 
-  /// Search with specific intent (brunch, family fun, etc.)
+  /// Search with specific intent (brunch, family fun, etc.) using AI search
   Future<ApiResponse<EventsWithTotal>> searchByIntent({
     required String intent,
     String? area,
     int page = 1,
     int perPage = 20,
   }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'intent': intent,
-        'page': page,
-        'per_page': perPage,
-      };
-
-      if (area != null) {
-        queryParams['area'] = area;
-      }
-
-      final response = await _dio.get(
-        '/search/smart-search',  // Fixed: Remove trailing slash
-        queryParameters: queryParams,
+    // Use AI search with intent as query
+    String query = intent;
+    if (area != null) {
+      query += ' in $area';
+    }
+    
+    final aiResult = await aiSearch(
+      query: query,
+      page: page,
+      perPage: perPage,
+    );
+    
+    if (aiResult.isSuccess) {
+      return ApiResponse<EventsWithTotal>.success(
+        EventsWithTotal(
+          events: aiResult.data!.events,
+          total: aiResult.data!.total,
+        ),
       );
-
-      if (response.statusCode == 200) {
-        final responseData = response.data;
-        final eventsJson = responseData['events'] as List<dynamic>;
-        final total = responseData['pagination']['total'] as int;
-        
-        final events = SafeEventParser.parseEventList(eventsJson);
-        
-        return ApiResponse<EventsWithTotal>.success(
-          EventsWithTotal(events: events, total: total),
-        );
-      } else {
-        return ApiResponse<EventsWithTotal>.error(
-          'Failed to search by intent: ${response.statusCode}',
-        );
-      }
-    } on DioException catch (e) {
+    } else {
       return ApiResponse<EventsWithTotal>.error(
-        'Network error searching by intent: ${e.message}',
-      );
-    } catch (e) {
-      return ApiResponse<EventsWithTotal>.error(
-        'Unexpected error searching by intent: $e',
+        aiResult.error ?? 'AI search failed',
       );
     }
   }
