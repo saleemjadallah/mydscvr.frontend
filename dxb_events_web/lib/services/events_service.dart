@@ -154,7 +154,6 @@ class EventsService {
         options: Options(
           receiveTimeout: const Duration(seconds: 90), // Increased for 504 gateway timeout issues
           sendTimeout: const Duration(seconds: 90),
-          connectTimeout: const Duration(seconds: 30),
         ),
       );
 
