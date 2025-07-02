@@ -767,10 +767,10 @@ class _EventAdviceWidgetState extends State<EventAdviceWidget>
     try {
       print('👍 Attempting to mark advice as helpful: ${advice.id}');
       final adviceService = AdviceApiService();
-      final success = await adviceService.markAdviceHelpful(advice.id);
-      print('👍 Mark helpful result: $success');
+      final result = await adviceService.markAdviceHelpful(advice.id);
+      print('👍 Mark helpful result: ${result.isSuccess}, ${result.errorMessage}');
       
-      if (success) {
+      if (result.isSuccess && !result.isAlreadyVoted) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -817,14 +817,46 @@ class _EventAdviceWidgetState extends State<EventAdviceWidget>
         }
       } else {
         if (mounted) {
+          // Show specific error message
+          final message = result.errorMessage ?? 'Unable to vote on advice';
+          final color = result.isAlreadyVoted ? AppColors.dubaiGold : AppColors.error;
+          final icon = result.isAlreadyVoted ? LucideIcons.info : LucideIcons.alertCircle;
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Please log in to vote on advice'),
-              backgroundColor: AppColors.error,
+              content: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: color,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
             ),
           );
         }
@@ -834,7 +866,33 @@ class _EventAdviceWidgetState extends State<EventAdviceWidget>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    LucideIcons.alertCircle,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error: $e',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(

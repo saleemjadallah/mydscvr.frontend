@@ -180,7 +180,7 @@ class AdviceApiService {
   }
 
   // Mark advice as helpful
-  Future<bool> markAdviceHelpful(String adviceId) async {
+  Future<MarkHelpfulResult> markAdviceHelpful(String adviceId) async {
     try {
       print('👍 Marking advice as helpful: $adviceId');
       
@@ -189,7 +189,7 @@ class AdviceApiService {
       final accessToken = prefs.getString('access_token');
       if (accessToken == null) {
         print('❌ No access token found for helpful vote');
-        return false;
+        return MarkHelpfulResult.error('Please log in to vote on advice');
       }
       
       final response = await _dio.post('/advice/interact/$adviceId', data: {
@@ -197,14 +197,41 @@ class AdviceApiService {
       });
       
       print('👍 Helpful response: ${response.statusCode} - ${response.data}');
-      return response.statusCode == 200;
+      
+      if (response.statusCode == 200) {
+        // Check if already voted
+        final responseData = response.data;
+        if (responseData is Map && responseData['already_voted'] == true) {
+          return MarkHelpfulResult.alreadyVoted(responseData['message'] ?? 'You have already voted on this advice');
+        }
+        return MarkHelpfulResult.success();
+      }
+      
+      return MarkHelpfulResult.error('Failed to mark advice as helpful');
     } on DioException catch (e) {
       print('❌ Error marking advice as helpful: ${e.message}');
       print('❌ Response: ${e.response?.data}');
-      return false;
+      
+      String errorMessage = 'Failed to mark advice as helpful';
+      
+      if (e.response?.statusCode == 400) {
+        // Extract the specific error message from backend
+        final detail = e.response?.data['detail'];
+        if (detail != null && detail.contains('cannot rate your own advice')) {
+          errorMessage = 'You cannot rate your own advice';
+        } else {
+          errorMessage = detail ?? errorMessage;
+        }
+      } else if (e.response?.statusCode == 401) {
+        errorMessage = 'Please log in to vote on advice';
+      } else if (e.response?.statusCode == 403) {
+        errorMessage = 'Email verification required to vote on advice';
+      }
+      
+      return MarkHelpfulResult.error(errorMessage);
     } catch (e) {
       print('❌ Unexpected error marking advice as helpful: $e');
-      return false;
+      return MarkHelpfulResult.error('Unexpected error occurred');
     }
   }
 
@@ -282,4 +309,24 @@ class AdviceSubmissionResult {
   AdviceSubmissionResult.error(this.errorMessage)
       : isSuccess = false,
         advice = null;
+}
+
+// Result class for marking advice as helpful
+class MarkHelpfulResult {
+  final bool isSuccess;
+  final bool isAlreadyVoted;
+  final String? errorMessage;
+
+  MarkHelpfulResult.success()
+      : isSuccess = true,
+        isAlreadyVoted = false,
+        errorMessage = null;
+
+  MarkHelpfulResult.alreadyVoted(this.errorMessage)
+      : isSuccess = true,
+        isAlreadyVoted = true;
+
+  MarkHelpfulResult.error(this.errorMessage)
+      : isSuccess = false,
+        isAlreadyVoted = false;
 }
