@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'event.g.dart';
-
 /// Main event model for Dubai family activities
 @JsonSerializable()
 class Event {
@@ -183,8 +181,9 @@ class Event {
     this.aiHighlights,
   });
 
-  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
-  Map<String, dynamic> toJson() => _$EventToJson(this);
+  // Use fromBackendApi instead of generated fromJson
+  factory Event.fromJson(Map<String, dynamic> json) => Event.fromBackendApi(json);
+  Map<String, dynamic> toJson() => throw UnimplementedError('Use fromBackendApi for parsing');
 
   /// Create Event from backend API response
   factory Event.fromBackendApi(Map<String, dynamic> json) {
@@ -559,8 +558,24 @@ class EnhancedContent {
     this.tips,
   });
 
-  factory EnhancedContent.fromJson(Map<String, dynamic> json) => _$EnhancedContentFromJson(json);
-  Map<String, dynamic> toJson() => _$EnhancedContentToJson(this);
+  factory EnhancedContent.fromJson(Map<String, dynamic> json) {
+    return EnhancedContent(
+      familySummary: json['family_summary'],
+      kidsDescription: json['kids_description'],
+      practicalInfo: json['practical_info'],
+      highlights: json['highlights'],
+      tips: json['tips'],
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'family_summary': familySummary,
+      'kids_description': kidsDescription,
+      'practical_info': practicalInfo,
+      'highlights': highlights,
+      'tips': tips,
+    };
+  }
 }
 
 /// Venue information
@@ -603,8 +618,44 @@ class Venue {
     required this.publicTransportAccess,
   });
 
-  factory Venue.fromJson(Map<String, dynamic> json) => _$VenueFromJson(json);
-  Map<String, dynamic> toJson() => _$VenueToJson(this);
+  factory Venue.fromJson(Map<String, dynamic> json) {
+    return Venue(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      address: json['address'] ?? '',
+      area: json['area'] ?? '',
+      district: json['district'],
+      city: json['city'],
+      postalCode: json['postal_code'],
+      latitude: json['latitude']?.toDouble(),
+      longitude: json['longitude']?.toDouble(),
+      phone: json['phone'],
+      email: json['email'],
+      website: json['website'],
+      amenities: json['amenities'],
+      parkingAvailable: json['parking_available'] ?? false,
+      publicTransportAccess: json['public_transport_access'] ?? false,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'address': address,
+      'area': area,
+      'district': district,
+      'city': city,
+      'postal_code': postalCode,
+      'latitude': latitude,
+      'longitude': longitude,
+      'phone': phone,
+      'email': email,
+      'website': website,
+      'amenities': amenities,
+      'parking_available': parkingAvailable,
+      'public_transport_access': publicTransportAccess,
+    };
+  }
 
   String get fullAddress {
     final parts = <String>[address];
@@ -660,8 +711,40 @@ class Pricing {
     this.isRefundable = true,
   });
 
-  factory Pricing.fromJson(Map<String, dynamic> json) => _$PricingFromJson(json);
-  Map<String, dynamic> toJson() => _$PricingToJson(this);
+  factory Pricing.fromJson(Map<String, dynamic> json) {
+    return Pricing(
+      basePrice: (json['base_price'] ?? 0).toDouble(),
+      maxPrice: json['max_price']?.toDouble(),
+      childPrice: json['child_price']?.toDouble(),
+      seniorPrice: json['senior_price']?.toDouble(),
+      groupDiscount: json['group_discount']?.toDouble(),
+      groupDiscounts: Map<String, double>.from(json['group_discounts'] ?? {}),
+      earlyBirdDiscount: json['early_bird_discount']?.toDouble(),
+      currency: json['currency'] ?? 'AED',
+      bookingFee: json['booking_fee']?.toDouble(),
+      cancellationFee: json['cancellation_fee']?.toDouble(),
+      pricingNotes: json['pricing_notes'],
+      priceCategories: Map<String, double>.from(json['price_categories'] ?? {}),
+      isRefundable: json['is_refundable'] ?? true,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'base_price': basePrice,
+      'max_price': maxPrice,
+      'child_price': childPrice,
+      'senior_price': seniorPrice,
+      'group_discount': groupDiscount,
+      'group_discounts': groupDiscounts,
+      'early_bird_discount': earlyBirdDiscount,
+      'currency': currency,
+      'booking_fee': bookingFee,
+      'cancellation_fee': cancellationFee,
+      'pricing_notes': pricingNotes,
+      'price_categories': priceCategories,
+      'is_refundable': isRefundable,
+    };
+  }
 
   bool get isFree => basePrice == 0;
   
@@ -701,9 +784,32 @@ class FamilySuitability {
     this.notes,
   });
 
-  factory FamilySuitability.fromJson(Map<String, dynamic> json) => 
-      _$FamilySuitabilityFromJson(json);
-  Map<String, dynamic> toJson() => _$FamilySuitabilityToJson(this);
+  factory FamilySuitability.fromJson(Map<String, dynamic> json) {
+    return FamilySuitability(
+      minAge: json['min_age'],
+      maxAge: json['max_age'],
+      recommendedAgeRange: json['recommended_age_range'],
+      strollerFriendly: json['stroller_friendly'] ?? false,
+      babyChanging: json['baby_changing'] ?? false,
+      nursingFriendly: json['nursing_friendly'] ?? false,
+      kidMenuAvailable: json['kid_menu_available'] ?? false,
+      educationalContent: json['educational_content'] ?? false,
+      notes: json['notes'],
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'min_age': minAge,
+      'max_age': maxAge,
+      'recommended_age_range': recommendedAgeRange,
+      'stroller_friendly': strollerFriendly,
+      'baby_changing': babyChanging,
+      'nursing_friendly': nursingFriendly,
+      'kid_menu_available': kidMenuAvailable,
+      'educational_content': educationalContent,
+      'notes': notes,
+    };
+  }
 
   bool get isAllAges => minAge == null && maxAge == null;
   
@@ -735,9 +841,28 @@ class OrganizerInfo {
     required this.verificationStatus,
   });
 
-  factory OrganizerInfo.fromJson(Map<String, dynamic> json) => 
-      _$OrganizerInfoFromJson(json);
-  Map<String, dynamic> toJson() => _$OrganizerInfoToJson(this);
+  factory OrganizerInfo.fromJson(Map<String, dynamic> json) {
+    return OrganizerInfo(
+      name: json['name'] ?? '',
+      description: json['description'],
+      phone: json['phone'],
+      email: json['email'],
+      website: json['website'],
+      socialMedia: json['social_media'] != null ? Map<String, String>.from(json['social_media']) : null,
+      verificationStatus: json['verification_status'] ?? 'pending',
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'description': description,
+      'phone': phone,
+      'email': email,
+      'website': website,
+      'social_media': socialMedia,
+      'verification_status': verificationStatus,
+    };
+  }
 
   bool get isVerified => verificationStatus == 'verified';
 }
@@ -761,9 +886,26 @@ class EventsResponse {
     required this.totalPages,
   });
 
-  factory EventsResponse.fromJson(Map<String, dynamic> json) => 
-      _$EventsResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$EventsResponseToJson(this);
+  factory EventsResponse.fromJson(Map<String, dynamic> json) {
+    return EventsResponse(
+      events: (json['events'] as List<dynamic>)
+          .map((e) => Event.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: json['total'] ?? 0,
+      page: json['page'] ?? 1,
+      perPage: json['per_page'] ?? 20,
+      totalPages: json['total_pages'] ?? 1,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'events': events.map((e) => e.toJson()).toList(),
+      'total': total,
+      'page': page,
+      'per_page': perPage,
+      'total_pages': totalPages,
+    };
+  }
 
   bool get hasMore => page < totalPages;
 }
@@ -954,6 +1096,40 @@ class EventsFilter {
     this.sortOrder,
   });
 
-  factory EventsFilter.fromJson(Map<String, dynamic> json) => _$EventsFilterFromJson(json);
-  Map<String, dynamic> toJson() => _$EventsFilterToJson(this);
+  factory EventsFilter.fromJson(Map<String, dynamic> json) {
+    return EventsFilter(
+      category: json['category'],
+      location: json['location'],
+      area: json['area'],
+      date: json['date'],
+      priceMin: json['price_min']?.toDouble(),
+      priceMax: json['price_max']?.toDouble(),
+      ageMin: json['age_min'],
+      ageMax: json['age_max'],
+      familyFriendly: json['family_friendly'],
+      freeOnly: json['free_only'],
+      featuredOnly: json['featured_only'],
+      hasAvailability: json['has_availability'],
+      sortBy: json['sort_by'],
+      sortOrder: json['sort_order'],
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'category': category,
+      'location': location,
+      'area': area,
+      'date': date,
+      'price_min': priceMin,
+      'price_max': priceMax,
+      'age_min': ageMin,
+      'age_max': ageMax,
+      'family_friendly': familyFriendly,
+      'free_only': freeOnly,
+      'featured_only': featuredOnly,
+      'has_availability': hasAvailability,
+      'sort_by': sortBy,
+      'sort_order': sortOrder,
+    };
+  }
 } 

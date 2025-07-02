@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/events_service.dart';
 import '../models/ai_search.dart';
-import '../models/ai_search_response.dart';
+import '../models/ai_search_response.dart' as backend_ai;
 import '../models/event.dart';
 
 // Events service provider
