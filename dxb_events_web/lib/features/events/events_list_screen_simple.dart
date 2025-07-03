@@ -202,20 +202,23 @@ class _EventsListScreenSimpleState extends ConsumerState<EventsListScreenSimple>
       );
     }
 
-    // Events grid with responsive breakpoints
+    // Responsive layout: Grid for desktop, Carousel for tablets and mobile
     final screenWidth = MediaQuery.of(context).size.width;
-    int crossAxisCount;
+    final isTabletOrMobile = screenWidth <= 800;
     
-    // Responsive breakpoints to match user requirements:
-    // 3-4 events only on big screens, 2 on smaller screens, carousel on mobile
+    if (isTabletOrMobile) {
+      // Use carousel for tablets and mobile to fix cramped layout and text overflow
+      return _buildMobileCarousel(displayEvents);
+    }
+    
+    // Grid for desktop only
+    int crossAxisCount;
     if (screenWidth > 1400) {
       crossAxisCount = 4; // Large desktop: 4 cards
     } else if (screenWidth > 1200) {
-      crossAxisCount = 3; // Wide desktop: 3 cards (only for very wide displays)
-    } else if (screenWidth > 800) {
-      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards
+      crossAxisCount = 3; // Wide desktop: 3 cards
     } else {
-      crossAxisCount = 1; // Mobile: 1 card (could implement carousel here if needed)
+      crossAxisCount = 2; // Smaller desktop: 2 cards
     }
     
     return GridView.builder(
@@ -237,6 +240,65 @@ class _EventsListScreenSimpleState extends ConsumerState<EventsListScreenSimple>
           },
         );
       },
+    );
+  }
+
+  Widget _buildMobileCarousel(List<Event> displayEvents) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Carousel section header
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Browse Events',
+                style: GoogleFonts.comfortaa(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                'Swipe to browse →',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Horizontal carousel - Optimized for tablets and mobile
+        Expanded(
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: displayEvents.length,
+            itemBuilder: (context, index) {
+              final event = displayEvents[index];
+              final screenWidth = MediaQuery.of(context).size.width;
+              final cardWidth = screenWidth <= 600 ? screenWidth * 0.85 : 340.0; // Responsive card width
+              
+              return Container(
+                width: cardWidth,
+                margin: const EdgeInsets.only(right: 16, bottom: 16),
+                child: EventCardSimple(
+                  event: event,
+                  onTap: () {
+                    context.go('/event/${event.id}');
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 } 

@@ -468,17 +468,24 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
     int crossAxisCount;
     double childAspectRatio;
     
-    // Improved responsive breakpoints to avoid cramped 3-card layout
+    // Responsive breakpoints aligned with main events list:
+    // Carousel for tablets/mobile (800px and below), grid for desktop only
     final screenWidth = MediaQuery.of(context).size.width;
     
+    // Use carousel for tablets and mobile to avoid cramped layout
+    if (screenWidth <= 800) {
+      return Column(children: _buildMobileCarousel(events));
+    }
+    
+    // Grid for desktop only
     if (screenWidth > 1400) {
       crossAxisCount = 4; // Large desktop: 4 cards
       childAspectRatio = 0.85;
-    } else if (screenWidth > 1100) {
-      crossAxisCount = 3; // Wide screen: 3 cards (only for very wide displays)
+    } else if (screenWidth > 1200) {
+      crossAxisCount = 3; // Wide desktop: 3 cards
       childAspectRatio = 0.9;
     } else {
-      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards (better spacing)
+      crossAxisCount = 2; // Smaller desktop: 2 cards
       childAspectRatio = 0.85;
     }
 

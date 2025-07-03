@@ -590,14 +590,20 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildTabletGrid(BuildContext context, List<Event> events) {
-    // Use improved responsive logic instead of fixed 3-column
+    // Use responsive logic aligned with main events list: carousel for 800px and below
     final screenWidth = MediaQuery.of(context).size.width;
-    int crossAxisCount;
     
-    if (screenWidth > 1100) {
-      crossAxisCount = 3; // Only use 3 columns on very wide tablets
+    // Switch to carousel for tablets and mobile (800px and below)
+    if (screenWidth <= 800) {
+      return _buildMobileCarousel(context, events);
+    }
+    
+    // Grid only for desktop
+    int crossAxisCount;
+    if (screenWidth > 1200) {
+      crossAxisCount = 3; // Only use 3 columns on very wide displays
     } else {
-      crossAxisCount = 2; // Better spacing with 2 columns for most tablets
+      crossAxisCount = 2; // 2 columns for smaller desktop
     }
     
     return GridView.builder(
