@@ -1338,14 +1338,39 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
     }
   }
 
-  void _callVenue(String phone) {
-    // TODO: Implement phone call
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Calling $phone...'),
-        backgroundColor: AppColors.dubaiGold,
-      ),
-    );
+  void _callVenue(String phone) async {
+    try {
+      final uri = Uri.parse('tel:$phone');
+      
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        throw 'Could not initiate phone call';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not call $phone'),
+            backgroundColor: AppColors.error,
+            action: SnackBarAction(
+              label: 'Copy Number',
+              textColor: Colors.white,
+              onPressed: () {
+                // For web, show the number so user can copy it manually
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Phone: $phone'),
+                    backgroundColor: AppColors.dubaiGold,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+    }
   }
 
   String _getEventDescription(Event event) {
@@ -1760,29 +1785,39 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   void _launchUrl(String url) async {
-    // TODO: Implement web-safe URL launching
-    print('Launch URL: $url');
-    /*
     try {
+      // Ensure URL has proper protocol
       final uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
+      
       // Use platform-specific URL launching
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        await launchUrl(
+          uri, 
+          mode: LaunchMode.externalApplication,
+          webOnlyWindowName: '_blank', // Open in new tab for web
+        );
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not launch: ${uri.toString()}')),
-          );
-        }
+        throw 'Could not launch URL: ${uri.toString()}';
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error opening URL: $e')),
+          SnackBar(
+            content: Text('Could not open link: $e'),
+            backgroundColor: AppColors.error,
+            action: SnackBarAction(
+              label: 'Copy URL',
+              textColor: Colors.white,
+              onPressed: () {
+                // For web, we can try to copy to clipboard
+                // This is a fallback if URL launching fails
+                print('URL to copy: $url');
+              },
+            ),
+          ),
         );
       }
     }
-    */
   }
 }
 
