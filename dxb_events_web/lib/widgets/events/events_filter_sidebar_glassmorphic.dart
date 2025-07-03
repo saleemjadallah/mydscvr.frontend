@@ -134,68 +134,12 @@ class _EventsFilterSidebarGlassmorphicState extends State<EventsFilterSidebarGla
             if (widget.isExpanded) ...[
               SizedBox(height: isMobile ? 12 : 16),
               
-              // Scrollable content
+              // Scrollable content with responsive layout
               Flexible(
                 child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Date Range Filter
-                      _buildFilterSection(
-                        'Date Range',
-                        _buildDateRangeFilter(),
-                        isMobile,
-                      ),
-                      
-                      SizedBox(height: isMobile ? 16 : 20),
-                      
-                      // Location Filter
-                      _buildFilterSection(
-                        'Locations',
-                        _buildLocationFilter(),
-                        isMobile,
-                      ),
-                      
-                      SizedBox(height: isMobile ? 16 : 20),
-                      
-                      // Categories Filter
-                      _buildFilterSection(
-                        'Categories',
-                        _buildCategoriesFilter(),
-                        isMobile,
-                      ),
-                      
-                      SizedBox(height: isMobile ? 16 : 20),
-                      
-                      // Age Groups Filter
-                      _buildFilterSection(
-                        'Age Groups',
-                        _buildAgeGroupsFilter(),
-                        isMobile,
-                      ),
-                      
-                      SizedBox(height: isMobile ? 16 : 20),
-                      
-                      // Price Range Filter
-                      _buildFilterSection(
-                        'Price Range',
-                        _buildPriceRangeFilter(),
-                        isMobile,
-                      ),
-                      
-                      SizedBox(height: isMobile ? 16 : 20),
-                      
-                      // Features Filter
-                      _buildFilterSection(
-                        'Features',
-                        _buildFeaturesFilter(),
-                        isMobile,
-                      ),
-                      
-                      // Bottom padding for scroll
-                      SizedBox(height: isMobile ? 12 : 16),
-                    ],
-                  ),
+                  child: screenWidth > 1200 
+                    ? _buildDesktopHorizontalLayout(isMobile)
+                    : _buildVerticalLayout(isMobile),
                 ),
               ),
             ],
@@ -772,5 +716,144 @@ class _EventsFilterSidebarGlassmorphicState extends State<EventsFilterSidebarGla
       case 'Education': return 'Educational Content';
       default: return mobileFeature;
     }
+  }
+
+  // New horizontal layout for desktop screens > 1200px
+  Widget _buildDesktopHorizontalLayout(bool isMobile) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date Range Filter
+              _buildFilterSection(
+                'Date Range',
+                _buildDateRangeFilter(),
+                isMobile,
+              ),
+              
+              SizedBox(height: isMobile ? 16 : 20),
+              
+              // Categories Filter
+              _buildFilterSection(
+                'Categories',
+                _buildCategoriesFilter(),
+                isMobile,
+              ),
+              
+              SizedBox(height: isMobile ? 16 : 20),
+              
+              // Price Range Filter
+              _buildFilterSection(
+                'Price Range',
+                _buildPriceRangeFilter(),
+                isMobile,
+              ),
+            ],
+          ),
+        ),
+        
+        SizedBox(width: 24),
+        
+        // Right column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Location Filter
+              _buildFilterSection(
+                'Locations',
+                _buildLocationFilter(),
+                isMobile,
+              ),
+              
+              SizedBox(height: isMobile ? 16 : 20),
+              
+              // Age Groups Filter
+              _buildFilterSection(
+                'Age Groups',
+                _buildAgeGroupsFilter(),
+                isMobile,
+              ),
+              
+              SizedBox(height: isMobile ? 16 : 20),
+              
+              // Features Filter
+              _buildFilterSection(
+                'Features',
+                _buildFeaturesFilter(),
+                isMobile,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Original vertical layout for mobile and smaller screens
+  Widget _buildVerticalLayout(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Date Range Filter
+        _buildFilterSection(
+          'Date Range',
+          _buildDateRangeFilter(),
+          isMobile,
+        ),
+        
+        SizedBox(height: isMobile ? 16 : 20),
+        
+        // Location Filter
+        _buildFilterSection(
+          'Locations',
+          _buildLocationFilter(),
+          isMobile,
+        ),
+        
+        SizedBox(height: isMobile ? 16 : 20),
+        
+        // Categories Filter
+        _buildFilterSection(
+          'Categories',
+          _buildCategoriesFilter(),
+          isMobile,
+        ),
+        
+        SizedBox(height: isMobile ? 16 : 20),
+        
+        // Age Groups Filter
+        _buildFilterSection(
+          'Age Groups',
+          _buildAgeGroupsFilter(),
+          isMobile,
+        ),
+        
+        SizedBox(height: isMobile ? 16 : 20),
+        
+        // Price Range Filter
+        _buildFilterSection(
+          'Price Range',
+          _buildPriceRangeFilter(),
+          isMobile,
+        ),
+        
+        SizedBox(height: isMobile ? 16 : 20),
+        
+        // Features Filter
+        _buildFilterSection(
+          'Features',
+          _buildFeaturesFilter(),
+          isMobile,
+        ),
+        
+        // Bottom padding for scroll
+        SizedBox(height: isMobile ? 12 : 16),
+      ],
+    );
   }
 } 

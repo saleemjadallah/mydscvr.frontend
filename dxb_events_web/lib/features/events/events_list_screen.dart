@@ -792,44 +792,39 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           ],
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Filter sidebar
+          // Filter panel at the top for desktop
           Container(
-            width: 320,
             margin: EdgeInsets.all(16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFFFF6B6B).withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: EventsFilterSidebarGlassmorphic(
-                filters: _currentFilters,
-                onFiltersChanged: (filters) {
-                  setState(() {
-                    _currentFilters = filters;
-                  });
-                },
-                isExpanded: true,
-                onToggle: () {}, // Always expanded on desktop
-              ),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFFF6B6B).withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: EventsFilterSidebarGlassmorphic(
+              filters: _currentFilters,
+              onFiltersChanged: (filters) {
+                setState(() {
+                  _currentFilters = filters;
+                });
+              },
+              isExpanded: true,
+              onToggle: () {}, // Always expanded on desktop
             ),
           ),
           
-          // Main content area
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(top: 16, right: 16, bottom: 16),
-              child: _buildMainContent(),
-            ),
+          // Main content area - takes full width now
+          Container(
+            margin: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            child: _buildMainContent(),
           ),
         ],
       ),
