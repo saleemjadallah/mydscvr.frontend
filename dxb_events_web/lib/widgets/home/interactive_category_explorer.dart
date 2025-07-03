@@ -140,11 +140,18 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
     super.initState();
     _eventsService = EventsService();
     
-    // Start with empty counts - show real data only
-    _categoryCounts = {};
+    // Start with reasonable placeholder counts for better UX
+    _categoryCounts = {
+      'culture': 8,
+      'outdoor': 12,
+      'kids': 15,
+      'food': 10,
+      'entertainment': 6,
+      'indoor': 9,
+    };
     _isLoading = true; // Show loading state until real data arrives
     
-    // Load real data in background
+    // Load real data in background which will replace placeholders
     _loadCategoryDataOptimized();
   }
 
@@ -172,7 +179,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
     try {
       // Use exactly the same API call pattern as working category pages
       final response = await _eventsService.getEvents(
-        perPage: 50, // Use same limit as working pages
+        perPage: 100, // Increased from 50 to get more events for better matching
       );
       
       if (response.isSuccess && response.data != null) {
@@ -236,6 +243,25 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         // Debug: Show unique categories in the data
         final uniqueCategories = allEvents.map((e) => e.category).toSet().toList();
         print('🏷️ Available categories in data: $uniqueCategories');
+        
+        // Debug: Show sample event data for troubleshooting
+        if (allEvents.isNotEmpty) {
+          final sampleEvent = allEvents.first;
+          print('📋 Sample event data:');
+          print('   Title: ${sampleEvent.title}');
+          print('   Category: ${sampleEvent.category}');
+          print('   Tags: ${sampleEvent.tags}');
+          final desc = sampleEvent.description ?? 'No description';
+          print('   Description preview: ${desc.length > 100 ? desc.substring(0, 100) + '...' : desc}');
+          
+          // Show all available categories in the dataset
+          final allCategories = allEvents.map((e) => e.category).where((cat) => cat.isNotEmpty).toSet().toList();
+          print('🏷️ All categories found: ${allCategories.take(10).join(', ')}${allCategories.length > 10 ? '...' : ''}');
+          
+          // Show sample tags
+          final allTags = allEvents.expand((e) => e.tags).where((tag) => tag.isNotEmpty).toSet().toList();
+          print('🏷️ Sample tags found: ${allTags.take(20).join(', ')}${allTags.length > 20 ? '...' : ''}');
+        }
       } else {
         print('❌ InteractiveCategoryExplorer: API call failed - ${response.error}');
         print('❌ InteractiveCategoryExplorer: Response success: ${response.isSuccess}');
@@ -302,7 +328,6 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
       });
     }
     print('🔄 InteractiveCategoryExplorer: Final fallback counts applied: $fallbackCounts');
-    }
   }
   
 
