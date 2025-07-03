@@ -161,17 +161,18 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         setState(() {
           _categoryEvents = Map.from(_cachedCategoryEvents!);
           _categoryCounts = Map.from(_cachedCategoryCounts!);
+          _isLoading = false;
         });
       }
       return;
     }
 
-    print('🔄 Loading fresh category data...');
+    print('🔄 Loading fresh category data using same logic as category pages...');
     
     try {
-      // Fetch all events once instead of multiple calls
+      // Fetch all events once for filtering (same as category pages do)
       final response = await _eventsService.getEvents(
-        perPage: 100, // Reduced from 200
+        perPage: 200, // Get comprehensive event list
         sortBy: 'start_date',
       );
       
@@ -182,15 +183,40 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         final Map<String, List<Event>> categoryEvents = {};
         final Map<String, int> categoryCounts = {};
 
-        // Process all categories in parallel using the same event data
+        // Process all categories using same broad tag-based filtering as category pages
         for (final category in categories) {
           final categoryId = category['id'] as String;
           final apiCategories = category['apiCategories'] as List<String>;
           final tags = category['tags'] as List<String>;
+          final categoryName = category['name'] as String;
           
-          final filteredEvents = _filterEventsForCategory(allEvents, apiCategories, tags);
-          categoryEvents[categoryId] = filteredEvents.take(10).toList(); // Limit to top 10
+          // Use the exact same filtering logic as EventsListScreenEnhanced
+          final filteredEvents = allEvents.where((event) {
+            // Check exact category match (case-insensitive)
+            final categoryMatch = apiCategories.any((category) => 
+              event.category.toLowerCase() == category.toLowerCase()
+            );
+            
+            // Check broad tag-based matching (same as category page)
+            final tagMatch = tags.any((tag) =>
+              event.tags.any((eventTag) => 
+                eventTag.toLowerCase().contains(tag.toLowerCase())
+              ) ||
+              event.category.toLowerCase().contains(tag.toLowerCase()) ||
+              event.title.toLowerCase().contains(tag.toLowerCase()) ||
+              event.description.toLowerCase().contains(tag.toLowerCase())
+            );
+            
+            return categoryMatch || tagMatch;
+          }).toList();
+          
+          // Sort by date
+          filteredEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
+          
+          categoryEvents[categoryId] = filteredEvents.take(10).toList(); // Limit to top 10 for preview
           categoryCounts[categoryId] = filteredEvents.length;
+          
+          print('✅ $categoryName: ${filteredEvents.length} events (matches category page count)');
         }
 
         // Cache the results
@@ -202,43 +228,34 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
           setState(() {
             _categoryEvents = categoryEvents;
             _categoryCounts = categoryCounts;
+            _isLoading = false;
           });
         }
         
         print('✅ Category data loaded and cached');
-        print('📊 Category counts: $categoryCounts');
+        print('📊 Final category counts: $categoryCounts');
         // Debug: Show unique categories in the data
         final uniqueCategories = allEvents.map((e) => e.category).toSet().toList();
         print('🏷️ Available categories in data: $uniqueCategories');
       } else {
         print('❌ Failed to load events: ${response.error}');
-        // Keep fallback counts if API fails
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       print('❌ Error loading category data: $e');
-      // Keep fallback counts if error occurs
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
   
-  List<Event> _filterEventsForCategory(List<Event> allEvents, List<String> apiCategories, List<String> tags) {
-    return allEvents.where((event) {
-      // Check category match (case-insensitive)
-      final categoryMatch = apiCategories.any((category) => 
-        event.category.toLowerCase() == category.toLowerCase()
-      );
-      
-      // Check tag match (case-insensitive partial matching)
-      final tagMatch = tags.any((tag) => 
-        event.tags.any((eventTag) => 
-          eventTag.toLowerCase().contains(tag.toLowerCase())
-        ) ||
-        event.category.toLowerCase().contains(tag.toLowerCase()) ||
-        event.title.toLowerCase().contains(tag.toLowerCase())
-      );
-      
-      return categoryMatch || tagMatch;
-    }).toList();
-  }
+
 
 
   @override
@@ -313,7 +330,6 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
   Widget _buildCategoryBubble(Map<String, dynamic> category, bool isHovered) {
     final categoryId = category['id'] as String;
     final eventCount = _categoryCounts[categoryId] ?? 0;
-    final isLoadingReal = _cachedCategoryEvents == null; // Show loading indicator if no cached data
     
     return MouseRegion(
       onEnter: (_) => setState(() => _hoveredCategory = category['id']),
@@ -405,7 +421,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
                 ),
                 
                 // Content
-                if (!isHovered) _buildDefaultContent(category, eventCount, isLoadingReal),
+                if (!isHovered) _buildDefaultContent(category, eventCount, false),
                 
                 // Hover Preview
                 if (isHovered) _buildHoverContent(category, categoryId),
@@ -454,14 +470,14 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        isLoadingReal || eventCount == 0 ? 'Loading...' : '$eventCount events',
+                        _isLoading ? 'Loading...' : eventCount > 0 ? '$eventCount events' : 'No events',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
-                      if (isLoadingReal) ...[
+                      if (_isLoading) ...[
                         const SizedBox(width: 4),
                         SizedBox(
                           width: 8,
