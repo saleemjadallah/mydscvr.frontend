@@ -141,8 +141,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         sortBy: 'start_date',
       );
 
-      // Load trending events
-      final trendingResponse = await _eventsService.getTrendingEvents(limit: 10);
+      // Load trending events (prefer firecrawl for quality)
+      final trendingResponse = await _eventsService.getTrendingEvents(
+        limit: 10,
+        firecrawlOnly: true, // Use high-quality firecrawl events
+      );
 
       if (mounted) {
         setState(() {

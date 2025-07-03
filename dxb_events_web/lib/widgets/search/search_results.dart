@@ -565,11 +565,35 @@ class _SearchResultsWidgetState extends ConsumerState<SearchResultsWidget> {
 
   Widget _buildEventsList(List<Event> events) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth > 1200;
-    final isMediumScreen = screenWidth > 800;
-
-    if (isLargeScreen) {
-      // Large screen: 3 columns
+    
+    // Responsive grid aligned with main events list:
+    // 3-4 events only on big screens, 2 on smaller screens, list on mobile
+    if (screenWidth > 1400) {
+      // Very large screen: 4 columns
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+        ),
+        itemCount: events.length,
+        itemBuilder: (context, index) {
+          return EventCard(
+            event: events[index],
+            isCompact: false,
+          ).animate().slideY(
+            delay: Duration(milliseconds: index * 100),
+            duration: 400.ms,
+            begin: 0.3,
+            curve: Curves.easeOut,
+          ).fadeIn();
+        },
+      );
+    } else if (screenWidth > 1200) {
+      // Large screen: 3 columns (only for very wide displays)
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -592,7 +616,7 @@ class _SearchResultsWidgetState extends ConsumerState<SearchResultsWidget> {
           ).fadeIn();
         },
       );
-    } else if (isMediumScreen) {
+    } else if (screenWidth > 800) {
       // Medium screen: 2 columns
       return GridView.builder(
         shrinkWrap: true,

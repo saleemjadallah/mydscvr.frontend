@@ -404,11 +404,23 @@ class EventsService {
   }
 
   /// Get trending events
-  Future<ApiResponse<List<Event>>> getTrendingEvents({int limit = 10}) async {
+  Future<ApiResponse<List<Event>>> getTrendingEvents({
+    int limit = 10,
+    String? extractionMethod,
+    bool firecrawlOnly = false,
+  }) async {
     try {
+      final queryParams = <String, dynamic>{'limit': limit};
+      
+      if (firecrawlOnly) {
+        queryParams['firecrawl_only'] = true;
+      } else if (extractionMethod != null) {
+        queryParams['extraction_method'] = extractionMethod;
+      }
+      
       final response = await _dio.get(
         '/events/trending/list',
-        queryParameters: {'limit': limit},
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
@@ -424,6 +436,48 @@ class EventsService {
         return ApiResponse.success(events);
       } else {
         return ApiResponse.error('Failed to fetch trending events: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  /// Get firecrawl-extracted events (high-quality verified events)
+  Future<ApiResponse<List<Event>>> getFirecrawlEvents({
+    int limit = 20,
+    String? area,
+    String sortBy = 'trending_score',
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'limit': limit,
+        'sort_by': sortBy,
+      };
+      
+      if (area != null) {
+        queryParams['area'] = area;
+      }
+      
+      final response = await _dio.get(
+        '/events/firecrawl/list',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final eventsData = data['events'] as List<dynamic>;
+        
+        final events = eventsData
+            .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+            .where((event) => event != null)
+            .cast<Event>()
+            .toList();
+
+        return ApiResponse.success(events);
+      } else {
+        return ApiResponse.error('Failed to fetch firecrawl events: ${response.statusMessage}');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));

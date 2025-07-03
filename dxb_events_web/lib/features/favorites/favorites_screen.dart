@@ -309,16 +309,17 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
       return _buildEmptyState(type);
     }
 
-    // Improved responsive grid count to avoid cramped 3-card layout
+    // Responsive grid aligned with main events list:
+    // 3-4 events only on big screens, 2 on smaller screens, 1 on mobile
     final screenWidth = MediaQuery.of(context).size.width;
     int crossAxisCount;
     
     if (screenWidth > 1400) {
       crossAxisCount = 4; // Large desktop: 4 cards
-    } else if (screenWidth > 1100) {
-      crossAxisCount = 3; // Wide screen: 3 cards (only for very wide displays)
-    } else if (screenWidth > 600) {
-      crossAxisCount = 2; // Tablet: 2 cards (better spacing than cramped 3)
+    } else if (screenWidth > 1200) {
+      crossAxisCount = 3; // Wide desktop: 3 cards (only for very wide displays)
+    } else if (screenWidth > 800) {
+      crossAxisCount = 2; // Tablet: 2 cards (better spacing)
     } else {
       crossAxisCount = 1; // Mobile: 1 card
     }

@@ -17,17 +17,25 @@ class TrendingEventsService {
   TrendingEventsService(this._eventsService);
 
   /// Get trending events using the smart algorithm (refreshes weekly on Mondays)
+  /// Now uses firecrawl-extracted events for higher quality results
   Future<ApiResponse<List<TrendingEventData>>> getSmartTrendingEvents({
     int limit = 10,
+    bool useFirecrawlOnly = true, // Default to firecrawl events for quality
   }) async {
     try {
       print('🔥 TrendingEventsService: Starting to calculate trending events...');
       print('🔥 TrendingEventsService: Algorithm refresh date: ${_getLastMondayDate()}');
+      print('🔥 TrendingEventsService: Using firecrawl-only events: $useFirecrawlOnly');
       
-      // Get all events (remove date filter temporarily to get all available events)
-      final response = await _eventsService.getEvents(
-        perPage: 100, // Get more events to have good selection
-      );
+      // Get events - prefer firecrawl for higher quality
+      final response = useFirecrawlOnly 
+          ? await _eventsService.getFirecrawlEvents(
+              limit: 100, // Get more events for good selection
+              sortBy: 'start_date', // Get diverse events by date
+            )
+          : await _eventsService.getEvents(
+              perPage: 100, // Fallback to all events
+            );
 
       if (!response.isSuccess || response.data == null) {
         print('🚨 TrendingEventsService: Failed to fetch events - ${response.error}');

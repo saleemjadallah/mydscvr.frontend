@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/search.dart';
 import '../../providers/search_provider.dart';
+import '../../services/events_service.dart';
 
 class CategoryBrowserWidget extends ConsumerWidget {
   final bool showAllCategories;
@@ -367,11 +368,136 @@ class CategorySelectorWidget extends ConsumerWidget {
 }
 
 /// Category stats widget showing number of events per category
-class CategoryStatsWidget extends ConsumerWidget {
+class CategoryStatsWidget extends ConsumerStatefulWidget {
   const CategoryStatsWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CategoryStatsWidget> createState() => _CategoryStatsWidgetState();
+}
+
+class _CategoryStatsWidgetState extends ConsumerState<CategoryStatsWidget> {
+  late final EventsService _eventsService;
+  Map<String, int> _categoryCounts = {};
+  bool _isLoading = true;
+  
+  // Define category mappings that match exactly with category pages
+  final _categoryMappings = {
+    'family_fun': {
+      'apiCategories': ['family', 'kids'],
+      'tags': ['family', 'kids', 'children', 'all_ages', 'all-ages', 'family-friendly'],
+    },
+    'water_activities': {
+      'apiCategories': ['water_sports', 'beach', 'outdoor_activities'],
+      'tags': ['water', 'beach', 'swimming', 'marine', 'aqua', 'sea', 'ocean'],
+    },
+    'cultural': {
+      'apiCategories': ['cultural', 'arts'],
+      'tags': ['cultural', 'heritage', 'art', 'museum', 'gallery', 'theater', 'opera', 'traditional'],
+    },
+    'adventure': {
+      'apiCategories': ['adventure', 'outdoor_activities', 'sports'],
+      'tags': ['adventure', 'outdoor', 'sports', 'hiking', 'climbing', 'extreme'],
+    },
+    'educational': {
+      'apiCategories': ['educational', 'workshops'],
+      'tags': ['educational', 'workshop', 'learning', 'class', 'course', 'training'],
+    },
+    'entertainment': {
+      'apiCategories': ['entertainment', 'shows'],
+      'tags': ['entertainment', 'show', 'performance', 'comedy', 'concert', 'music'],
+    },
+    'shopping': {
+      'apiCategories': ['shopping'],
+      'tags': ['shopping', 'mall', 'retail', 'market', 'bazaar', 'souk'],
+    },
+    'dining': {
+      'apiCategories': ['food', 'dining'],
+      'tags': ['food', 'dining', 'restaurant', 'cuisine', 'culinary', 'chef', 'tasting'],
+    },
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _eventsService = EventsService();
+    _loadCategoryCounts();
+  }
+
+  Future<void> _loadCategoryCounts() async {
+    try {
+      print('📊 Loading category counts for CategoryStatsWidget...');
+      
+      // Load all events using same method as Interactive Category Explorer
+      final response = await _eventsService.getEvents(
+        perPage: 200, // Get all events
+        sortBy: 'start_date',
+      );
+      
+      if (response.isSuccess && response.data != null) {
+        final allEvents = response.data!;
+        print('📊 Processing ${allEvents.length} events for category stats');
+        
+        final Map<String, int> categoryCounts = {};
+
+        // Process each category using same broad tag-based filtering
+        for (final entry in _categoryMappings.entries) {
+          final categoryId = entry.key;
+          final mapping = entry.value;
+          final apiCategories = mapping['apiCategories'] as List<String>;
+          final tags = mapping['tags'] as List<String>;
+          
+          // Use the exact same filtering logic as category pages
+          final filteredEvents = allEvents.where((event) {
+            // Check exact category match (case-insensitive)
+            final categoryMatch = apiCategories.any((category) => 
+              event.category.toLowerCase() == category.toLowerCase()
+            );
+            
+            // Check broad tag-based matching (same as category page)
+            final tagMatch = tags.any((tag) =>
+              event.tags.any((eventTag) => 
+                eventTag.toLowerCase().contains(tag.toLowerCase())
+              ) ||
+              event.category.toLowerCase().contains(tag.toLowerCase()) ||
+              event.title.toLowerCase().contains(tag.toLowerCase()) ||
+              event.description.toLowerCase().contains(tag.toLowerCase())
+            );
+            
+            return categoryMatch || tagMatch;
+          }).toList();
+          
+          categoryCounts[categoryId] = filteredEvents.length;
+          print('✅ $categoryId: ${filteredEvents.length} events (matches category page count)');
+        }
+
+        if (mounted) {
+          setState(() {
+            _categoryCounts = categoryCounts;
+            _isLoading = false;
+          });
+        }
+        
+        print('✅ CategoryStatsWidget counts loaded: $categoryCounts');
+      } else {
+        print('❌ Failed to load events for CategoryStatsWidget: ${response.error}');
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ Error loading category counts: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final categories = EventCategory.allCategories;
 
     return Column(
@@ -387,8 +513,7 @@ class CategoryStatsWidget extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         ...categories.map((category) {
-          // Mock event count - in real app, get from API
-          final eventCount = _getMockEventCount(category.id);
+          final eventCount = _categoryCounts[category.id] ?? 0;
           
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -437,13 +562,38 @@ class CategoryStatsWidget extends ConsumerWidget {
                     color: AppColors.dubaiTeal.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    '$eventCount events',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.dubaiTeal,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_isLoading) ...[
+                        SizedBox(
+                          width: 10,
+                          height: 10,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Loading...',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.dubaiTeal,
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          '$eventCount events',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.dubaiTeal,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -452,20 +602,5 @@ class CategoryStatsWidget extends ConsumerWidget {
         }).toList(),
       ],
     );
-  }
-
-  int _getMockEventCount(String categoryId) {
-    // Mock data - replace with real API call
-    final mockCounts = {
-      'family_fun': 42,
-      'water_activities': 28,
-      'cultural': 35,
-      'adventure': 31,
-      'educational': 19,
-      'entertainment': 25,
-      'shopping': 38,
-      'dining': 44,
-    };
-    return mockCounts[categoryId] ?? 0;
   }
 } 
