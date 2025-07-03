@@ -276,13 +276,19 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
 
   /// Build the top app bar with gradient background and logo
   Widget _buildTopAppBar(BuildContext context, AuthState authState) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+    
+    // Responsive app bar height
+    final appBarHeight = isMobile ? 90.0 : 80.0;
+    
     return SliverAppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       pinned: true,
       floating: true,
-      expandedHeight: 80,
-      toolbarHeight: 80,
+      expandedHeight: appBarHeight,
+      toolbarHeight: appBarHeight,
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -296,48 +302,40 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
         ),
       ),
-      title: Row(
-        children: [
-          Image.asset(
-            'assets/images/mydscvr-logo.png',
-            height: 40,
-            width: 40,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              // Debug print to help identify the issue
-              print('🔍 DEBUG: Logo failed to load: $error');
-              print('🔍 DEBUG: StackTrace: $stackTrace');
-              // Fallback to a text-based logo
-              return Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+      title: GestureDetector(
+        onTap: () => context.go('/'),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenWidth = MediaQuery.of(context).size.width;
+            final isMobile = screenWidth <= 600;
+            
+            // Responsive logo and text sizing
+            final logoHeight = isMobile ? 45.0 : 40.0;
+            final logoWidth = isMobile ? 45.0 : 40.0;
+            final fontSize = isMobile ? 24.0 : 26.0;
+            
+            return Row(
+              children: [
+                Image.asset(
+                  'assets/images/mydscvr-logo.png',
+                  height: logoHeight,
+                  width: logoWidth,
+                  fit: BoxFit.contain,
+                  // No errorBuilder - let the logo display properly
                 ),
-                child: Center(
-                  child: Text(
-                    'M',
-                    style: GoogleFonts.comfortaa(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.dubaiTeal,
-                    ),
+                const SizedBox(width: 12),
+                Text(
+                  'MyDscvr',
+                  style: GoogleFonts.comfortaa(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-              );
-            },
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'MyDscvr',
-            style: GoogleFonts.comfortaa(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
+              ],
+            );
+          },
+        ),
       ),
       actions: [
         // Auth Buttons/Profile

@@ -577,48 +577,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ),
       ),
-      title: Row(
-        children: [
-          Image.asset(
-            'assets/images/mydscvr-logo.png',
-            height: 40,
-            width: 40,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              // Debug print to help identify the issue
-              print('🔍 DEBUG: Logo failed to load: $error');
-              print('🔍 DEBUG: StackTrace: $stackTrace');
-              // Fallback to a text-based logo
-              return Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    'M',
-                    style: GoogleFonts.comfortaa(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.dubaiTeal,
+      title: GestureDetector(
+        onTap: () => context.go('/'),
+        child: Row(
+          children: [
+            Image.asset(
+              'assets/images/mydscvr-logo.png',
+              height: 40,
+              width: 40,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                // Debug print to help identify the issue
+                print('🔍 DEBUG: Logo failed to load: $error');
+                print('🔍 DEBUG: StackTrace: $stackTrace');
+                // Fallback to a text-based logo
+                return Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'M',
+                      style: GoogleFonts.comfortaa(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.dubaiTeal,
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'MyDscvr',
-            style: GoogleFonts.comfortaa(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+                );
+              },
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Text(
+              'MyDscvr',
+              style: GoogleFonts.comfortaa(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         if (isAuthenticated) ...[
