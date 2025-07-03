@@ -816,8 +816,12 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                   _currentFilters = filters;
                 });
               },
-              isExpanded: true,
-              onToggle: () {}, // Always expanded on desktop
+              isExpanded: _isFilterExpanded,
+              onToggle: () {
+                setState(() {
+                  _isFilterExpanded = !_isFilterExpanded;
+                });
+              },
             ),
           ),
           
