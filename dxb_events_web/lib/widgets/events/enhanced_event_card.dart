@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../models/event.dart';
+import '../../utils/duration_formatter.dart';
 import '../../features/event_details/event_details_screen.dart';
 
 /// Enhanced Event Card that showcases all new backend extraction features
@@ -299,35 +300,63 @@ class EnhancedEventCard extends StatelessWidget {
   }
 
   Widget _buildEventDetailsRow() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Duration
-        if (event.durationHours != null)
-          _buildDetailChip(
-            icon: LucideIcons.clock,
-            label: '${event.durationHours!.toStringAsFixed(0)}h',
-            color: AppColors.dubaiTeal,
-          ),
+        // Duration and experience metrics (like featured events)
+        Row(
+          children: [
+            Icon(
+              LucideIcons.clock,
+              size: 14,
+              color: AppColors.dubaiTeal,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                '${DurationFormatter.formatForDetails(event.startDate, event.endDate)} experience',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppColors.dubaiTeal,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         
-        const SizedBox(width: 8),
+        const SizedBox(height: 8),
         
-        // Indoor/Outdoor
-        if (event.indoorOutdoor != null)
-          _buildDetailChip(
-            icon: event.indoorOutdoor == 'indoor' ? LucideIcons.home : LucideIcons.sun,
-            label: event.indoorOutdoor!.toUpperCase(),
-            color: event.indoorOutdoor == 'indoor' ? Colors.blue : Colors.green,
-          ),
-        
-        const SizedBox(width: 8),
-        
-        // Age restrictions
-        if (event.ageRestrictions != null)
-          _buildDetailChip(
-            icon: LucideIcons.users,
-            label: event.ageRestrictions!,
-            color: AppColors.dubaiGold,
-          ),
+        // Additional detail chips
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            // Age restrictions
+            _buildDetailChip(
+              icon: LucideIcons.users,
+              label: event.ageRange,
+              color: AppColors.dubaiGold,
+            ),
+            
+            // Indoor/Outdoor
+            if (event.indoorOutdoor != null)
+              _buildDetailChip(
+                icon: event.indoorOutdoor == 'indoor' ? LucideIcons.home : LucideIcons.sun,
+                label: event.indoorOutdoor!.toUpperCase(),
+                color: event.indoorOutdoor == 'indoor' ? Colors.blue : Colors.green,
+              ),
+              
+            // Duration hours (if available)
+            if (event.durationHours != null)
+              _buildDetailChip(
+                icon: LucideIcons.clock,
+                label: '${event.durationHours!.toStringAsFixed(0)}h',
+                color: AppColors.dubaiTeal,
+              ),
+          ],
+        ),
       ],
     );
   }

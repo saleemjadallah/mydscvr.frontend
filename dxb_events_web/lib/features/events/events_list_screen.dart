@@ -1099,14 +1099,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       return _buildMobileCarousel(filteredEvents);
     }
     
-    // Improved responsive grid with better tablet experience
+    // Responsive grid optimized for user preferences:
+    // 3-4 events only on big screens, 2 on smaller screens
     int crossAxisCount;
     if (screenWidth > 1400) {
       crossAxisCount = 4; // Large desktop: 4 cards
-    } else if (screenWidth > 1100) {
-      crossAxisCount = 3; // Wide screen: 3 cards (only for very wide displays)
+    } else if (screenWidth > 1200) {
+      crossAxisCount = 3; // Wide desktop: 3 cards (only for very wide displays)
     } else {
-      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards (skip cramped 3-card layout)
+      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards (better spacing)
     }
 
     return Padding(
@@ -3189,6 +3190,32 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             style: GoogleFonts.inter(
                               fontSize: 13, // Bigger font
                               color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Duration and experience metrics (like featured events)
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.clock,
+                          size: 16,
+                          color: AppColors.dubaiTeal,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${DurationFormatter.formatForDetails(event.startDate, event.endDate)} experience',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: AppColors.dubaiTeal,
+                              fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

@@ -202,11 +202,26 @@ class _EventsListScreenSimpleState extends ConsumerState<EventsListScreenSimple>
       );
     }
 
-    // Events grid
+    // Events grid with responsive breakpoints
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount;
+    
+    // Responsive breakpoints to match user requirements:
+    // 3-4 events only on big screens, 2 on smaller screens, carousel on mobile
+    if (screenWidth > 1400) {
+      crossAxisCount = 4; // Large desktop: 4 cards
+    } else if (screenWidth > 1200) {
+      crossAxisCount = 3; // Wide desktop: 3 cards (only for very wide displays)
+    } else if (screenWidth > 800) {
+      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards
+    } else {
+      crossAxisCount = 1; // Mobile: 1 card (could implement carousel here if needed)
+    }
+    
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         childAspectRatio: 0.75,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,

@@ -263,7 +263,7 @@ class _EventCardSimpleState extends State<EventCardSimple>
                             
                             const SizedBox(height: 6),
                             
-                            // Age range and duration - always show
+                            // Age range - always show
                             Row(
                               children: [
                                 Icon(
@@ -279,19 +279,27 @@ class _EventCardSimpleState extends State<EventCardSimple>
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                              ],
+                            ),
+                            
+                            const SizedBox(height: 6),
+                            
+                            // Duration and experience metrics (like featured events)
+                            Row(
+                              children: [
                                 Icon(
                                   LucideIcons.clock,
                                   size: 14,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.dubaiTeal,
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
-                                    isMobile ? _formatDurationShort() : _formatDuration(),
+                                    '${_formatDuration()} experience',
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.dubaiTeal,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),

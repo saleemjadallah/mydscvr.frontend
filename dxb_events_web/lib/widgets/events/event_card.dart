@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/event.dart';
+import '../../utils/duration_formatter.dart';
 import 'event_actions.dart';
 
 class EventCard extends StatelessWidget {
@@ -95,6 +96,31 @@ class EventCard extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               color: AppColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 4),
+                    
+                    // Duration and experience metrics (like featured events)
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.clock,
+                          size: 12,
+                          color: AppColors.dubaiTeal,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '${DurationFormatter.formatForDetails(event.startDate, event.endDate)} experience',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: AppColors.dubaiTeal,
+                              fontWeight: FontWeight.w600,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

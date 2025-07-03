@@ -180,6 +180,28 @@ class EventCardEnhanced extends StatelessWidget {
                     
                     const SizedBox(height: 4),
                     
+                    // Duration and experience metrics (like featured events)
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.clock,
+                          size: 12,
+                          color: AppColors.dubaiTeal,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_formatDurationExperience()} experience',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: AppColors.dubaiTeal,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 6),
+                    
                     // Key features chips
                     Wrap(
                       spacing: 4,
@@ -655,6 +677,10 @@ class EventCardEnhanced extends StatelessWidget {
 
   String _formatDuration() {
     return DurationFormatter.formatForCard(event.startDate, event.endDate);
+  }
+
+  String _formatDurationExperience() {
+    return DurationFormatter.formatForDetails(event.startDate, event.endDate);
   }
 
   List<Widget> _buildFeatureChips() {
