@@ -126,8 +126,9 @@ class EventsService {
       };
 
       // Use the optimized AI search endpoint with enhanced temporal parsing
+      // Temporarily use full URL until Netlify proxy is updated
       final response = await _dio.get(
-        'ai-search-v2',  // Enhanced endpoint with temporal parsing and single OpenAI call
+        'https://mydscvr.xyz/api/ai-search-v2',  // Enhanced endpoint with temporal parsing and single OpenAI call
         queryParameters: queryParams,
         options: Options(
           receiveTimeout: const Duration(seconds: 90), // Keep generous timeout but expect 10-15s response
