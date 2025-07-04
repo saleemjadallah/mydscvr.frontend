@@ -230,7 +230,7 @@ class SuperSearchService {
       }
 
       final response = await _dio.get(
-        '/algolia-search',
+        '/api/algolia-search',
         queryParameters: queryParams,
         options: Options(
           receiveTimeout: const Duration(seconds: 10), // Fast timeout for Algolia
@@ -264,7 +264,7 @@ class SuperSearchService {
   }) async {
     try {
       final response = await _dio.get(
-        '/algolia-search/suggest',
+        '/api/algolia-search/suggest',
         queryParameters: {
           'q': query,
           'limit': limit,
@@ -294,7 +294,7 @@ class SuperSearchService {
   /// Get available filters for the search interface
   Future<ApiResponse<SuperSearchAvailableFilters>> getAvailableFilters() async {
     try {
-      final response = await _dio.get('/algolia-search/facets');
+      final response = await _dio.get('/api/algolia-search/facets');
 
       if (response.statusCode == 200) {
         final filters = SuperSearchAvailableFilters.fromJson(response.data);
@@ -318,7 +318,7 @@ class SuperSearchService {
   /// Get Super Search service status
   Future<ApiResponse<SuperSearchStatus>> getStatus() async {
     try {
-      final response = await _dio.get('/algolia-search/status');
+      final response = await _dio.get('/api/algolia-search/status');
 
       if (response.statusCode == 200) {
         final status = SuperSearchStatus.fromJson(response.data);
