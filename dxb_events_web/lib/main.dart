@@ -9,6 +9,7 @@ import 'features/home/home_screen_beautiful.dart';
 import 'features/events/events_list_screen.dart';
 import 'features/event_details/event_details_screen.dart';
 import 'features/search/ai_search_screen.dart';
+import 'features/search/super_search_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/auth/login_screen.dart';
@@ -42,6 +43,13 @@ final GoRouter _router = GoRouter(
       builder: (context, state) {
         final query = state.uri.queryParameters['query'];
         return AISearchScreen(initialQuery: query);
+      },
+    ),
+    GoRoute(
+      path: '/super-search',
+      builder: (context, state) {
+        final query = state.uri.queryParameters['query'];
+        return SuperSearchScreen(initialQuery: query);
       },
     ),
     

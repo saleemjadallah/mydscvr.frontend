@@ -47,6 +47,7 @@ import '../../widgets/home/weekend_highlights.dart';
 import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/common/footer.dart';
 import '../../widgets/common/ad_placeholder.dart';
+import '../../widgets/search/super_search_button.dart';
 
 // Add animation imports for gradual integration
 import '../../core/animations/animations.dart';
@@ -225,6 +226,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               
               // Beautiful hero section - optimized
               _buildHeroSection(),
+              
+              // MyDscvr Super Search Button
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: const SuperSearchButton(),
+                ),
+              ),
               
               // Quick filters
               SliverToBoxAdapter(

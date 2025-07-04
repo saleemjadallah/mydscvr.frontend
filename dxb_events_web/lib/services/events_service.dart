@@ -112,8 +112,8 @@ class EventsService {
     }
   }
 
-  /// AI-powered search using OpenAI for intelligent event discovery
-  Future<ApiResponse<AISearchResult>> aiSearch({
+  /// MyDscvr Super Search - Instant intelligent search powered by Algolia
+  Future<ApiResponse<AISearchResult>> superSearch({
     required String query,
     int page = 1,
     int perPage = 20,
@@ -125,54 +125,76 @@ class EventsService {
         'per_page': perPage,
       };
 
-      // Use the optimized AI search endpoint with enhanced temporal parsing
-      // Temporarily use full URL until Netlify proxy is updated
       final response = await _dio.get(
-        'https://mydscvr.xyz/api/ai-search-v2',  // Enhanced endpoint with temporal parsing and single OpenAI call
+        '/algolia-search',  // MyDscvr Super Search endpoint
         queryParameters: queryParams,
         options: Options(
-          receiveTimeout: const Duration(seconds: 90), // Keep generous timeout but expect 10-15s response
-          sendTimeout: const Duration(seconds: 90),
+          receiveTimeout: const Duration(seconds: 10), // Fast timeout for Algolia
+          sendTimeout: const Duration(seconds: 5),
         ),
       );
 
       if (response.statusCode == 200) {
         final responseData = response.data;
         
-        // Parse the AI search response
-        final aiSearchResponse = AISearchResponse.fromJson(responseData);
+        // Parse events from Algolia response
+        final eventsData = responseData['events'] as List<dynamic>;
+        final events = eventsData
+            .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+            .where((event) => event != null)
+            .cast<Event>()
+            .toList();
         
-        // Parse events with AI fields
-        final events = aiSearchResponse.events.map((eventJson) {
-          // Events are already parsed by the fromJson method
-          return eventJson;
-        }).toList();
+        final pagination = responseData['pagination'] as Map<String, dynamic>;
+        final suggestions = (responseData['suggestions'] as List<dynamic>?)?.cast<String>() ?? [];
+        final metadata = responseData['search_metadata'] as Map<String, dynamic>;
         
         return ApiResponse<AISearchResult>.success(
           AISearchResult(
             events: events,
-            total: aiSearchResponse.pagination.total,
-            aiResponse: aiSearchResponse.aiResponse,
-            suggestions: aiSearchResponse.suggestions,
-            queryAnalysis: aiSearchResponse.queryAnalysis,
-            processingTimeMs: aiSearchResponse.processingTimeMs,
-            aiEnabled: aiSearchResponse.aiEnabled,
+            total: pagination['total'] as int,
+            aiResponse: 'Found ${pagination['total']} events using MyDscvr Super Search powered by Algolia in ${metadata['total_processing_time_ms']}ms',
+            suggestions: suggestions,
+            queryAnalysis: QueryAnalysis(
+              intent: 'search',
+              categories: [],
+              locationPreferences: [],
+              keywords: [query],
+              confidence: 0.9,
+            ),
+            processingTimeMs: metadata['total_processing_time_ms'] as int? ?? 0,
+            aiEnabled: true,
           ),
         );
       } else {
         return ApiResponse<AISearchResult>.error(
-          'Failed to perform AI search: ${response.statusCode}',
+          'Failed to perform Super Search: ${response.statusCode}',
         );
       }
     } on DioException catch (e) {
       return ApiResponse<AISearchResult>.error(
-        'Network error during AI search: ${e.message}',
+        'Network error during Super Search: ${e.message}',
       );
     } catch (e) {
       return ApiResponse<AISearchResult>.error(
-        'Unexpected error during AI search: $e',
+        'Unexpected error during Super Search: $e',
       );
     }
+  }
+
+  /// AI-powered search using OpenAI for intelligent event discovery
+  /// Note: Redirects to superSearch for better performance
+  Future<ApiResponse<AISearchResult>> aiSearch({
+    required String query,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    // Redirect to Super Search for better performance
+    return superSearch(
+      query: query,
+      page: page,
+      perPage: perPage,
+    );
   }
 
   /// Search with specific intent (brunch, family fun, etc.) using AI search

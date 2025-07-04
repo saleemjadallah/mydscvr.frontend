@@ -8,6 +8,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../providers/search_provider.dart';
 import '../../services/events_service.dart';
+import '../../features/search/super_search_screen.dart';
 
 /// Simplified home search widget to test overlay functionality
 class SimpleHomeSearchWidget extends ConsumerStatefulWidget {
@@ -205,7 +206,7 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
                 }
               },
               decoration: InputDecoration(
-                hintText: 'Ask me about Dubai family activities...',
+                hintText: 'Try MyDscvr Super Search - Find events instantly...',
                 hintStyle: GoogleFonts.inter(
                   color: AppColors.textSecondary,
                 ),
@@ -338,8 +339,15 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
   void _performSearch(String query) {
     if (query.trim().isEmpty) return;
     
-    // Navigate to ai-search page with search query
-    context.go('/ai-search?query=${Uri.encodeComponent(query.trim())}');
+    // Navigate to MyDscvr Super Search with search query
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SuperSearchScreen(
+          initialQuery: query.trim(),
+        ),
+      ),
+    );
   }
 
   Future<void> _searchEventTitles(String query) async {
