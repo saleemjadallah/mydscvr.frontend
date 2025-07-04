@@ -31,8 +31,16 @@ class SafeEventParser {
       if (!_hasRequiredFields(eventJson)) {
         if (kDebugMode) {
           print('🚨 SafeEventParser: Missing required fields in event data');
+          print('🚨 SafeEventParser: Available fields: ${eventJson.keys.toList()}');
         }
         return null;
+      }
+
+      // Debug: Check date formats
+      if (kDebugMode) {
+        print('🔍 SafeEventParser: Parsing event with title: ${eventJson['title']}');
+        print('🔍 SafeEventParser: start_date: ${eventJson['start_date']} (${eventJson['start_date'].runtimeType})');
+        print('🔍 SafeEventParser: end_date: ${eventJson['end_date']} (${eventJson['end_date'].runtimeType})');
       }
 
       // Parse using fromBackendApi with additional safety
@@ -98,15 +106,28 @@ class SafeEventParser {
 
   /// Check if event JSON has required fields
   static bool _hasRequiredFields(Map<String, dynamic> json) {
-    final requiredFields = ['id', 'title'];
-    
-    for (final field in requiredFields) {
-      if (json[field] == null || json[field].toString().isEmpty) {
-        if (kDebugMode) {
-          print('🚨 SafeEventParser: Missing required field: $field');
-        }
-        return false;
+    // Check for title
+    if (json['title'] == null || json['title'].toString().isEmpty) {
+      if (kDebugMode) {
+        print('🚨 SafeEventParser: Missing required field: title');
       }
+      return false;
+    }
+    
+    // Check for id or objectID (Algolia uses objectID)
+    final hasId = json['id'] != null && json['id'].toString().isNotEmpty;
+    final hasObjectId = json['objectID'] != null && json['objectID'].toString().isNotEmpty;
+    
+    if (!hasId && !hasObjectId) {
+      if (kDebugMode) {
+        print('🚨 SafeEventParser: Missing required field: id or objectID');
+      }
+      return false;
+    }
+    
+    // If we have objectID but not id, copy it over
+    if (hasObjectId && !hasId) {
+      json['id'] = json['objectID'];
     }
     
     return true;
