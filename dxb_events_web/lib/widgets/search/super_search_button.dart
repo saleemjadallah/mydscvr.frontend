@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../features/search/super_search_screen.dart';
 
@@ -67,14 +68,12 @@ class _SuperSearchButtonState extends State<SuperSearchButton>
     if (widget.onTap != null) {
       widget.onTap!();
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SuperSearchScreen(
-            initialQuery: widget.initialQuery,
-          ),
-        ),
-      );
+      final query = widget.initialQuery?.trim();
+      if (query != null && query.isNotEmpty) {
+        context.go('/super-search?query=${Uri.encodeComponent(query)}');
+      } else {
+        context.go('/super-search');
+      }
     }
   }
 
@@ -231,14 +230,12 @@ class SuperSearchButtonCompact extends StatelessWidget {
     if (onTap != null) {
       onTap!();
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SuperSearchScreen(
-            initialQuery: initialQuery,
-          ),
-        ),
-      );
+      final query = initialQuery?.trim();
+      if (query != null && query.isNotEmpty) {
+        context.go('/super-search?query=${Uri.encodeComponent(query)}');
+      } else {
+        context.go('/super-search');
+      }
     }
   }
 
@@ -305,14 +302,12 @@ class SuperSearchFAB extends StatelessWidget {
     if (onPressed != null) {
       onPressed!();
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SuperSearchScreen(
-            initialQuery: initialQuery,
-          ),
-        ),
-      );
+      final query = initialQuery?.trim();
+      if (query != null && query.isNotEmpty) {
+        context.go('/super-search?query=${Uri.encodeComponent(query)}');
+      } else {
+        context.go('/super-search');
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/event.dart';
 import '../../services/super_search_service.dart';
 import '../../widgets/events/event_card.dart';
@@ -647,15 +648,7 @@ class _SuperSearchScreenState extends State<SuperSearchScreen>
                     child: EventCard(
                       event: event,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EventDetailsScreen(
-                              eventId: event.id,
-                              event: event,
-                            ),
-                          ),
-                        );
+                        context.go('/event/${event.id}');
                       },
                     ),
                   );

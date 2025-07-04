@@ -339,15 +339,8 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
   void _performSearch(String query) {
     if (query.trim().isEmpty) return;
     
-    // Navigate to MyDscvr Super Search with search query
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SuperSearchScreen(
-          initialQuery: query.trim(),
-        ),
-      ),
-    );
+    // Navigate to MyDscvr Super Search using proper routing
+    context.go('/super-search?query=${Uri.encodeComponent(query.trim())}');
   }
 
   Future<void> _searchEventTitles(String query) async {
