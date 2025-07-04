@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:go_router/go_router.dart';
+import '../../services/super_search_service.dart';
+import '../../widgets/events/event_card.dart';
 
 // State Management
 final searchQueryProvider = StateProvider<String>((ref) => '');
@@ -48,10 +51,16 @@ class SuperSearchScreen extends ConsumerStatefulWidget {
 
 class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
     with TickerProviderStateMixin {
+  final SuperSearchService _superSearchService = SuperSearchService();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   late AnimationController _pulseController;
   late AnimationController _searchBarController;
+  
+  SuperSearchResult? _searchResult;
+  bool _isLoading = false;
+  bool _showResults = false;
+  String? _error;
 
   @override
   void initState() {
@@ -79,6 +88,10 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
     if (widget.initialQuery != null) {
       _searchController.text = widget.initialQuery!;
       ref.read(searchQueryProvider.notifier).state = widget.initialQuery!;
+      // Perform initial search
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _performSearch(widget.initialQuery!);
+      });
     }
   }
 
@@ -91,10 +104,37 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
     super.dispose();
   }
 
-  void _performSearch(String query) {
+  Future<void> _performSearch(String query) async {
+    if (query.trim().isEmpty) return;
+    
     _searchController.text = query;
     ref.read(searchQueryProvider.notifier).state = query;
-    // Navigate to search results or show results here
+    
+    setState(() {
+      _isLoading = true;
+      _showResults = true;
+      _error = null;
+    });
+
+    final response = await _superSearchService.search(
+      query: query.trim(),
+      filters: const SuperSearchFilters(),
+      page: 1,
+      perPage: 20,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        if (response.isSuccess) {
+          _searchResult = response.data;
+          _error = null;
+        } else {
+          _error = response.error;
+          _searchResult = null;
+        }
+      });
+    }
   }
   
   void _onFilterTap(String filter) {
@@ -134,15 +174,22 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
               padding: const EdgeInsets.all(20),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildHeroSection(),
-                  const SizedBox(height: 32),
+                  if (!_showResults) ...[
+                    _buildHeroSection(),
+                    const SizedBox(height: 32),
+                  ],
                   _buildSearchBar(),
-                  const SizedBox(height: 24),
-                  _buildQuickFilters(),
-                  const SizedBox(height: 32),
-                  _buildSearchSuggestions(),
-                  const SizedBox(height: 24),
-                  _buildTrendingSearches(),
+                  if (_showResults) ...[
+                    const SizedBox(height: 24),
+                    _buildSearchResults(),
+                  ] else ...[
+                    const SizedBox(height: 24),
+                    _buildQuickFilters(),
+                    const SizedBox(height: 32),
+                    _buildSearchSuggestions(),
+                    const SizedBox(height: 24),
+                    _buildTrendingSearches(),
+                  ],
                 ]),
               ),
             ),
@@ -279,10 +326,19 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
               ),
               prefixIcon: Container(
                 padding: const EdgeInsets.all(8),
-                child: Icon(
-                  LucideIcons.search,
-                  color: MyDscvrColors.dubaiTeal,
-                  size: 20,
+                child: GestureDetector(
+                  onTap: _showResults ? () {
+                    setState(() {
+                      _showResults = false;
+                      _searchController.clear();
+                      ref.read(searchQueryProvider.notifier).state = '';
+                    });
+                  } : null,
+                  child: Icon(
+                    _showResults ? LucideIcons.arrowLeft : LucideIcons.search,
+                    color: MyDscvrColors.dubaiTeal,
+                    size: 20,
+                  ),
                 ),
               ),
               suffixIcon: _searchController.text.isNotEmpty
@@ -558,6 +614,210 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
         ],
       ),
     ).animate().slideY(begin: 0.3, duration: 800.ms);
+  }
+  
+  Widget _buildSearchResults() {
+    if (_isLoading) {
+      return Container(
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(MyDscvrColors.dubaiTeal),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Searching events...',
+                style: GoogleFonts.nunito(
+                  fontSize: 16,
+                  color: MyDscvrColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    if (_error != null) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Icon(
+              LucideIcons.alertCircle,
+              size: 48,
+              color: MyDscvrColors.dubaiCoral,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Search Error',
+              style: GoogleFonts.comfortaa(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: MyDscvrColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: GoogleFonts.nunito(
+                fontSize: 14,
+                color: MyDscvrColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                if (_searchController.text.trim().isNotEmpty) {
+                  _performSearch(_searchController.text.trim());
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MyDscvrColors.dubaiTeal,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Try Again',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    if (_searchResult == null || _searchResult!.events.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Icon(
+              LucideIcons.searchX,
+              size: 48,
+              color: MyDscvrColors.textSecondary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Events Found',
+              style: GoogleFonts.comfortaa(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: MyDscvrColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Try searching with different keywords or explore our popular searches below.',
+              style: GoogleFonts.nunito(
+                fontSize: 14,
+                color: MyDscvrColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _showResults = false;
+                  _searchController.clear();
+                  ref.read(searchQueryProvider.notifier).state = '';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MyDscvrColors.dubaiTeal,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Browse Popular Searches',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    final result = _searchResult!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Search metadata
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${result.total} results found',
+                style: GoogleFonts.nunito(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: MyDscvrColors.textPrimary,
+                ),
+              ),
+              if (result.metadata.totalProcessingTimeMs > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: MyDscvrColors.dubaiTeal.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${result.metadata.totalProcessingTimeMs}ms',
+                    style: GoogleFonts.nunito(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: MyDscvrColors.dubaiTeal,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Results list
+        ...result.events.asMap().entries.map((entry) {
+          final index = entry.key;
+          final event = entry.value;
+          
+          return AnimationConfiguration.staggeredList(
+            position: index,
+            duration: const Duration(milliseconds: 375),
+            child: SlideAnimation(
+              verticalOffset: 50,
+              child: FadeInAnimation(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: EventCard(
+                    event: event,
+                    onTap: () {
+                      context.go('/event/${event.id}');
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ],
+    );
   }
 }
 
