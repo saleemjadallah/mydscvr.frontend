@@ -205,6 +205,23 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
       floating: true,
       backgroundColor: Colors.transparent,
       elevation: 0,
+      leading: IconButton(
+        onPressed: () {
+          context.go('/');
+        },
+        icon: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: MyDscvrColors.dubaiTeal.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            LucideIcons.arrowLeft,
+            color: MyDscvrColors.dubaiTeal,
+            size: 20,
+          ),
+        ),
+      ).animate().scale(delay: 150.ms),
       title: Text(
         'Super Search',
         style: GoogleFonts.comfortaa(
