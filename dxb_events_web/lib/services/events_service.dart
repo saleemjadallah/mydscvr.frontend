@@ -127,7 +127,7 @@ class EventsService {
 
       // Use the optimized AI search endpoint with enhanced temporal parsing
       final response = await _dio.get(
-        '/api/ai-search-v2',  // Enhanced endpoint with temporal parsing and single OpenAI call
+        'ai-search-v2',  // Enhanced endpoint with temporal parsing and single OpenAI call
         queryParameters: queryParams,
         options: Options(
           receiveTimeout: const Duration(seconds: 90), // Keep generous timeout but expect 10-15s response
