@@ -36,11 +36,9 @@ class SafeEventParser {
         return null;
       }
 
-      // Debug: Check date formats
+      // Debug: Check parsing success
       if (kDebugMode) {
-        print('🔍 SafeEventParser: Parsing event with title: ${eventJson['title']}');
-        print('🔍 SafeEventParser: start_date: ${eventJson['start_date']} (${eventJson['start_date'].runtimeType})');
-        print('🔍 SafeEventParser: end_date: ${eventJson['end_date']} (${eventJson['end_date'].runtimeType})');
+        print('✅ SafeEventParser: Successfully parsing event: ${eventJson['title']}');
       }
 
       // Parse using fromBackendApi with additional safety
