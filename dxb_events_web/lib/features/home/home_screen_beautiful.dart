@@ -933,7 +933,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  // Confetti Animation Widget
+  // Confetti Animation Widget with Continuous Loop
   Widget _buildConfetti(int index, bool isMobile) {
     final colors = [
       const Color(0xFFff6b6b), // Red
@@ -945,34 +945,24 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     
     final random = index * 37; // Pseudo-random based on index
     final color = colors[random % colors.length];
-    final size = 4.0 + (random % 4);
+    final size = 6.0 + (random % 4); // Slightly larger for visibility
     final left = (random % 100).toDouble();
+    final delay = random % 3000; // Stagger start times
     
     return Positioned(
       left: left,
-      top: -10,
-      child: TweenAnimationBuilder<double>(
-        duration: Duration(milliseconds: 2000 + (random % 1000)),
-        tween: Tween(begin: -10, end: isMobile ? 250 : 320),
-        curve: Curves.linear,
-        builder: (context, value, child) {
-          return Transform.translate(
-            offset: Offset(0, value),
-            child: Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-            ),
-          );
-        },
+      top: -20,
+      child: _ContinuousConfetti(
+        color: color,
+        size: size,
+        duration: Duration(milliseconds: 3000 + (random % 2000)),
+        delay: Duration(milliseconds: delay),
+        isMobile: isMobile,
       ),
     );
   }
 
-  // Animated Fireworks Widget
+  // Animated Fireworks Widget with Continuous Loop
   Widget _buildFirework(int index, bool isMobile) {
     final colors = [
       const Color(0xFFff6b6b), // Red
@@ -982,74 +972,17 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       const Color(0xFFf97316), // Orange
     ];
     
-    // Create staggered timing for different fireworks
-    final delay = index * 2000 + 1000; // Start at 1s, then every 2s
     final random = index * 73; // Different seed for fireworks
     final color = colors[random % colors.length];
-    final left = 20.0 + (index * 30.0) + (random % 20); // Spread across width
-    final top = 30.0 + (random % 40); // Vary vertical position
+    final left = 20.0 + (index * 60.0) + (random % 30); // Better spread across width
+    final top = 20.0 + (random % 60); // Vary vertical position
     
     return Positioned(
       left: left,
       top: top,
-      child: TweenAnimationBuilder<double>(
-        duration: const Duration(milliseconds: 1500),
-        tween: Tween(begin: 0, end: 1),
-        curve: Curves.easeOut,
-        builder: (context, animationValue, child) {
-          // Create explosion effect
-          if (animationValue < 0.1) {
-            // Pre-explosion: small growing dot
-            return Container(
-              width: 4 * animationValue * 10,
-              height: 4 * animationValue * 10,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.6),
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-            );
-          } else {
-            // Explosion: multiple particles radiating outward
-            return SizedBox(
-              width: 60,
-              height: 60,
-              child: Stack(
-                children: List.generate(8, (particleIndex) {
-                  final angle = (particleIndex * 45.0) * (3.14159 / 180); // Convert to radians
-                  final distance = (animationValue - 0.1) * 40; // Explosion radius
-                  final opacity = (1 - animationValue).clamp(0.0, 1.0);
-                  
-                  return Positioned(
-                    left: 30 + (distance * math.cos(angle)),
-                    top: 30 + (distance * math.sin(angle)),
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(opacity),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: color.withOpacity(opacity * 0.5),
-                            blurRadius: 3,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            );
-          }
-        },
+      child: _ContinuousFirework(
+        color: color,
+        delay: Duration(milliseconds: index * 1500), // Stagger the fireworks
       ),
     );
   }
@@ -1638,7 +1571,202 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       },
     );
   }
+}
 
+// Continuous Confetti Widget
+class _ContinuousConfetti extends StatefulWidget {
+  final Color color;
+  final double size;
+  final Duration duration;
+  final Duration delay;
+  final bool isMobile;
+
+  const _ContinuousConfetti({
+    required this.color,
+    required this.size,
+    required this.duration,
+    required this.delay,
+    required this.isMobile,
+  });
+
+  @override
+  State<_ContinuousConfetti> createState() => _ContinuousConfettiState();
+}
+
+class _ContinuousConfettiState extends State<_ContinuousConfetti>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+    _animation = Tween<double>(
+      begin: -20,
+      end: widget.isMobile ? 280 : 360,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.linear,
+    ));
+
+    // Start with delay, then repeat
+    Future.delayed(widget.delay, () {
+      if (mounted) {
+        _controller.repeat();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _animation.value),
+          child: Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              color: widget.color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: widget.color.withOpacity(0.4),
+                  blurRadius: 2,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Continuous Firework Widget (outside the main class)
+class _ContinuousFirework extends StatefulWidget {
+  final Color color;
+  final Duration delay;
+
+  const _ContinuousFirework({
+    required this.color,
+    required this.delay,
+  });
+
+  @override
+  State<_ContinuousFirework> createState() => _ContinuousFireworkState();
+}
+
+class _ContinuousFireworkState extends State<_ContinuousFirework>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+
+    // Start with delay, then repeat
+    Future.delayed(widget.delay, () {
+      if (mounted) {
+        _controller.repeat();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final value = _animation.value;
+        
+        if (value < 0.1) {
+          // Pre-explosion: growing dot
+          final size = value * 200; // 0 to 20 pixels
+          return Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: widget.color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: widget.color.withOpacity(0.8),
+                  blurRadius: size / 2,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Explosion: radiating particles
+          final explosionProgress = (value - 0.1) / 0.9;
+          final radius = explosionProgress * 50;
+          final opacity = (1 - explosionProgress).clamp(0.0, 1.0);
+          
+          return SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              children: List.generate(12, (index) {
+                final angle = (index * 30.0) * (math.pi / 180);
+                return Positioned(
+                  left: 50 + (radius * math.cos(angle)),
+                  top: 50 + (radius * math.sin(angle)),
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: widget.color.withOpacity(opacity),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.color.withOpacity(opacity * 0.6),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
+
+// Back to the main class
+extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
   // Mobile-optimized layout
   Widget _buildMobileContent(Event placeholderEvent) {
     return Padding(
