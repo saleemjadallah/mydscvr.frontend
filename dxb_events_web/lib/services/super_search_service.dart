@@ -48,6 +48,7 @@ class SuperSearchResult {
   final bool hasPrev;
   final List<String> suggestions;
   final SuperSearchMetadata metadata;
+  final String? aiResponse;
 
   const SuperSearchResult({
     required this.events,
@@ -59,6 +60,7 @@ class SuperSearchResult {
     required this.hasPrev,
     required this.suggestions,
     required this.metadata,
+    this.aiResponse,
   });
 
   factory SuperSearchResult.fromJson(Map<String, dynamic> json) {
@@ -86,7 +88,18 @@ class SuperSearchResult {
 
     final pagination = json['pagination'] as Map<String, dynamic>;
     final suggestions = (json['suggestions'] as List<dynamic>?)?.cast<String>() ?? [];
-    final metadata = SuperSearchMetadata.fromJson(json['search_metadata'] as Map<String, dynamic>);
+    final aiResponse = json['ai_response'] as String?;
+    
+    // Handle both AI search and Algolia search metadata formats
+    final metadataJson = json['search_metadata'] as Map<String, dynamic>? ?? {
+      'query': '',
+      'enhanced_query': '',
+      'filters_applied': 0,
+      'total_processing_time_ms': json['processing_time_ms'] ?? 0,
+      'algolia_time_ms': 0,
+      'service': 'ai-search',
+    };
+    final metadata = SuperSearchMetadata.fromJson(metadataJson);
 
     return SuperSearchResult(
       events: events,
@@ -98,6 +111,7 @@ class SuperSearchResult {
       hasPrev: pagination['has_prev'] as bool,
       suggestions: suggestions,
       metadata: metadata,
+      aiResponse: aiResponse,
     );
   }
 }
@@ -245,11 +259,11 @@ class SuperSearchService {
       }
 
       final response = await _dio.get(
-        '/algolia-search',
+        '/ai-search',
         queryParameters: queryParams,
         options: Options(
-          receiveTimeout: const Duration(seconds: 10), // Fast timeout for Algolia
-          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 15), // Longer timeout for AI processing
+          sendTimeout: const Duration(seconds: 10),
         ),
       );
 
