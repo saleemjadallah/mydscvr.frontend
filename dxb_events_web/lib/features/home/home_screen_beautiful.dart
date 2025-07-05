@@ -910,25 +910,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                           ),
                         ),
                         
-                        // Main content - gameshow layout
+                        // Main content - centered gameshow layout
                         Padding(
                           padding: EdgeInsets.all(contentPadding),
-                          child: Row(
-                            children: [
-                              // Trophy Section
-                              _buildTrophySection(isMobile),
-                              
-                              SizedBox(width: isMobile ? 16 : 24),
-                              
-                              // Text Content Area
-                              Expanded(
-                                child: _buildGameshowContent(placeholderEvent, isMobile),
-                              ),
-                              
-                              // Celebration Elements
-                              if (!isMobile) _buildCelebrationElements(),
-                            ],
-                          ),
+                          child: isMobile
+                              ? _buildMobileGameshowLayout(placeholderEvent)
+                              : _buildDesktopGameshowLayout(placeholderEvent, isTablet),
                         ),
                       ],
                     ),
@@ -1018,43 +1005,50 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  // Main Gameshow Content
-  Widget _buildGameshowContent(Event placeholderEvent, bool isMobile) {
+  // Mobile Gameshow Layout - Centered and Spacious
+  Widget _buildMobileGameshowLayout(Event placeholderEvent) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Brand Text with Glow
-        TweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 2),
-          tween: Tween(begin: 0, end: 1),
-          curve: Curves.easeInOut,
-          builder: (context, value, child) {
-            return Text(
-              'MyDscvr\'s Choice',
-              style: GoogleFonts.comfortaa(
-                fontSize: isMobile ? 14 : 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: const Color(0xFFffd700).withOpacity(value),
-                    blurRadius: 10,
-                    offset: const Offset(0, 0),
+        // Top Row: Trophy and Brand Text
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildTrophySection(true),
+            const SizedBox(width: 16),
+            // Brand Text with Glow
+            TweenAnimationBuilder<double>(
+              duration: const Duration(seconds: 2),
+              tween: Tween(begin: 0, end: 1),
+              curve: Curves.easeInOut,
+              builder: (context, value, child) {
+                return Text(
+                  'MyDscvr\'s Choice',
+                  style: GoogleFonts.comfortaa(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: const Color(0xFFffd700).withOpacity(value),
+                        blurRadius: 10,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ],
         ),
         
-        SizedBox(height: isMobile ? 4 : 8),
+        const SizedBox(height: 16),
         
-        // Main Title
+        // Main Title - Centered and Large
         Text(
           'Event of the Day',
           style: GoogleFonts.comfortaa(
-            fontSize: isMobile ? 24 : 32,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             shadows: [
@@ -1065,17 +1059,18 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               ),
             ],
           ),
+          textAlign: TextAlign.center,
         ),
         
-        SizedBox(height: isMobile ? 6 : 10),
+        const SizedBox(height: 12),
         
-        // Event Name (Dynamic)
+        // Event Name - Centered
         Text(
-          placeholderEvent.title.length > 40 
-              ? '${placeholderEvent.title.substring(0, 37)}...'
+          placeholderEvent.title.length > 35 
+              ? '${placeholderEvent.title.substring(0, 32)}...'
               : placeholderEvent.title,
           style: GoogleFonts.inter(
-            fontSize: isMobile ? 16 : 20,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             color: Colors.white,
             shadows: [
@@ -1088,53 +1083,211 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
         ),
         
-        SizedBox(height: isMobile ? 8 : 12),
+        const SizedBox(height: 16),
         
-        // Details Row
+        // Details Row - Centered
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildDetailBadge('📅', 'This Week', isMobile),
-            SizedBox(width: isMobile ? 8 : 12),
-            _buildDetailBadge('📍', placeholderEvent.venue?.area ?? 'Dubai', isMobile),
+            _buildDetailBadge('📅', 'This Week', true),
+            const SizedBox(width: 12),
+            _buildDetailBadge('📍', placeholderEvent.venue?.area ?? 'Dubai', true),
           ],
         ),
         
-        SizedBox(height: isMobile ? 8 : 12),
+        const SizedBox(height: 16),
         
-        // Winner Badge
+        // Winner Badge - Centered
         Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 12 : 16,
-            vertical: isMobile ? 6 : 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFFff6b6b), Color(0xFFee5a24)],
             ),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFFff6b6b).withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🎉', style: TextStyle(fontSize: 14)),
-              SizedBox(width: isMobile ? 4 : 6),
+              const Text('🎉', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
               Text(
                 'Featured Winner',
                 style: GoogleFonts.inter(
-                  fontSize: isMobile ? 12 : 14,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Desktop Gameshow Layout - Expanded and Spectacular
+  Widget _buildDesktopGameshowLayout(Event placeholderEvent, bool isTablet) {
+    return Row(
+      children: [
+        // Left Side - Large Trophy with Celebration
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLargeTrophySection(isTablet),
+              const SizedBox(height: 20),
+              _buildCelebrationElements(),
+            ],
+          ),
+        ),
+        
+        // Center Content - Main Text Area
+        Expanded(
+          flex: 4,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Brand Text with Glow
+              TweenAnimationBuilder<double>(
+                duration: const Duration(seconds: 2),
+                tween: Tween(begin: 0, end: 1),
+                curve: Curves.easeInOut,
+                builder: (context, value, child) {
+                  return Text(
+                    'MyDscvr\'s Choice',
+                    style: GoogleFonts.comfortaa(
+                      fontSize: isTablet ? 22 : 28,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: const Color(0xFFffd700).withOpacity(value),
+                          blurRadius: 15,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  );
+                },
+              ),
+              
+              SizedBox(height: isTablet ? 12 : 16),
+              
+              // Main Title - Large and Centered
+              Text(
+                'Event of the Day',
+                style: GoogleFonts.comfortaa(
+                  fontSize: isTablet ? 36 : 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(3, 3),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              
+              SizedBox(height: isTablet ? 16 : 20),
+              
+              // Event Name - Large and Prominent
+              Text(
+                placeholderEvent.title.length > 50 
+                    ? '${placeholderEvent.title.substring(0, 47)}...'
+                    : placeholderEvent.title,
+                style: GoogleFonts.inter(
+                  fontSize: isTablet ? 24 : 32,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 6,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              
+              SizedBox(height: isTablet ? 20 : 24),
+              
+              // Details Row - Larger and Centered
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildLargeDetailBadge('📅', 'This Week', isTablet),
+                  SizedBox(width: isTablet ? 16 : 20),
+                  _buildLargeDetailBadge('📍', placeholderEvent.venue?.area ?? 'Dubai', isTablet),
+                ],
+              ),
+              
+              SizedBox(height: isTablet ? 20 : 24),
+              
+              // Winner Badge - Large and Impressive
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24 : 32,
+                  vertical: isTablet ? 12 : 16,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFff6b6b), Color(0xFFee5a24)],
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFff6b6b).withOpacity(0.4),
+                      blurRadius: 15,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('🎉', style: TextStyle(fontSize: isTablet ? 18 : 22)),
+                    SizedBox(width: isTablet ? 8 : 12),
+                    Text(
+                      'Featured Winner',
+                      style: GoogleFonts.inter(
+                        fontSize: isTablet ? 16 : 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Right Side - More Celebration Elements
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildRightSideCelebration(),
             ],
           ),
         ),
@@ -1175,6 +1328,83 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
+  // Large Trophy Section for Desktop
+  Widget _buildLargeTrophySection(bool isTablet) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(seconds: 2),
+      tween: Tween(begin: 0, end: 1),
+      curve: Curves.bounceOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 0.8 + (value * 0.2),
+          child: Transform.rotate(
+            angle: (value - 0.5) * 0.1,
+            child: Container(
+              width: isTablet ? 100 : 120,
+              height: isTablet ? 100 : 120,
+              decoration: BoxDecoration(
+                color: const Color(0xFFffd700),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFffd700).withOpacity(0.6),
+                    blurRadius: 25,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.emoji_events,
+                size: isTablet ? 50 : 60,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Large Detail Badge for Desktop
+  Widget _buildLargeDetailBadge(String emoji, String text, bool isTablet) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 16 : 20,
+        vertical: isTablet ? 10 : 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.4),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: TextStyle(fontSize: isTablet ? 16 : 20)),
+          SizedBox(width: isTablet ? 6 : 8),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 14 : 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Celebration Elements (Desktop only)
   Widget _buildCelebrationElements() {
     return Column(
@@ -1190,15 +1420,59 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               scale: value,
               child: const Text(
                 '✨',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 28),
               ),
             );
           },
         ),
-        const SizedBox(height: 10),
-        const Text('🎊', style: TextStyle(fontSize: 20)),
-        const SizedBox(height: 10),
-        const Text('🎈', style: TextStyle(fontSize: 18)),
+        const SizedBox(height: 12),
+        const Text('🎊', style: TextStyle(fontSize: 24)),
+        const SizedBox(height: 12),
+        const Text('🎈', style: TextStyle(fontSize: 22)),
+      ],
+    );
+  }
+
+  // Right Side Celebration Elements
+  Widget _buildRightSideCelebration() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Animated Star
+        TweenAnimationBuilder<double>(
+          duration: const Duration(seconds: 3),
+          tween: Tween(begin: 0, end: 6.28), // 2 * PI for full rotation
+          curve: Curves.easeInOut,
+          builder: (context, value, child) {
+            return Transform.rotate(
+              angle: value,
+              child: const Text(
+                '⭐',
+                style: TextStyle(fontSize: 32),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 15),
+        const Text('🎆', style: TextStyle(fontSize: 26)),
+        const SizedBox(height: 15),
+        const Text('🎪', style: TextStyle(fontSize: 24)),
+        const SizedBox(height: 15),
+        // Pulsing Crown
+        TweenAnimationBuilder<double>(
+          duration: const Duration(seconds: 2),
+          tween: Tween(begin: 0.8, end: 1.2),
+          curve: Curves.easeInOut,
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: value,
+              child: const Text(
+                '👑',
+                style: TextStyle(fontSize: 28),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
