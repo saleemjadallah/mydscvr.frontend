@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:math' as math;
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -884,6 +885,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                         // Animated confetti background
                         ...List.generate(15, (index) => _buildConfetti(index, isMobile)),
                         
+                        // Animated fireworks
+                        ...List.generate(3, (index) => _buildFirework(index, isMobile)),
+                        
                         // Diagonal shine effect
                         Positioned.fill(
                           child: TweenAnimationBuilder<double>(
@@ -963,6 +967,88 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               ),
             ),
           );
+        },
+      ),
+    );
+  }
+
+  // Animated Fireworks Widget
+  Widget _buildFirework(int index, bool isMobile) {
+    final colors = [
+      const Color(0xFFff6b6b), // Red
+      const Color(0xFF4ecdc4), // Teal
+      const Color(0xFFffd700), // Gold
+      const Color(0xFFa855f7), // Purple
+      const Color(0xFFf97316), // Orange
+    ];
+    
+    // Create staggered timing for different fireworks
+    final delay = index * 2000 + 1000; // Start at 1s, then every 2s
+    final random = index * 73; // Different seed for fireworks
+    final color = colors[random % colors.length];
+    final left = 20.0 + (index * 30.0) + (random % 20); // Spread across width
+    final top = 30.0 + (random % 40); // Vary vertical position
+    
+    return Positioned(
+      left: left,
+      top: top,
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 1500),
+        tween: Tween(begin: 0, end: 1),
+        curve: Curves.easeOut,
+        builder: (context, animationValue, child) {
+          // Create explosion effect
+          if (animationValue < 0.1) {
+            // Pre-explosion: small growing dot
+            return Container(
+              width: 4 * animationValue * 10,
+              height: 4 * animationValue * 10,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.6),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            // Explosion: multiple particles radiating outward
+            return SizedBox(
+              width: 60,
+              height: 60,
+              child: Stack(
+                children: List.generate(8, (particleIndex) {
+                  final angle = (particleIndex * 45.0) * (3.14159 / 180); // Convert to radians
+                  final distance = (animationValue - 0.1) * 40; // Explosion radius
+                  final opacity = (1 - animationValue).clamp(0.0, 1.0);
+                  
+                  return Positioned(
+                    left: 30 + (distance * math.cos(angle)),
+                    top: 30 + (distance * math.sin(angle)),
+                    child: Container(
+                      width: 4,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(opacity),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(opacity * 0.5),
+                            blurRadius: 3,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            );
+          }
         },
       ),
     );
@@ -1433,7 +1519,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  // Right Side Celebration Elements
+  // Right Side Celebration Elements with Animated Fireworks
   Widget _buildRightSideCelebration() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1454,10 +1540,14 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           },
         ),
         const SizedBox(height: 15),
-        const Text('🎆', style: TextStyle(fontSize: 26)),
+        
+        // Animated Firework Burst
+        _buildFireworkBurst(),
+        
         const SizedBox(height: 15),
         const Text('🎪', style: TextStyle(fontSize: 24)),
         const SizedBox(height: 15),
+        
         // Pulsing Crown
         TweenAnimationBuilder<double>(
           duration: const Duration(seconds: 2),
@@ -1474,6 +1564,78 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           },
         ),
       ],
+    );
+  }
+
+  // Special Firework Burst Animation
+  Widget _buildFireworkBurst() {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(seconds: 4),
+      tween: Tween(begin: 0, end: 1),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        // Create a burst effect that repeats
+        final burstProgress = (value * 4) % 1; // Creates 4 bursts over 4 seconds
+        
+        if (burstProgress < 0.2) {
+          // Build-up phase
+          return Container(
+            width: 20 + (burstProgress * 40),
+            height: 20 + (burstProgress * 40),
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFFffd700).withOpacity(burstProgress * 5),
+                  Colors.transparent,
+                ],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text('🎆', style: TextStyle(fontSize: 26)),
+            ),
+          );
+        } else {
+          // Explosion phase
+          final explosionProgress = (burstProgress - 0.2) / 0.8;
+          final radius = explosionProgress * 30;
+          final opacity = (1 - explosionProgress).clamp(0.0, 1.0);
+          
+          return SizedBox(
+            width: 80,
+            height: 80,
+            child: Stack(
+              children: [
+                const Center(
+                  child: Text('🎆', style: TextStyle(fontSize: 26)),
+                ),
+                ...List.generate(12, (index) {
+                  final angle = (index * 30.0) * (math.pi / 180);
+                  return Positioned(
+                    left: 40 + (radius * math.cos(angle)),
+                    top: 40 + (radius * math.sin(angle)),
+                    child: Container(
+                      width: 3,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFffd700).withOpacity(opacity),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFffd700).withOpacity(opacity * 0.5),
+                            blurRadius: 2,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 
