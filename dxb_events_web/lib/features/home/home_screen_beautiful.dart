@@ -885,8 +885,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                         // Animated confetti background
                         ...List.generate(15, (index) => _buildConfetti(index, isMobile)),
                         
-                        // Animated fireworks
-                        ...List.generate(3, (index) => _buildFirework(index, isMobile)),
+                        // Animated fireworks - left side
+                        ...List.generate(3, (index) => _buildFirework(index, isMobile, isLeftSide: true)),
+                        
+                        // Animated fireworks - right side
+                        ...List.generate(3, (index) => _buildFirework(index, isMobile, isLeftSide: false)),
                         
                         // Diagonal shine effect
                         Positioned.fill(
@@ -963,7 +966,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Animated Fireworks Widget with Continuous Loop
-  Widget _buildFirework(int index, bool isMobile) {
+  Widget _buildFirework(int index, bool isMobile, {required bool isLeftSide}) {
     final colors = [
       const Color(0xFFff6b6b), // Red
       const Color(0xFF4ecdc4), // Teal
@@ -972,9 +975,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       const Color(0xFFf97316), // Orange
     ];
     
-    final random = index * 73; // Different seed for fireworks
+    final random = index * 73 + (isLeftSide ? 0 : 100); // Different seed for left/right
     final color = colors[random % colors.length];
-    final left = 20.0 + (index * 60.0) + (random % 30); // Better spread across width
+    
+    // Position fireworks on left or right side
+    final left = isLeftSide 
+        ? 20.0 + (index * 40.0) + (random % 20) // Left side positioning
+        : (isMobile ? 200.0 : 400.0) + (index * 40.0) + (random % 20); // Right side positioning
     final top = 20.0 + (random % 60); // Vary vertical position
     
     return Positioned(
@@ -982,7 +989,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       top: top,
       child: _ContinuousFirework(
         color: color,
-        delay: Duration(milliseconds: index * 1500), // Stagger the fireworks
+        delay: Duration(milliseconds: index * 1500 + (isLeftSide ? 0 : 750)), // Offset right side timing
       ),
     );
   }
@@ -1424,64 +1431,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  // Celebration Elements (Desktop only)
+  // Celebration Elements (Desktop only) - Just centered crown
   Widget _buildCelebrationElements() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Sparkle Effect
-        TweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 2),
-          tween: Tween(begin: 0, end: 1),
-          curve: Curves.elasticOut,
-          builder: (context, value, child) {
-            return Transform.scale(
-              scale: value,
-              child: const Text(
-                '✨',
-                style: TextStyle(fontSize: 28),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        const Text('🎊', style: TextStyle(fontSize: 24)),
-        const SizedBox(height: 12),
-        const Text('🎈', style: TextStyle(fontSize: 22)),
-      ],
-    );
-  }
-
-  // Right Side Celebration Elements with Animated Fireworks
-  Widget _buildRightSideCelebration() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Animated Star
-        TweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 3),
-          tween: Tween(begin: 0, end: 6.28), // 2 * PI for full rotation
-          curve: Curves.easeInOut,
-          builder: (context, value, child) {
-            return Transform.rotate(
-              angle: value,
-              child: const Text(
-                '⭐',
-                style: TextStyle(fontSize: 32),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 15),
-        
-        // Animated Firework Burst
-        _buildFireworkBurst(),
-        
-        const SizedBox(height: 15),
-        const Text('🎪', style: TextStyle(fontSize: 24)),
-        const SizedBox(height: 15),
-        
-        // Pulsing Crown
+        // Pulsing Crown - Centered
         TweenAnimationBuilder<double>(
           duration: const Duration(seconds: 2),
           tween: Tween(begin: 0.8, end: 1.2),
@@ -1491,11 +1446,22 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               scale: value,
               child: const Text(
                 '👑',
-                style: TextStyle(fontSize: 28),
+                style: TextStyle(fontSize: 32),
               ),
             );
           },
         ),
+      ],
+    );
+  }
+
+  // Right Side Celebration Elements - Minimal design with just fireworks
+  Widget _buildRightSideCelebration() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Empty space - fireworks are positioned with absolute positioning
+        const SizedBox(height: 80),
       ],
     );
   }
