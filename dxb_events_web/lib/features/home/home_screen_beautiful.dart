@@ -65,6 +65,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     super.dispose();
   }
 
+  /// Navigate to event details page
+  void _navigateToEventDetails(Event event) {
+    context.go('/event/${event.id}');
+  }
+
   /// Build AdSense ad container with header
   Widget _buildAdSenseContainer(String identifier, [Color? backgroundColor]) {
     return Container(
@@ -861,26 +866,32 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               builder: (context, scale, child) {
                 return Transform.scale(
                   scale: scale,
-                  child: Container(
-                    decoration: BoxDecoration(
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: InkWell(
+                      onTap: () => _navigateToEventDetails(placeholderEvent),
                       borderRadius: BorderRadius.circular(borderRadius),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF667eea), // Purple
-                          Color(0xFF764ba2), // Blue
+                      hoverColor: Colors.white.withOpacity(0.1),
+                      child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(borderRadius),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF667eea), // Purple
+                            Color(0xFF764ba2), // Blue
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF667eea).withOpacity(0.4),
+                            blurRadius: isMobile ? 15 : 25,
+                            offset: Offset(0, isMobile ? 8 : 12),
+                          ),
                         ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF667eea).withOpacity(0.4),
-                          blurRadius: isMobile ? 15 : 25,
-                          offset: Offset(0, isMobile ? 8 : 12),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
+                      child: Stack(
                       children: [
                         // Animated confetti background
                         ...List.generate(15, (index) => _buildConfetti(index, isMobile)),
@@ -925,6 +936,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                               : _buildDesktopGameshowLayout(placeholderEvent, isTablet),
                         ),
                       ],
+                      ),
+                    ),
                     ),
                   ),
                 );
