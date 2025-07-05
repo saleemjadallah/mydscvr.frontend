@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-// import 'package:share_plus/share_plus.dart'; // TODO: Replace with web-safe sharing
+import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1253,17 +1253,24 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   void _shareEvent(Event event) {
-    // TODO: Implement web-safe sharing
-    print('Share event: ${event.title}');
-    /*
-    Share.share(
-      'Check out this amazing event: ${event.title}\n\n'
-      '📅 ${_formatDateTime(event.startDate)}\n'
-      '📍 ${event.venue.name}, ${event.venue.area}\n\n'
-      'Discover more family activities on DXB Events!',
-      subject: event.title,
-    );
-    */
+    try {
+      Share.share(
+        'Check out this amazing event: ${event.title}\n\n'
+        '📅 ${_formatDateTime(event.startDate)}\n'
+        '📍 ${event.venue?.name ?? 'Dubai'}, ${event.venue?.area ?? 'UAE'}\n\n'
+        'Discover more family activities on MyDscvr!',
+        subject: event.title,
+      );
+    } catch (e) {
+      // Fallback for web or unsupported platforms
+      print('Share failed: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sharing not supported on this platform'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _toggleFavorite(String eventId) async {

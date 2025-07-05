@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/themes/app_typography.dart';
@@ -403,15 +404,7 @@ class SearchEventCard extends ConsumerWidget {
                       children: [
                         // Share Button
                         IconButton(
-                          onPressed: () {
-                            // TODO: Implement share
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Share functionality coming soon!'),
-                                backgroundColor: AppColors.dubaiTeal,
-                              ),
-                            );
-                          },
+                          onPressed: () => _shareEvent(event, context),
                           icon: Icon(
                             LucideIcons.share2,
                             size: 20,
@@ -595,6 +588,27 @@ class SearchEventCard extends ConsumerWidget {
       final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return '${startDate.day} ${months[startDate.month - 1]}';
+    }
+  }
+
+  void _shareEvent(Event event, BuildContext context) {
+    try {
+      final dateText = _formatEventDate(event.startDate, event.endDate);
+      Share.share(
+        'Check out this amazing event: ${event.title}\n\n'
+        '📅 $dateText\n'
+        '📍 ${event.venue?.name ?? 'Dubai'}, ${event.venue?.area ?? 'UAE'}\n\n'
+        'Discover more family activities on MyDscvr!',
+        subject: event.title,
+      );
+    } catch (e) {
+      // Fallback for web or unsupported platforms
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sharing not supported on this platform'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 } 
