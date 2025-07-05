@@ -42,7 +42,11 @@ class SafeEventParser {
       }
 
       // Parse using fromBackendApi with additional safety
-      return Event.fromBackendApi(eventJson);
+      final parsedEvent = Event.fromBackendApi(eventJson);
+      if (kDebugMode) {
+        print('✅ SafeEventParser: Successfully created Event object');
+      }
+      return parsedEvent;
       
     } catch (e, stackTrace) {
       if (kDebugMode) {

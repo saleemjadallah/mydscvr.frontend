@@ -277,13 +277,32 @@ class Event {
       verificationStatus: organizerData?['verification_status'] ?? (sourceData?['verified'] == true ? 'verified' : 'pending'),
     );
 
-    // Parse dates
+    // Parse dates with better error handling
     DateTime startDate;
     DateTime? endDate;
     try {
-      startDate = DateTime.parse(json['start_date']);
-      endDate = json['end_date'] != null ? DateTime.parse(json['end_date']) : null;
+      // Handle both string and timestamp formats
+      final startDateValue = json['start_date'];
+      if (startDateValue is String) {
+        startDate = DateTime.parse(startDateValue);
+      } else if (startDateValue is int) {
+        startDate = DateTime.fromMillisecondsSinceEpoch(startDateValue * 1000);
+      } else {
+        throw Exception('Invalid start_date format');
+      }
+      
+      final endDateValue = json['end_date'];
+      if (endDateValue != null) {
+        if (endDateValue is String) {
+          endDate = DateTime.parse(endDateValue);
+        } else if (endDateValue is int) {
+          endDate = DateTime.fromMillisecondsSinceEpoch(endDateValue * 1000);
+        }
+      }
     } catch (e) {
+      print('🚨 Event date parsing error: $e');
+      print('🚨 start_date value: ${json['start_date']}');
+      print('🚨 end_date value: ${json['end_date']}');
       startDate = DateTime.now().add(const Duration(days: 1));
       endDate = startDate.add(const Duration(hours: 2));
     }
