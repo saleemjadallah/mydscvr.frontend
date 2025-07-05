@@ -273,17 +273,6 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
         _buildQuickFilters(notifier),
         const SizedBox(height: 16),
         
-        // Debug info
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Displaying ${events.length} featured events',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
-        
         // Events display - carousel for mobile, grid for tablet/desktop
         if (isMobile) ...
           _buildMobileCarousel(events)
