@@ -259,11 +259,11 @@ class SuperSearchService {
       }
 
       final response = await _dio.get(
-        '/ai-search',
+        '/algolia-search',
         queryParameters: queryParams,
         options: Options(
-          receiveTimeout: const Duration(seconds: 15), // Longer timeout for AI processing
-          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10), // Fast Algolia AI search
+          sendTimeout: const Duration(seconds: 5),
         ),
       );
 
