@@ -269,10 +269,13 @@ class Event {
 
     // Parse organizer info - handle backend format
     final organizerData = json['organizer_info'] as Map<String, dynamic>?;
-    final sourceData = json['source'] as Map<String, dynamic>?;
+    // Handle source field - it can be either a string or a map
+    final sourceValue = json['source'];
+    final sourceData = sourceValue is Map<String, dynamic> ? sourceValue : null;
+    final sourceName = sourceValue is String ? sourceValue : sourceData?['name'];
     
     final organizerInfo = OrganizerInfo(
-      name: organizerData?['name'] ?? sourceData?['name'] ?? json['source_name'] ?? 'Dubai Events',
+      name: organizerData?['name'] ?? sourceName ?? json['source_name'] ?? 'Dubai Events',
       description: organizerData?['description'] ?? 'Verified event organizer',
       verificationStatus: organizerData?['verification_status'] ?? (sourceData?['verified'] == true ? 'verified' : 'pending'),
     );
