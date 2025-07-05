@@ -129,9 +129,12 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
         if (response.isSuccess) {
           _searchResult = response.data;
           _error = null;
+          print('🎯 SuperSearchScreen: Search successful! Events count: ${_searchResult?.events.length ?? 0}');
+          print('🎯 SuperSearchScreen: Total results: ${_searchResult?.total ?? 0}');
         } else {
           _error = response.error;
           _searchResult = null;
+          print('🚨 SuperSearchScreen: Search failed with error: ${response.error}');
         }
       });
     }

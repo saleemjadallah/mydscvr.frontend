@@ -63,11 +63,26 @@ class SuperSearchResult {
 
   factory SuperSearchResult.fromJson(Map<String, dynamic> json) {
     final eventsData = json['events'] as List<dynamic>;
+    
+    print('🔍 SuperSearchResult: Received ${eventsData.length} raw events');
+    
     final events = eventsData
-        .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+        .map((eventJson) {
+          try {
+            print('🔍 SuperSearchResult: Attempting to parse event: ${eventJson['title'] ?? 'Unknown'}');
+            final parsedEvent = Event.fromBackendApi(eventJson as Map<String, dynamic>);
+            print('✅ SuperSearchResult: Successfully parsed event: ${parsedEvent.title}');
+            return parsedEvent;
+          } catch (e) {
+            print('🚨 SuperSearchResult: Failed to parse event: ${eventJson['title'] ?? 'Unknown'} - Error: $e');
+            return null;
+          }
+        })
         .where((event) => event != null)
         .cast<Event>()
         .toList();
+
+    print('🎯 SuperSearchResult: Final parsed events count: ${events.length}');
 
     final pagination = json['pagination'] as Map<String, dynamic>;
     final suggestions = (json['suggestions'] as List<dynamic>?)?.cast<String>() ?? [];
