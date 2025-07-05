@@ -1854,7 +1854,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildMyDscvrChoice() {
-    print('🎯 DEBUG: Building MyDscvr\'s Choice Banner');
+    print('🎯 DEBUG: Building GameShow Winner Banner');
     
     // For now, use a featured event as placeholder until we implement daily choice API
     final placeholderEvent = _featuredEvents.isNotEmpty ? _featuredEvents.first : null;
@@ -1872,106 +1872,95 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         // Responsive dimensions
         final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
         final verticalMargin = isMobile ? 16.0 : 24.0;
-        final borderRadius = isMobile ? 16.0 : 24.0;
-        final contentPadding = isMobile ? 16.0 : 24.0;
+        final borderRadius = isMobile ? 20.0 : 25.0;
+        final contentPadding = isMobile ? 20.0 : 30.0;
         
         // Responsive heights
-        final containerHeight = isMobile ? null : (isTablet ? 240.0 : 280.0);
+        final containerHeight = isMobile ? null : (isTablet ? 280.0 : 320.0);
         
-        return Container(
-          margin: EdgeInsets.symmetric(
-            horizontal: horizontalMargin,
-            vertical: verticalMargin,
-          ),
-          height: containerHeight,
-          constraints: isMobile ? const BoxConstraints(minHeight: 200) : null,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
-            gradient: AppColors.oceanGradient,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.dubaiTeal.withOpacity(0.3),
-                blurRadius: isMobile ? 12 : 20,
-                offset: Offset(0, isMobile ? 6 : 10),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Background pattern bubbles - adjusted for mobile
-              if (!isMobile) ...[
-                Positioned(
-                  top: 20,
-                  right: 60,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.1),
-                    ),
-                  ),
+        return TweenAnimationBuilder<double>(
+          duration: const Duration(seconds: 3),
+          tween: Tween(begin: 1.0, end: 1.02),
+          curve: Curves.easeInOut,
+          builder: (context, scale, child) {
+            return Transform.scale(
+              scale: scale,
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: horizontalMargin,
+                  vertical: verticalMargin,
                 ),
-                Positioned(
-                  bottom: 40,
-                  left: 30,
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.08),
-                    ),
-                  ),
-                ),
-              ],
-              
-              // MyDscvr Logo/Badge
-              Positioned(
-                top: isMobile ? 12 : 16,
-                right: isMobile ? 12 : 16,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 8 : 12,
-                    vertical: isMobile ? 4 : 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        LucideIcons.sparkles,
-                        size: isMobile ? 12 : 16,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: isMobile ? 2 : 4),
-                      Text(
-                        'Choice',
-                        style: GoogleFonts.inter(
-                          fontSize: isMobile ? 10 : 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                height: containerHeight,
+                constraints: isMobile ? const BoxConstraints(minHeight: 240) : null,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF667eea), // Purple
+                      Color(0xFF764ba2), // Blue
                     ],
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF667eea).withOpacity(0.4),
+                      blurRadius: isMobile ? 15 : 25,
+                      offset: Offset(0, isMobile ? 8 : 12),
+                    ),
+                  ],
                 ),
-              ).animate().fadeIn(delay: 600.ms),
-              
-              // Main content - responsive layout
-              Padding(
-                padding: EdgeInsets.all(contentPadding),
-                child: isMobile 
-                  ? _buildMobileLayout(placeholderEvent)
-                  : _buildDesktopLayout(placeholderEvent, isTablet),
-              ),
+                child: Stack(
+                  children: [
+                    // Animated confetti background
+                    ...List.generate(15, (index) => _buildConfetti(index, isMobile)),
+                    
+                    // Diagonal shine effect
+                    Positioned.fill(
+                      child: TweenAnimationBuilder<double>(
+                        duration: const Duration(seconds: 4),
+                        tween: Tween(begin: -1.0, end: 1.0),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(borderRadius),
+                              gradient: LinearGradient(
+                                begin: Alignment(-1.0 + value, -1.0),
+                                end: Alignment(1.0 + value, 1.0),
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white.withOpacity(0.1),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.5, 1.0],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    // Main content - gameshow layout
+                    Padding(
+                      padding: EdgeInsets.all(contentPadding),
+                      child: Row(
+                        children: [
+                          // Trophy Section
+                          _buildTrophySection(isMobile),
+                          
+                          SizedBox(width: isMobile ? 16 : 24),
+                          
+                          // Text Content Area
+                          Expanded(
+                            child: _buildGameshowContent(placeholderEvent, isMobile),
+                          ),
+                          
+                          // Celebration Elements
+                          if (!isMobile) _buildCelebrationElements(),
+                        ],
+                      ),
+                    ),
             ],
           ),
         );
@@ -2337,6 +2326,267 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  // Confetti Animation Widget
+  Widget _buildConfetti(int index, bool isMobile) {
+    final colors = [
+      const Color(0xFFff6b6b), // Red
+      const Color(0xFF4ecdc4), // Teal
+      const Color(0xFFffd700), // Gold
+      const Color(0xFF96ceb4), // Green
+      const Color(0xFFfeca57), // Yellow
+    ];
+    
+    final random = index * 37; // Pseudo-random based on index
+    final color = colors[random % colors.length];
+    final size = 4.0 + (random % 4);
+    final left = (random % 100).toDouble();
+    
+    return Positioned(
+      left: left,
+      top: -10,
+      child: TweenAnimationBuilder<double>(
+        duration: Duration(milliseconds: 2000 + (random % 1000)),
+        tween: Tween(begin: -10, end: isMobile ? 250 : 320),
+        curve: Curves.linear,
+        builder: (context, value, child) {
+          return Transform.translate(
+            offset: Offset(0, value),
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // Trophy Section with Bounce Animation
+  Widget _buildTrophySection(bool isMobile) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(seconds: 2),
+      tween: Tween(begin: 0, end: 1),
+      curve: Curves.bounceOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 0.8 + (value * 0.2),
+          child: Transform.rotate(
+            angle: (value - 0.5) * 0.1,
+            child: Container(
+              width: isMobile ? 60 : 80,
+              height: isMobile ? 60 : 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFFffd700),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFffd700).withOpacity(0.4),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.emoji_events,
+                size: isMobile ? 30 : 40,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Main Gameshow Content
+  Widget _buildGameshowContent(Event placeholderEvent, bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Brand Text with Glow
+        TweenAnimationBuilder<double>(
+          duration: const Duration(seconds: 2),
+          tween: Tween(begin: 0, end: 1),
+          curve: Curves.easeInOut,
+          builder: (context, value, child) {
+            return Text(
+              'MyDscvr\'s Choice',
+              style: GoogleFonts.comfortaa(
+                fontSize: isMobile ? 14 : 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: const Color(0xFFffd700).withOpacity(value),
+                    blurRadius: 10,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        
+        SizedBox(height: isMobile ? 4 : 8),
+        
+        // Main Title
+        Text(
+          'Event of the Day',
+          style: GoogleFonts.comfortaa(
+            fontSize: isMobile ? 24 : 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 4,
+                offset: const Offset(2, 2),
+              ),
+            ],
+          ),
+        ).animate().fadeIn(delay: 200.ms),
+        
+        SizedBox(height: isMobile ? 6 : 10),
+        
+        // Event Name (Dynamic)
+        Text(
+          placeholderEvent.title.length > 40 
+              ? '${placeholderEvent.title.substring(0, 37)}...'
+              : placeholderEvent.title,
+          style: GoogleFonts.inter(
+            fontSize: isMobile ? 16 : 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 4,
+                offset: const Offset(2, 2),
+              ),
+            ],
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ).animate().fadeIn(delay: 400.ms),
+        
+        SizedBox(height: isMobile ? 8 : 12),
+        
+        // Details Row
+        Row(
+          children: [
+            _buildDetailBadge('📅', 'This Week', isMobile),
+            SizedBox(width: isMobile ? 8 : 12),
+            _buildDetailBadge('📍', placeholderEvent.venue.area, isMobile),
+          ],
+        ).animate().fadeIn(delay: 600.ms),
+        
+        SizedBox(height: isMobile ? 8 : 12),
+        
+        // Winner Badge
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 12 : 16,
+            vertical: isMobile ? 6 : 8,
+          ),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFff6b6b), Color(0xFFee5a24)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFff6b6b).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🎉', style: TextStyle(fontSize: 14)),
+              SizedBox(width: isMobile ? 4 : 6),
+              Text(
+                'Featured Winner',
+                style: GoogleFonts.inter(
+                  fontSize: isMobile ? 12 : 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ).animate().fadeIn(delay: 800.ms),
+      ],
+    );
+  }
+
+  // Detail Badge Helper
+  Widget _buildDetailBadge(String emoji, String text, bool isMobile) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 10,
+        vertical: isMobile ? 4 : 6,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: TextStyle(fontSize: isMobile ? 10 : 12)),
+          SizedBox(width: isMobile ? 3 : 4),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: isMobile ? 10 : 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Celebration Elements (Desktop only)
+  Widget _buildCelebrationElements() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Sparkle Effect
+        TweenAnimationBuilder<double>(
+          duration: const Duration(seconds: 2),
+          tween: Tween(begin: 0, end: 1),
+          curve: Curves.elasticOut,
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: value,
+              child: const Text(
+                '✨',
+                style: TextStyle(fontSize: 24),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+        const Text('🎊', style: TextStyle(fontSize: 20)),
+        const SizedBox(height: 10),
+        const Text('🎈', style: TextStyle(fontSize: 18)),
       ],
     );
   }
