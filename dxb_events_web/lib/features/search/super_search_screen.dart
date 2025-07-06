@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:math';
 import '../../services/super_search_service.dart';
 import '../../widgets/events/event_card.dart';
 
@@ -254,59 +255,726 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
   }
 
   Widget _buildHeroSection() {
+    return Stack(
+      children: [
+        // Floating Particles Background
+        _buildParticlesBackground(),
+        
+        // Main Hero Content
+        Column(
+          children: [
+            const SizedBox(height: 20),
+            
+            // Epic SUPER SEARCH Animated Title
+            _buildAnimatedSuperSearchTitle(),
+            
+            const SizedBox(height: 24),
+            
+            // Subtitle with typewriter effect
+            Text(
+              'Discover perfect family experiences in Dubai',
+              style: GoogleFonts.nunito(
+                fontSize: 16,
+                color: MyDscvrColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ).animate().fadeIn(delay: 2400.ms).slideY(begin: 0.3),
+            
+            const SizedBox(height: 16),
+            
+            // Gaming-style stats row
+            _buildGamingStatsRow(),
+          ],
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildAnimatedSuperSearchTitle() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+        final isMediumScreen = constraints.maxWidth < 900;
+        
+        return Column(
+          children: [
+            // SUPER word
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                _buildAnimatedLetter('S', 0, const Color(0xFF00D4FF), _electricSparkAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('U', 200, const Color(0xFF39FF14), _bouncingBallAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('P', 400, const Color(0xFFFF1493), _heartbeatAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('E', 600, const Color(0xFFFFD700), _coinFlipAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('R', 800, const Color(0xFFFF4500), _fireFlickerAnimation, isSmallScreen, isMediumScreen),
+              ],
+            ),
+            
+            SizedBox(height: isSmallScreen ? 4 : 8),
+            
+            // SEARCH word
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                _buildAnimatedLetter('S', 1200, const Color(0xFF9932CC), _waveMotionAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('E', 1400, const Color(0xFFFF6B47), _explodingStarAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('A', 1600, const Color(0xFF40E0D0), _floatingBubbleAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('R', 1800, const Color(0xFF32CD32), _lightningBoltAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('C', 2000, const Color(0xFF4169E1), _spiralSwirlAnimation, isSmallScreen, isMediumScreen),
+                _buildAnimatedLetter('H', 2200, const Color(0xFFFF00FF), _digitalGlitchAnimation, isSmallScreen, isMediumScreen),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  Widget _buildAnimatedLetter(String letter, int delayMs, Color color, Widget Function(String, Color, bool, bool) animationBuilder, bool isSmallScreen, bool isMediumScreen) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: isSmallScreen ? 1 : 2),
+      child: animationBuilder(letter, color, isSmallScreen, isMediumScreen),
+    ).animate().fadeIn(delay: Duration(milliseconds: delayMs)).scale(
+      delay: Duration(milliseconds: delayMs),
+      duration: 600.ms,
+      begin: const Offset(0.5, 0.5),
+      end: const Offset(1.0, 1.0),
+    );
+  }
+  
+  // Individual Letter Animations
+  Widget _electricSparkAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(seconds: isSmallScreen ? 1 : 2),
+      builder: (context, value, child) {
+        return Semantics(
+          label: 'Letter $letter with electric spark animation',
+          child: Transform.scale(
+            scale: 1.0 + (0.1 * sin(value * pi * 4)),
+            child: Transform.rotate(
+              angle: sin(value * pi * 8) * 0.1,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(isSmallScreen ? 0.6 : 0.8),
+                      blurRadius: (isSmallScreen ? 10 : 15) + (10 * sin(value * pi * 6)),
+                      spreadRadius: isSmallScreen ? 1 : 2,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  letter,
+                  style: GoogleFonts.orbitron(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _bouncingBallAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1200 : 1800),
+      builder: (context, value, child) {
+        final bounce = sin(value * pi * 3) * 0.3;
+        return Semantics(
+          label: 'Letter $letter with bouncing ball animation',
+          child: Transform.translate(
+            offset: Offset(0, -bounce.abs() * (isSmallScreen ? 15 : 20)),
+            child: Transform.scale(
+              scale: 1.0 + (bounce.abs() * 0.1),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(isSmallScreen ? 0.4 : 0.6),
+                      blurRadius: (isSmallScreen ? 8 : 10).toDouble() + (bounce.abs() * 15),
+                      offset: Offset(0, (isSmallScreen ? 3 : 5).toDouble() + (bounce.abs() * 10)),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  letter,
+                  style: GoogleFonts.orbitron(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _heartbeatAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1500 : 2200),
+      builder: (context, value, child) {
+        double scale = 1.0;
+        if (value > 0.1 && value < 0.25) {
+          scale = isSmallScreen ? 1.2 : 1.3;
+        } else if (value > 0.35 && value < 0.5) {
+          scale = isSmallScreen ? 1.2 : 1.3;
+        }
+        
+        return Semantics(
+          label: 'Letter $letter with heartbeat animation',
+          child: Transform.scale(
+            scale: scale,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(scale > 1.0 ? (isSmallScreen ? 0.6 : 0.8) : 0.4),
+                    blurRadius: scale > 1.0 ? (isSmallScreen ? 20 : 25) : (isSmallScreen ? 8 : 10),
+                    spreadRadius: scale > 1.0 ? (isSmallScreen ? 2 : 3) : 1,
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _coinFlipAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(seconds: isSmallScreen ? 1 : 2),
+      builder: (context, value, child) {
+        return Semantics(
+          label: 'Letter $letter with coin flip animation',
+          child: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(value * pi * 2),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(isSmallScreen ? 0.4 : 0.6),
+                    blurRadius: isSmallScreen ? 12 : 15,
+                    spreadRadius: isSmallScreen ? 1 : 2,
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _fireFlickerAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1000 : 1500),
+      builder: (context, value, child) {
+        return Semantics(
+          label: 'Letter $letter with fire flicker animation',
+          child: Transform.scale(
+            scale: 1.0 + (sin(value * pi * 8) * (isSmallScreen ? 0.03 : 0.05)),
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(0, 1, sin(value * pi * 6) * (isSmallScreen ? 0.05 : 0.1))
+                ..setEntry(1, 0, sin(value * pi * 4) * 0.02),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(isSmallScreen ? 0.5 : 0.7),
+                      blurRadius: (isSmallScreen ? 8 : 12) + (sin(value * pi * 10) * (isSmallScreen ? 5 : 8)),
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  letter,
+                  style: GoogleFonts.orbitron(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _waveMotionAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1400 : 2100),
+      builder: (context, value, child) {
+        return Semantics(
+          label: 'Letter $letter with wave motion animation',
+          child: Transform.translate(
+            offset: Offset(0, sin(value * pi * 4) * (isSmallScreen ? 7 : 10)),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(isSmallScreen ? 0.4 : 0.6),
+                    blurRadius: isSmallScreen ? 8 : 12,
+                    offset: Offset(0, sin(value * pi * 4) * (isSmallScreen ? 3 : 5)),
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _explodingStarAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1300 : 1900),
+      builder: (context, value, child) {
+        final explosion = value > 0.3 && value < 0.5 ? 1.0 : 0.0;
+        return Semantics(
+          label: 'Letter $letter with exploding star animation',
+          child: Transform.scale(
+            scale: 1.0 + (explosion * (isSmallScreen ? 0.3 : 0.4)),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.5 + (explosion * 0.4)),
+                    blurRadius: (isSmallScreen ? 8 : 10) + (explosion * (isSmallScreen ? 15 : 20)),
+                    spreadRadius: explosion * (isSmallScreen ? 3 : 5),
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _floatingBubbleAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1600 : 2300),
+      builder: (context, value, child) {
+        return Semantics(
+          label: 'Letter $letter with floating bubble animation',
+          child: Transform.translate(
+            offset: Offset(0, sin(value * pi * 2) * (isSmallScreen ? 10 : 15)),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(isSmallScreen ? 0.3 : 0.5),
+                    blurRadius: isSmallScreen ? 10 : 15,
+                    spreadRadius: isSmallScreen ? 1 : 2,
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _lightningBoltAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1200 : 1700),
+      builder: (context, value, child) {
+        final flash = value > 0.2 && value < 0.3 ? 1.0 : 0.0;
+        return Semantics(
+          label: 'Letter $letter with lightning bolt animation',
+          child: Transform.translate(
+            offset: Offset(
+              sin(value * pi * 12) * (isSmallScreen ? 2 : 3) * flash,
+              cos(value * pi * 12) * (isSmallScreen ? 2 : 3) * flash,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.4 + (flash * 0.6)),
+                    blurRadius: (isSmallScreen ? 6 : 8) + (flash * (isSmallScreen ? 18 : 25)),
+                    spreadRadius: flash * (isSmallScreen ? 2 : 3),
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _spiralSwirlAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1700 : 2400),
+      builder: (context, value, child) {
+        final radius = (isSmallScreen ? 5 : 8) * sin(value * pi * 2);
+        return Semantics(
+          label: 'Letter $letter with spiral swirl animation',
+          child: Transform.translate(
+            offset: Offset(
+              cos(value * pi * 4) * radius,
+              sin(value * pi * 4) * radius,
+            ),
+            child: Transform.scale(
+              scale: 1.0 + (sin(value * pi * 4) * (isSmallScreen ? 0.05 : 0.1)),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(isSmallScreen ? 0.4 : 0.6),
+                      blurRadius: isSmallScreen ? 8 : 12,
+                      spreadRadius: isSmallScreen ? 1 : 2,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  letter,
+                  style: GoogleFonts.orbitron(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _digitalGlitchAnimation(String letter, Color color, bool isSmallScreen, bool isMediumScreen) {
+    final fontSize = isSmallScreen ? 28.0 : (isMediumScreen ? 36.0 : 48.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: isSmallScreen ? 1100 : 1600),
+      builder: (context, value, child) {
+        final glitch = value > 0.4 && value < 0.6 ? 1.0 : 0.0;
+        return Semantics(
+          label: 'Letter $letter with digital glitch animation',
+          child: Transform.translate(
+            offset: Offset(
+              sin(value * pi * 20) * (isSmallScreen ? 1 : 2) * glitch,
+              cos(value * pi * 25) * (isSmallScreen ? 0.5 : 1) * glitch,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.5),
+                    blurRadius: (isSmallScreen ? 7 : 10) + (glitch * (isSmallScreen ? 10 : 15)),
+                    spreadRadius: 1,
+                  ),
+                  if (glitch > 0)
+                    BoxShadow(
+                      color: Colors.cyan.withOpacity(0.3),
+                      blurRadius: isSmallScreen ? 3 : 5,
+                      offset: Offset(isSmallScreen ? -1 : -2, 0),
+                    ),
+                  if (glitch > 0)
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: isSmallScreen ? 3 : 5,
+                      offset: Offset(isSmallScreen ? 1 : 2, 0),
+                    ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildParticlesBackground() {
+    return MediaQuery.of(context).accessibleNavigation || 
+           MediaQuery.of(context).disableAnimations
+        ? const SizedBox.shrink() // Hide particles for accessibility
+        : Positioned.fill(
+            child: ExcludeSemantics(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final particleCount = constraints.maxWidth < 600 ? 8 : 15;
+                  return Stack(
+                    children: List.generate(particleCount, (index) {
+                      return Positioned(
+                        left: (index * 50.0) % (constraints.maxWidth > 300 ? 300 : constraints.maxWidth),
+                        top: (index * 30.0) % 200,
+                        child: _buildFloatingParticle(index, constraints.maxWidth < 600),
+                      );
+                    }),
+                  );
+                },
+              ),
+            ),
+          );
+  }
+  
+  Widget _buildFloatingParticle(int index, bool isSmallScreen) {
+    final colors = [
+      const Color(0xFF00D4FF),
+      const Color(0xFF39FF14),
+      const Color(0xFFFF1493),
+      const Color(0xFFFFD700),
+      const Color(0xFFFF4500),
+      const Color(0xFF9932CC),
+    ];
+    
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: (isSmallScreen ? 2000 : 3000) + (index * 200)),
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(
+            sin(value * pi * 2 + index) * (isSmallScreen ? 12 : 20),
+            cos(value * pi * 2 + index) * (isSmallScreen ? 8 : 15),
+          ),
+          child: Opacity(
+            opacity: (isSmallScreen ? 0.2 : 0.3) + (sin(value * pi * 3) * 0.2),
+            child: Container(
+              width: isSmallScreen ? 4 : 6,
+              height: isSmallScreen ? 4 : 6,
+              decoration: BoxDecoration(
+                color: colors[index % colors.length],
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: colors[index % colors.length].withOpacity(isSmallScreen ? 0.3 : 0.5),
+                    blurRadius: isSmallScreen ? 4 : 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildGamingStatsRow() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.1),
+            Colors.black.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: MyDscvrColors.dubaiTeal.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildStatItem('⚡', 'INSTANT', 'RESULTS'),
+          _buildStatItem('🎯', 'AI-POWERED', 'SEARCH'),
+          _buildStatItem('🚀', 'SUPER', 'SPEED'),
+        ],
+      ),
+    ).animate().fadeIn(delay: 2800.ms).slideY(begin: 0.5);
+  }
+  
+  Widget _buildStatItem(String emoji, String label, String value) {
     return Column(
       children: [
-        // Animated Magic Wand Icon
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            gradient: MyDscvrColors.sunsetGradient,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: MyDscvrColors.dubaiCoral.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: const Icon(
-            LucideIcons.sparkles,
-            color: Colors.white,
-            size: 36,
-          ),
-        ).animate(
-          onPlay: (controller) => controller.repeat(reverse: true),
-        ).scale(
-          duration: 2000.ms,
-          begin: const Offset(1.0, 1.0),
-          end: const Offset(1.05, 1.05),
+        Text(
+          emoji,
+          style: const TextStyle(fontSize: 20),
         ),
-        
-        const SizedBox(height: 20),
-        
-        // Hero Text
+        const SizedBox(height: 4),
         Text(
-          'Find Amazing Events',
-          style: GoogleFonts.comfortaa(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: MyDscvrColors.textPrimary,
+          label,
+          style: GoogleFonts.orbitron(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: MyDscvrColors.dubaiTeal,
           ),
-          textAlign: TextAlign.center,
-        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3),
-        
-        const SizedBox(height: 8),
-        
+        ),
         Text(
-          'Discover perfect family experiences in Dubai',
-          style: GoogleFonts.nunito(
-            fontSize: 16,
+          value,
+          style: GoogleFonts.orbitron(
+            fontSize: 8,
+            fontWeight: FontWeight.w400,
             color: MyDscvrColors.textSecondary,
           ),
-          textAlign: TextAlign.center,
-        ).animate().fadeIn(delay: 400.ms),
+        ),
       ],
     );
   }
@@ -316,83 +984,212 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
       animation: _searchBarController,
       builder: (context, child) {
         return Container(
-          height: 56,
+          height: 60,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            // Gaming-style gradient background
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF1a1a2e),
+                const Color(0xFF16213e),
+                const Color(0xFF0f3460),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
-              // Animated glow effect when focused
+              // Animated neon glow effect when focused
               if (_searchBarController.value > 0)
                 BoxShadow(
-                  color: MyDscvrColors.dubaiTeal.withOpacity(0.3 * _searchBarController.value),
-                  blurRadius: 20,
+                  color: const Color(0xFF00D4FF).withOpacity(0.6 * _searchBarController.value),
+                  blurRadius: 25,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 0),
+                ),
+              if (_searchBarController.value > 0)
+                BoxShadow(
+                  color: const Color(0xFF39FF14).withOpacity(0.4 * _searchBarController.value),
+                  blurRadius: 35,
+                  spreadRadius: 1,
                   offset: const Offset(0, 0),
                 ),
             ],
           ),
-          child: TextField(
-            controller: _searchController,
-            focusNode: _searchFocusNode,
-            decoration: InputDecoration(
-              hintText: 'Search events, venues, activities...',
-              hintStyle: GoogleFonts.nunito(
-                color: MyDscvrColors.textSecondary,
-                fontSize: 16,
-              ),
-              prefixIcon: Container(
-                padding: const EdgeInsets.all(8),
-                child: GestureDetector(
-                  onTap: _showResults ? () {
-                    setState(() {
-                      _showResults = false;
-                      _searchController.clear();
-                      ref.read(searchQueryProvider.notifier).state = '';
-                    });
-                  } : null,
-                  child: Icon(
-                    _showResults ? LucideIcons.arrowLeft : LucideIcons.search,
-                    color: MyDscvrColors.dubaiTeal,
-                    size: 20,
+          child: Stack(
+            children: [
+              // Animated border glow
+              if (_searchBarController.value > 0)
+                Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF00D4FF).withOpacity(0.5 * _searchBarController.value),
+                        const Color(0xFF39FF14).withOpacity(0.5 * _searchBarController.value),
+                        const Color(0xFFFF1493).withOpacity(0.5 * _searchBarController.value),
+                        const Color(0xFFFFD700).withOpacity(0.5 * _searchBarController.value),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                ),
+              // Search input
+              Positioned.fill(
+                child: Container(
+                  margin: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF1a1a2e),
+                        const Color(0xFF16213e),
+                        const Color(0xFF0f3460),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(23),
+                  ),
+                  child: Semantics(
+                    label: 'Search for events, venues, and activities in Dubai',
+                    hint: 'Enter your search terms and press search or enter',
+                    child: TextField(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      style: GoogleFonts.orbitron(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Search events, venues, activities...',
+                        hintStyle: GoogleFonts.orbitron(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.all(12),
+                          child: GestureDetector(
+                            onTap: _showResults ? () {
+                              setState(() {
+                                _showResults = false;
+                                _searchController.clear();
+                                ref.read(searchQueryProvider.notifier).state = '';
+                              });
+                            } : null,
+                            child: Semantics(
+                              label: _showResults ? 'Go back to search' : 'Search',
+                              button: true,
+                              child: _buildAnimatedSearchIcon(),
+                            ),
+                          ),
+                        ),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? Semantics(
+                                label: 'Clear search',
+                                button: true,
+                                child: IconButton(
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    ref.read(searchQueryProvider.notifier).state = '';
+                                  },
+                                  icon: Icon(
+                                    LucideIcons.x,
+                                    color: Colors.white.withOpacity(0.7),
+                                    size: 20,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                padding: const EdgeInsets.all(12),
+                                child: Semantics(
+                                  label: 'Voice search',
+                                  button: true,
+                                  child: _buildAnimatedMicIcon(),
+                                ),
+                              ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 18,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        ref.read(searchQueryProvider.notifier).state = value;
+                        setState(() {}); // Trigger rebuild for suffix icon
+                      },
+                      onSubmitted: (value) {
+                        _performSearch(value);
+                      },
+                    ),
                   ),
                 ),
               ),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        _searchController.clear();
-                        ref.read(searchQueryProvider.notifier).state = '';
-                      },
-                      icon: const Icon(LucideIcons.x, size: 20),
-                    )
-                  : Container(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        LucideIcons.mic,
-                        color: MyDscvrColors.textSecondary,
-                        size: 20,
-                      ),
-                    ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-            ),
-            onChanged: (value) {
-              ref.read(searchQueryProvider.notifier).state = value;
-            },
-            onSubmitted: (value) {
-              _performSearch(value);
-            },
+            ],
           ),
         );
       },
     ).animate().slideY(begin: 0.5, duration: 600.ms);
+  }
+  
+  Widget _buildAnimatedSearchIcon() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(seconds: 2),
+      builder: (context, value, child) {
+        return Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00D4FF).withOpacity(0.6),
+                blurRadius: 8 + (sin(value * pi * 4) * 4),
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Icon(
+            _showResults ? LucideIcons.arrowLeft : LucideIcons.search,
+            color: const Color(0xFF00D4FF),
+            size: 24,
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildAnimatedMicIcon() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(seconds: 3),
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 1.0 + (sin(value * pi * 2) * 0.1),
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF39FF14).withOpacity(0.4),
+                  blurRadius: 6 + (sin(value * pi * 6) * 3),
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Icon(
+              LucideIcons.mic,
+              color: const Color(0xFF39FF14),
+              size: 20,
+            ),
+          ),
+        );
+      },
+    );
   }
   
   Widget _buildQuickFilters() {
