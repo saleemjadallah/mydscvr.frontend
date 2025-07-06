@@ -31,8 +31,7 @@ class _FAQScreenState extends State<FAQScreen> with TickerProviderStateMixin {
   Set<String> _expandedFAQs = {};
   bool _showSearch = false;
 
-  // Category keys for smooth scrolling
-  final Map<FAQCategory, GlobalKey> _categoryKeys = {};
+  // Note: Category scrolling not needed when filtering by category
 
   @override
   void initState() {
@@ -48,10 +47,7 @@ class _FAQScreenState extends State<FAQScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 500),
     );
     
-    // Initialize category keys
-    for (final category in FAQCategory.values) {
-      _categoryKeys[category] = GlobalKey();
-    }
+    // Initialize FAQ data
     
     // Load initial data
     _loadFAQs();
@@ -96,22 +92,6 @@ class _FAQScreenState extends State<FAQScreen> with TickerProviderStateMixin {
       _searchController.clear();
     });
     _loadFAQs();
-    
-    // Scroll to category section
-    if (category != null) {
-      _scrollToCategory(category);
-    }
-  }
-
-  void _scrollToCategory(FAQCategory category) {
-    final key = _categoryKeys[category];
-    if (key?.currentContext != null) {
-      Scrollable.ensureVisible(
-        key!.currentContext!,
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.easeInOut,
-      );
-    }
   }
 
   void _toggleFAQ(String faqId) {
@@ -578,7 +558,7 @@ class _FAQScreenState extends State<FAQScreen> with TickerProviderStateMixin {
     final isExpanded = _expandedFAQs.contains(faq.id);
     
     return Container(
-      key: _categoryKeys[faq.category],
+      key: ValueKey(faq.id),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
