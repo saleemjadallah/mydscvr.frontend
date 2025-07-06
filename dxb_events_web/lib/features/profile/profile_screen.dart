@@ -19,6 +19,7 @@ import '../../models/user.dart' hide FamilyMember;
 // Service imports
 import '../../services/providers/auth_provider_mongodb.dart';
 import '../../services/providers/preferences_provider.dart';
+import '../../services/providers/api_provider.dart';
 
 // Feature imports
 import '../onboarding/onboarding_controller.dart';
@@ -1451,14 +1452,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  // Action Methods (TODO: Implement actual functionality)
+  // Action Methods
   void _editPersonalInfo(UserProfile? user) {
-    // TODO: Navigate to edit personal info screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Edit personal info coming soon!'),
-        backgroundColor: AppColors.dubaiTeal,
-      ),
+    if (user == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => _EditPersonalInfoDialog(user: user),
     );
   }
 
@@ -1984,6 +1984,358 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     if (children.isEmpty) return 0;
     
     return children.map((c) => c.age).reduce((a, b) => a < b ? a : b);
+  }
+}
+
+/// Edit Personal Information Dialog
+class _EditPersonalInfoDialog extends ConsumerStatefulWidget {
+  final UserProfile user;
+  
+  const _EditPersonalInfoDialog({required this.user});
+  
+  @override
+  ConsumerState<_EditPersonalInfoDialog> createState() => _EditPersonalInfoDialogState();
+}
+
+class _EditPersonalInfoDialogState extends ConsumerState<_EditPersonalInfoDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _phoneController;
+  DateTime? _selectedDate;
+  String? _selectedGender;
+  bool _isLoading = false;
+  
+  final List<String> _genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
+  
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController = TextEditingController(text: widget.user.firstName);
+    _lastNameController = TextEditingController(text: widget.user.lastName);
+    _phoneController = TextEditingController(text: widget.user.phoneNumber);
+    _selectedDate = widget.user.dateOfBirth;
+    _selectedGender = widget.user.gender;
+  }
+  
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        width: 500,
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.dubaiTeal.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      LucideIcons.edit,
+                      color: AppColors.dubaiTeal,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Edit Personal Information',
+                    style: AppTypography.headlineSmall.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(LucideIcons.x),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // First Name Field
+              TextFormField(
+                controller: _firstNameController,
+                decoration: InputDecoration(
+                  labelText: 'First Name',
+                  prefixIcon: const Icon(LucideIcons.user),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your first name';
+                  }
+                  return null;
+                },
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Last Name Field
+              TextFormField(
+                controller: _lastNameController,
+                decoration: InputDecoration(
+                  labelText: 'Last Name',
+                  prefixIcon: const Icon(LucideIcons.user),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your last name';
+                  }
+                  return null;
+                },
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Phone Number Field
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  prefixIcon: const Icon(LucideIcons.phone),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    if (!RegExp(r'^\+?[\d\s\-\(\)]+$').hasMatch(value)) {
+                      return 'Please enter a valid phone number';
+                    }
+                  }
+                  return null;
+                },
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Date of Birth Field
+              InkWell(
+                onTap: () => _selectDate(),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(LucideIcons.calendar),
+                      const SizedBox(width: 12),
+                      Text(
+                        _selectedDate != null
+                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                            : 'Select Date of Birth',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: _selectedDate != null 
+                              ? AppColors.textPrimary 
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Gender Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: InputDecoration(
+                  labelText: 'Gender',
+                  prefixIcon: const Icon(LucideIcons.userCheck),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: _genderOptions.map((gender) {
+                  return DropdownMenuItem(
+                    value: gender,
+                    child: Text(gender),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value;
+                  });
+                },
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _saveChanges,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.dubaiTeal,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Save Changes'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now().subtract(const Duration(days: 365 * 25)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: AppColors.dubaiTeal,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+  
+  Future<void> _saveChanges() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final updateData = {
+        'first_name': _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim(),
+        'phone_number': _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        'date_of_birth': _selectedDate?.toIso8601String(),
+        'gender': _selectedGender,
+      };
+      
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.updateProfile(updateData);
+      
+      if (response.isSuccess && response.data != null) {
+        // Update the auth state by refetching current user
+        final authNotifier = ref.read(authProvider.notifier);
+        final userResponse = await apiClient.getCurrentUser();
+        if (userResponse.isSuccess && userResponse.data != null) {
+          // Update the auth state with refreshed user data
+          final currentState = ref.read(authProvider);
+          ref.read(authProvider.notifier).state = currentState.copyWith(
+            user: userResponse.data,
+          );
+        }
+        
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    LucideIcons.checkCircle,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('Personal information updated successfully!'),
+                ],
+              ),
+              backgroundColor: AppColors.success,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        throw Exception(response.message ?? 'Failed to update profile');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  LucideIcons.alertCircle,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Failed to update profile: ${e.toString()}'),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }
 
