@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:math';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
@@ -184,21 +183,9 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
               controller: _controller,
               focusNode: _focusNode,
               style: GoogleFonts.orbitron(
-                color: Colors.white,
+                color: const Color(0xFF1A1A1A),
                 fontSize: 16,
-                fontWeight: FontWeight.w500,
-                shadows: [
-                  Shadow(
-                    color: const Color(0xFF00D4FF).withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 0),
-                  ),
-                  Shadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: 2,
-                    offset: const Offset(1, 1),
-                  ),
-                ],
+                fontWeight: FontWeight.w600,
               ),
               onSubmitted: _performSearch,
               onChanged: (value) {
@@ -224,25 +211,22 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
                 }
               },
               decoration: InputDecoration(
-                hintText: '✨ Try MyDscvr Super Search - Find events instantly...',
+                hintText: 'Super Search',
                 hintStyle: GoogleFonts.orbitron(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  shadows: [
-                    Shadow(
-                      color: const Color(0xFF39FF14).withOpacity(0.4),
-                      blurRadius: 6,
-                      offset: const Offset(0, 0),
-                    ),
-                  ],
+                  color: const Color(0xFF4A5568),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 16,
                 ),
-                prefixIcon: _buildAnimatedSearchIcon(),
+                prefixIcon: const Icon(
+                  LucideIcons.search,
+                  color: Color(0xFF4A5568),
+                  size: 20,
+                ),
               ),
             ),
           ),
@@ -281,34 +265,6 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
     );
   }
 
-  Widget _buildAnimatedSearchIcon() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(seconds: 3),
-        builder: (context, value, child) {
-          return Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00D4FF).withOpacity(0.4 + (sin(value * pi * 2) * 0.2)),
-                  blurRadius: 8 + (sin(value * pi * 4) * 2),
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: Icon(
-              LucideIcons.search,
-              color: const Color(0xFF00D4FF),
-              size: 20,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildSectionHeader(String title) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -318,19 +274,7 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
         style: GoogleFonts.orbitron(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFF39FF14),
-          shadows: [
-            Shadow(
-              color: const Color(0xFF39FF14).withOpacity(0.5),
-              blurRadius: 4,
-              offset: const Offset(0, 0),
-            ),
-            Shadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 1,
-              offset: const Offset(0.5, 0.5),
-            ),
-          ],
+          color: const Color(0xFF4A5568),
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -375,21 +319,10 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
           ),
           child: Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF00D4FF).withOpacity(0.3),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  LucideIcons.search,
-                  size: 14,
-                  color: const Color(0xFF00D4FF),
-                ),
+              Icon(
+                LucideIcons.search,
+                size: 14,
+                color: const Color(0xFF4A5568),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -398,19 +331,7 @@ class _SimpleHomeSearchWidgetState extends ConsumerState<SimpleHomeSearchWidget>
                   style: GoogleFonts.orbitron(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: const Color(0xFF40E0D0).withOpacity(0.3),
-                        blurRadius: 4,
-                        offset: const Offset(0, 0),
-                      ),
-                      Shadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 1,
-                        offset: const Offset(0.5, 0.5),
-                      ),
-                    ],
+                    color: const Color(0xFF2D3748),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
