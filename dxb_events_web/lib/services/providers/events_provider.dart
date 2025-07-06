@@ -4,6 +4,7 @@ import '../../models/search.dart';
 import '../api/dio_config.dart';
 import '../api/api_client.dart' show ApiClient;
 import 'api_provider.dart';
+import 'preferences_provider.dart';
 
 /// State class for events list with loading and error states
 class EventsState {
@@ -41,8 +42,14 @@ class EventsState {
 /// Events notifier for managing events state
 class EventsNotifier extends StateNotifier<EventsState> {
   final ApiClient _apiClient;
+  final Ref _ref;
 
-  EventsNotifier(this._apiClient) : super(const EventsState());
+  EventsNotifier(this._apiClient, this._ref) : super(const EventsState());
+
+  /// Apply family-friendly filtering to a list of events
+  List<Event> _applyFamilyFriendlyFilter(List<Event> events, bool shouldFilter) {
+    return applyFamilyFriendlyFilter(events, shouldFilter);
+  }
 
   /// Load events with optional filters
   Future<void> loadEvents({
@@ -80,7 +87,12 @@ class EventsNotifier extends StateNotifier<EventsState> {
 
       if (response.isSuccess && response.data != null) {
         final eventsList = response.data!.map((eventData) => Event.fromBackendApi(eventData)).toList();
-        final newEvents = refresh ? eventsList : [...state.events, ...eventsList];
+        
+        // Apply family-friendly filtering if user preference is enabled
+        final preferences = _ref.read(preferencesProvider);
+        final filteredEvents = _applyFamilyFriendlyFilter(eventsList, preferences.familyFriendlyOnly);
+        
+        final newEvents = refresh ? filteredEvents : [...state.events, ...filteredEvents];
         
         state = state.copyWith(
           events: newEvents,
@@ -189,84 +201,150 @@ class EventsNotifier extends StateNotifier<EventsState> {
   }
 }
 
+/// Helper function to check if an event is family-friendly (can be used across providers)
+bool isEventFamilyFriendly(Event event) {
+  // Conservative approach - only filter out clearly inappropriate content
+  
+  // If familyScore exists and is very low, filter out
+  if (event.familyScore != null && event.familyScore! < 60) {
+    return false;
+  }
+  
+  // If age minimum is too high (for teens/adults only), filter out
+  if (event.familySuitability.minAge != null && event.familySuitability.minAge! > 12) {
+    return false;
+  }
+  
+  // Filter out specific categories that are clearly not family-friendly
+  final adultCategories = [
+    'nightlife', 'bars', 'clubs', 'adult', 'mature', 
+    'dating', 'casino', 'gambling', 'wine tasting', 'brewery'
+  ];
+  
+  for (final category in event.categories) {
+    if (adultCategories.any((adult) => 
+        category.toLowerCase().contains(adult.toLowerCase()))) {
+      return false;
+    }
+  }
+  
+  // If event has age restrictions mentioning 18+, 21+, etc.
+  if (event.ageRestrictions?.toLowerCase().contains(RegExp(r'\b(18|21)\+')) == true) {
+    return false;
+  }
+  
+  // Default to family-friendly if no exclusion criteria met
+  return true;
+}
+
+/// Helper function to apply family-friendly filtering to a list of events
+List<Event> applyFamilyFriendlyFilter(List<Event> events, bool shouldFilter) {
+  if (!shouldFilter) return events;
+  return events.where(isEventFamilyFriendly).toList();
+}
+
 /// Provider for events state management
 final eventsProvider = StateNotifierProvider<EventsNotifier, EventsState>((ref) {
   final apiClient = ref.watch(apiClientProvider);
-  return EventsNotifier(apiClient);
+  return EventsNotifier(apiClient, ref);
 });
 
 /// Provider for featured events
 final featuredEventsProvider = FutureProvider<List<Event>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
+  final preferences = ref.watch(preferencesProvider);
+  
   try {
     final response = await apiClient.getEvents(page: 1);
     if (response.isSuccess && response.data != null) {
-      return response.data!
+      final featuredEvents = response.data!
           .map((eventData) => Event.fromBackendApi(eventData))
           .where((event) => event.isFeatured)
-          .take(10)
           .toList();
+      
+      // Apply family-friendly filtering if enabled
+      final filteredEvents = applyFamilyFriendlyFilter(featuredEvents, preferences.familyFriendlyOnly);
+      
+      return filteredEvents.take(10).toList();
     } else {
       throw Exception(response.message ?? 'Failed to load featured events');
     }
   } catch (e) {
-    throw Exception('Failed to load featured events: ${_getErrorMessage(e)}');
+    throw Exception('Failed to load featured events: $e');
   }
 });
 
 /// Provider for trending events
 final trendingEventsProvider = FutureProvider<List<Event>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
+  final preferences = ref.watch(preferencesProvider);
+  
   try {
     final response = await apiClient.getEvents(page: 1);
     if (response.isSuccess && response.data != null) {
-      return response.data!
+      final trendingEvents = response.data!
           .map((eventData) => Event.fromBackendApi(eventData))
           .where((event) => event.isTrending)
-          .take(10)
           .toList();
+      
+      // Apply family-friendly filtering if enabled
+      final filteredEvents = applyFamilyFriendlyFilter(trendingEvents, preferences.familyFriendlyOnly);
+      
+      return filteredEvents.take(10).toList();
     } else {
       throw Exception(response.message ?? 'Failed to load trending events');
     }
   } catch (e) {
-    throw Exception('Failed to load trending events: ${_getErrorMessage(e)}');
+    throw Exception('Failed to load trending events: $e');
   }
 });
 
 /// Provider for weekend events
 final weekendEventsProvider = FutureProvider<List<Event>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
+  final preferences = ref.watch(preferencesProvider);
+  
   try {
     final response = await apiClient.getEvents(page: 1);
     if (response.isSuccess && response.data != null) {
-      return response.data!
+      final weekendEvents = response.data!
           .map((eventData) => Event.fromBackendApi(eventData))
           .where((event) => event.isThisWeekend)
-          .take(20)
           .toList();
+      
+      // Apply family-friendly filtering if enabled
+      final filteredEvents = applyFamilyFriendlyFilter(weekendEvents, preferences.familyFriendlyOnly);
+      
+      return filteredEvents.take(20).toList();
     } else {
       throw Exception(response.message ?? 'Failed to load weekend events');
     }
   } catch (e) {
-    throw Exception('Failed to load weekend events: ${_getErrorMessage(e)}');
+    throw Exception('Failed to load weekend events: $e');
   }
 });
 
 /// Provider for events by category
 final eventsByCategoryProvider = FutureProvider.family<List<Event>, String>((ref, category) async {
   final apiClient = ref.watch(apiClientProvider);
+  final preferences = ref.watch(preferencesProvider);
+  
   try {
     final response = await apiClient.getEvents(category: category);
     if (response.isSuccess && response.data != null) {
-      return response.data!
+      final categoryEvents = response.data!
           .map((eventData) => Event.fromBackendApi(eventData))
-          .take(20)
           .toList();
+      
+      // Apply family-friendly filtering if enabled
+      final filteredEvents = applyFamilyFriendlyFilter(categoryEvents, preferences.familyFriendlyOnly);
+      
+      return filteredEvents.take(20).toList();
     } else {
       throw Exception(response.message ?? 'Failed to load events for category');
     }
   } catch (e) {
-    throw Exception('Failed to load events for category $category: ${_getErrorMessage(e)}');
+    throw Exception('Failed to load events for category $category: $e');
   }
 });
 

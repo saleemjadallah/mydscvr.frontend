@@ -20,6 +20,7 @@ import '../../core/animations/animations.dart';
 import '../../core/widgets/curved_container.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/providers/auth_provider_mongodb.dart';
+import '../../services/providers/preferences_provider.dart';
 import '../../models/user.dart';
 import '../../services/events_service.dart';
 import '../../models/event.dart';
@@ -344,6 +345,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ),
       ),
       actions: [
+        // Family Friendly Indicator
+        _buildFamilyFriendlyIndicator(),
         // Auth Buttons/Profile
         if (authState.status == AuthStatus.authenticated && authState.user != null)
           _buildUserProfile(authState.user!)
@@ -431,6 +434,44 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
         ),
       ],
+    );
+  }
+
+  /// Build family friendly indicator when enabled
+  Widget _buildFamilyFriendlyIndicator() {
+    final preferences = ref.watch(preferencesProvider);
+    
+    if (!preferences.familyFriendlyOnly) {
+      return const SizedBox.shrink();
+    }
+    
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            LucideIcons.shield,
+            color: Colors.white,
+            size: 16,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'Family Friendly',
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
