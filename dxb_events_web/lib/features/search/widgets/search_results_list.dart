@@ -487,8 +487,36 @@ class SearchEventCard extends ConsumerWidget {
 
   Widget _buildFavoriteButton(WidgetRef ref, bool isFavorited) {
     return GestureDetector(
-      onTap: () {
-        ref.read(favoritesProvider.notifier).toggleFavorite(event.id);
+      onTap: () async {
+        try {
+          await ref.read(favoritesProvider.notifier).toggleFavorite(event.id);
+        } catch (e) {
+          // Show error message for authentication failure
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.alertCircle,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        e.toString().replaceAll('Exception: ', ''),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: AppColors.error,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

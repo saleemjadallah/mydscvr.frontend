@@ -499,6 +499,12 @@ class FavoritesNotifier extends StateNotifier<List<String>> {
 
   /// Toggle favorite status
   Future<void> toggleFavorite(String eventId) async {
+    // Check authentication first
+    final isAuthenticated = _ref.read(isAuthenticatedProvider);
+    if (!isAuthenticated) {
+      throw Exception('Please sign up or log in to save events to your favorites');
+    }
+
     if (state.contains(eventId)) {
       await removeFromFavorites(eventId);
     } else {

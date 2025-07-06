@@ -1274,54 +1274,113 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   Future<void> _toggleFavorite(String eventId) async {
-    final isFavorite = ref.read(isEventHeartedProvider(eventId));
-    
-    final authNotifier = ref.read(authProvider.notifier);
-    if (isFavorite) {
-      await authNotifier.unheartEvent(eventId);
-    } else {
-      await authNotifier.heartEvent(eventId);
-    }
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(
-                isFavorite ? Icons.heart_broken : Icons.favorite,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  isFavorite 
-                    ? 'Removed from favorites' 
-                    : 'Added to favorites! ❤️',
+    // Check authentication first
+    final isAuthenticated = ref.read(isAuthenticatedProvider);
+    if (!isAuthenticated) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  LucideIcons.alertCircle,
+                  color: Colors.white,
+                  size: 20,
                 ),
-              ),
-              if (!isFavorite) ...[
-                TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    context.push('/favorites');
-                  },
-                  child: const Text(
-                    'View',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Please sign up or log in to save events to your favorites',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
-            ],
+            ),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
           ),
-          backgroundColor: isFavorite ? AppColors.textSecondary : AppColors.dubaiCoral,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+        );
+      }
+      return;
+    }
+
+    final isFavorite = ref.read(isEventHeartedProvider(eventId));
+    
+    final authNotifier = ref.read(authProvider.notifier);
+    bool success = false;
+    
+    if (isFavorite) {
+      success = await authNotifier.unheartEvent(eventId);
+    } else {
+      success = await authNotifier.heartEvent(eventId);
+    }
+    
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  isFavorite ? Icons.heart_broken : Icons.favorite,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    isFavorite 
+                      ? 'Removed from favorites' 
+                      : 'Added to favorites! ❤️',
+                  ),
+                ),
+                if (!isFavorite) ...[
+                  TextButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      context.push('/favorites');
+                    },
+                    child: const Text(
+                      'View',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            backgroundColor: isFavorite ? AppColors.textSecondary : AppColors.dubaiCoral,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Show error message if operation failed
+        final authState = ref.read(authProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  LucideIcons.alertCircle,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    authState.error ?? 'Failed to update favorites',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
