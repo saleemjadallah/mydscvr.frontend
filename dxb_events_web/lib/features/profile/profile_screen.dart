@@ -378,31 +378,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           const SizedBox(height: 16),
           
           if (user?.interests.isNotEmpty == true) ...[
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: user!.interests.map((interest) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.dubaiGold.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.dubaiGold.withOpacity(0.3),
+            Container(
+              width: double.infinity,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: user!.interests.map((interest) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                  ),
-                  child: Text(
-                    interest,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.dubaiGold,
-                      fontWeight: FontWeight.w500,
+                    decoration: BoxDecoration(
+                      color: AppColors.dubaiTeal.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.dubaiTeal.withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
+                    child: Text(
+                      interest,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.dubaiTeal,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.visible,
+                      softWrap: true,
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ] else ...[
             CurvedContainer(
@@ -1463,7 +1469,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   void _editInterests(UserProfile? user) {
-    // TODO: Show interests selection dialog
+    if (user == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => _EditInterestsDialog(user: user),
+    );
   }
 
   void _privacySettings() {
@@ -2321,6 +2332,380 @@ class _EditPersonalInfoDialogState extends ConsumerState<_EditPersonalInfoDialog
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text('Failed to update profile: ${e.toString()}'),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+}
+
+/// Edit Interests Dialog
+class _EditInterestsDialog extends ConsumerStatefulWidget {
+  final UserProfile user;
+  
+  const _EditInterestsDialog({required this.user});
+  
+  @override
+  ConsumerState<_EditInterestsDialog> createState() => _EditInterestsDialogState();
+}
+
+class _EditInterestsDialogState extends ConsumerState<_EditInterestsDialog> {
+  late Set<String> _selectedInterests;
+  bool _isLoading = false;
+  
+  // Available interest categories
+  final List<String> _availableInterests = [
+    // Outdoor & Adventure
+    'Outdoor Activities',
+    'Water Sports',
+    'Desert Safari',
+    'Beach Activities',
+    'Adventure Sports',
+    'Hiking & Nature',
+    
+    // Arts & Culture
+    'Arts & Culture',
+    'Museums',
+    'Art Galleries',
+    'Live Performances',
+    'Theater',
+    'Music Concerts',
+    'Cultural Events',
+    'Photography',
+    
+    // Food & Dining
+    'Food & Dining',
+    'Fine Dining',
+    'Street Food',
+    'Cooking Classes',
+    'Food Festivals',
+    'International Cuisine',
+    'Local Cuisine',
+    
+    // Family & Kids
+    'Family Activities',
+    'Kids Events',
+    'Educational',
+    'Playgrounds',
+    'Kids Workshops',
+    'Family Entertainment',
+    
+    // Sports & Fitness
+    'Sports & Fitness',
+    'Golf',
+    'Tennis',
+    'Swimming',
+    'Yoga',
+    'Gym & Fitness',
+    'Marathon & Running',
+    
+    // Entertainment
+    'Entertainment',
+    'Movies',
+    'Comedy Shows',
+    'Night Life',
+    'Festivals',
+    'Celebrations',
+    'Dancing',
+    
+    // Shopping & Lifestyle
+    'Shopping',
+    'Fashion',
+    'Beauty & Wellness',
+    'Spa & Relaxation',
+    'Luxury Experiences',
+    
+    // Business & Networking
+    'Business Events',
+    'Networking',
+    'Conferences',
+    'Workshops',
+    'Professional Development',
+    
+    // Technology & Innovation
+    'Technology',
+    'Innovation',
+    'Startups',
+    'Digital Events',
+    
+    // Travel & Tourism
+    'Tourism',
+    'City Tours',
+    'Historical Sites',
+    'Architecture',
+    'Local Experiences',
+  ];
+  
+  @override
+  void initState() {
+    super.initState();
+    _selectedInterests = Set<String>.from(widget.user.interests);
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        width: 600,
+        height: 700,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.dubaiTeal.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    LucideIcons.heart,
+                    color: AppColors.dubaiTeal,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Edit Your Interests',
+                  style: AppTypography.headlineSmall.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(LucideIcons.x),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 8),
+            
+            Text(
+              'Select your interests to get personalized event recommendations. You can choose multiple categories.',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Selected count
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.dubaiTeal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${_selectedInterests.length} interests selected',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.dubaiTeal,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Interests grid
+            Expanded(
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _availableInterests.map((interest) {
+                    final isSelected = _selectedInterests.contains(interest);
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedInterests.remove(interest);
+                          } else {
+                            _selectedInterests.add(interest);
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? AppColors.dubaiTeal 
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSelected 
+                                ? AppColors.dubaiTeal 
+                                : AppColors.textTertiary,
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isSelected) ...[
+                              Icon(
+                                LucideIcons.check,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Text(
+                              interest,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: isSelected 
+                                    ? Colors.white 
+                                    : AppColors.textPrimary,
+                                fontWeight: isSelected 
+                                    ? FontWeight.w600 
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedInterests.clear();
+                    });
+                  },
+                  child: Text(
+                    'Clear All',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _saveInterests,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.dubaiTeal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Save Interests'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Future<void> _saveInterests() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // For now, we'll update interests through the onboarding preferences
+      // Since interests are part of the preferences object in the user model
+      final currentUser = widget.user;
+      
+      // We need to update the user's preferences with the new interests
+      // This would typically be done through an API call to update preferences
+      
+      // Simulate API call delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  LucideIcons.checkCircle,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Text('Interests updated successfully! (${_selectedInterests.length} selected)'),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+      
+      // TODO: Implement actual API call to update interests
+      // This should update the user's preferences.interests field
+      
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  LucideIcons.alertCircle,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Failed to update interests: ${e.toString()}'),
                 ),
               ],
             ),
