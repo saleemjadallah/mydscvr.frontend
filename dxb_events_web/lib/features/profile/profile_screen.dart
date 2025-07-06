@@ -228,10 +228,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           
           const SizedBox(height: 16),
           
-          // Name Field
+          // First Name Field
           _buildInfoCard(
-            'Full Name',
-            user?.displayName ?? 'Not provided',
+            'First Name',
+            user?.firstName ?? 'Not provided',
+            LucideIcons.user,
+            onTap: () => _editPersonalInfo(user),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Last Name Field
+          _buildInfoCard(
+            'Last Name',
+            user?.lastName ?? 'Not provided',
             LucideIcons.user,
             onTap: () => _editPersonalInfo(user),
           ),
@@ -244,6 +254,57 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             user?.email ?? 'Not provided',
             LucideIcons.mail,
             onTap: () => _editPersonalInfo(user),
+            trailing: user?.isEmailVerified == true 
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.checkCircle,
+                          size: 12,
+                          color: AppColors.success,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Verified',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.alertCircle,
+                          size: 12,
+                          color: AppColors.warning,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Unverified',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.warning,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
           ),
           
           const SizedBox(height: 12),
@@ -253,6 +314,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             'Phone Number',
             user?.phoneNumber ?? 'Not provided',
             LucideIcons.phone,
+            onTap: () => _editPersonalInfo(user),
+            trailing: user?.isPhoneVerified == true 
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.checkCircle,
+                          size: 12,
+                          color: AppColors.success,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Verified',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : null,
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Date of Birth Field
+          _buildInfoCard(
+            'Date of Birth',
+            user?.dateOfBirth != null 
+                ? '${user!.dateOfBirth!.day}/${user.dateOfBirth!.month}/${user.dateOfBirth!.year}'
+                : 'Not provided',
+            LucideIcons.calendar,
+            onTap: () => _editPersonalInfo(user),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Gender Field
+          _buildInfoCard(
+            'Gender',
+            user?.gender ?? 'Not provided',
+            LucideIcons.userCheck,
             onTap: () => _editPersonalInfo(user),
           ),
           
@@ -632,8 +742,82 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Account Statistics
+          _buildSectionHeader('Account Overview', LucideIcons.barChart3),
+          
+          const SizedBox(height: 16),
+          
+          Consumer(
+            builder: (context, ref, child) {
+              final authState = ref.watch(authProvider);
+              final user = authState.user;
+              
+              return Column(
+                children: [
+                  _buildInfoCard(
+                    'Member Since',
+                    user?.createdAt != null 
+                        ? '${user!.createdAt.day}/${user.createdAt.month}/${user.createdAt.year}'
+                        : 'N/A',
+                    LucideIcons.userPlus,
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  _buildInfoCard(
+                    'Saved Events',
+                    '${user?.savedEvents?.length ?? 0}',
+                    LucideIcons.bookmark,
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  _buildInfoCard(
+                    'Favorite Events',
+                    '${user?.heartedEvents?.length ?? 0}',
+                    LucideIcons.heart,
+                  ),
+                ],
+              );
+            },
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // Security Settings
+          _buildSectionHeader('Security & Privacy', LucideIcons.shield),
+          
+          const SizedBox(height: 16),
+          
+          _buildActionCard(
+            'Change Password',
+            'Update your account password',
+            LucideIcons.key,
+            onTap: () => _changePassword(),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          _buildActionCard(
+            'Two-Factor Authentication',
+            'Add extra security to your account',
+            LucideIcons.smartphone,
+            onTap: () => _setupTwoFactor(),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          _buildActionCard(
+            'Download My Data',
+            'Export your personal information',
+            LucideIcons.download,
+            onTap: () => _downloadData(),
+          ),
+          
+          const SizedBox(height: 32),
+          
           // App Information
-          _buildSectionHeader('About', LucideIcons.info),
+          _buildSectionHeader('App Information', LucideIcons.info),
           
           const SizedBox(height: 16),
           
@@ -704,6 +888,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             'Learn how we protect your data',
             LucideIcons.shield,
             onTap: () => _showPrivacyPolicy(),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          _buildActionCard(
+            'Cookies Policy',
+            'How we use cookies and tracking',
+            LucideIcons.cookie,
+            onTap: () => _showCookiesPolicy(),
           ),
           
           const SizedBox(height: 32),
@@ -793,7 +986,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  Widget _buildInfoCard(String label, String value, IconData icon, {VoidCallback? onTap}) {
+  Widget _buildInfoCard(String label, String value, IconData icon, {VoidCallback? onTap, Widget? trailing}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -848,7 +1041,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ],
                 ),
               ),
+              if (trailing != null) ...[
+                const SizedBox(width: 12),
+                trailing,
+              ],
               if (onTap != null) ...[
+                const SizedBox(width: 8),
                 Icon(
                   LucideIcons.chevronRight,
                   size: 18,
@@ -1274,16 +1472,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     // TODO: Show interests selection dialog
   }
 
-  void _changePassword() {
-    // TODO: Navigate to change password screen
-  }
-
   void _privacySettings() {
     // TODO: Navigate to privacy settings screen
-  }
-
-  void _downloadData() {
-    // TODO: Implement data download
   }
 
   void _deleteAccount() {
@@ -1315,23 +1505,69 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   void _openHelpCenter() {
-    // TODO: Navigate to help center
+    context.push('/faq');
   }
 
   void _contactSupport() {
-    // TODO: Open support contact
+    // TODO: Open support contact form or email
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Support contact feature coming soon!'),
+        backgroundColor: AppColors.dubaiTeal,
+      ),
+    );
   }
 
   void _sendFeedback() {
     // TODO: Show feedback form
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Feedback feature coming soon!'),
+        backgroundColor: AppColors.dubaiTeal,
+      ),
+    );
   }
 
   void _showTerms() {
-    // TODO: Show terms of service
+    context.push('/terms');
   }
 
   void _showPrivacyPolicy() {
-    // TODO: Show privacy policy
+    context.push('/privacy');
+  }
+
+  void _showCookiesPolicy() {
+    context.push('/cookies');
+  }
+
+  void _changePassword() {
+    // TODO: Implement change password functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Change password feature coming soon!'),
+        backgroundColor: AppColors.dubaiTeal,
+      ),
+    );
+  }
+
+  void _setupTwoFactor() {
+    // TODO: Implement two-factor authentication setup
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Two-factor authentication setup coming soon!'),
+        backgroundColor: AppColors.dubaiTeal,
+      ),
+    );
+  }
+
+  void _downloadData() {
+    // TODO: Implement data export functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Data export feature coming soon!'),
+        backgroundColor: AppColors.dubaiTeal,
+      ),
+    );
   }
 
   void _logout() async {

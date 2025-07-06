@@ -20,6 +20,7 @@ import 'features/auth/reset_password_screen.dart';
 import 'features/legal/terms_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/legal/cookies_screen.dart';
+import 'features/help/faq_screen.dart';
 import 'features/favorites/favorites_screen.dart';
 
 // Comprehensive router with beautiful home screen
@@ -201,7 +202,7 @@ final GoRouter _router = GoRouter(
       ),
     ),
     
-    // Legal pages
+    // Legal and Help pages
     GoRoute(
       path: '/terms',
       builder: (context, state) => const TermsScreen(),
@@ -213,6 +214,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/cookies',
       builder: (context, state) => const CookiesScreen(),
+    ),
+    GoRoute(
+      path: '/faq',
+      builder: (context, state) => const FAQScreen(),
     ),
   ],
 );
