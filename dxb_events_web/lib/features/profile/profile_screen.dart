@@ -40,6 +40,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    
+    // Refresh user data when profile screen loads to ensure favorites count is accurate
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(authProvider.notifier).refreshUser();
+      }
+    });
   }
 
   @override

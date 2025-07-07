@@ -58,6 +58,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     _eventsService = EventsService();
     _scrollController = ScrollController();
     _loadEvents(); // Re-enabled for final solution
+    
+    // Refresh user data when home screen loads to ensure favorites count is accurate in app bar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(authProvider.notifier).refreshUser();
+      }
+    });
   }
   
   @override
