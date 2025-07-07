@@ -12,8 +12,11 @@ class AdviceAuthPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+    
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.all(isMobile ? 8 : 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -23,24 +26,24 @@ class AdviceAuthPrompt extends StatelessWidget {
             Color(0xFF8B5CF6), // Purple gradient
           ],
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 24),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF6366F1).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            blurRadius: isMobile ? 12 : 20,
+            offset: Offset(0, isMobile ? 4 : 8),
           ),
         ],
       ),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon with gradient background
+            // Icon with gradient background - smaller on mobile
             Container(
-              width: 80,
-              height: 80,
+              width: isMobile ? 60 : 80,
+              height: isMobile ? 60 : 80,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
@@ -48,83 +51,96 @@ class AdviceAuthPrompt extends StatelessWidget {
                     Color(0xFF44A08D), // Darker teal
                   ],
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF4ECDC4).withOpacity(0.4),
-                    blurRadius: 16,
+                    blurRadius: isMobile ? 12 : 16,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline_rounded,
-                size: 40,
+                size: isMobile ? 30 : 40,
                 color: Colors.white,
               ),
             ),
             
-            const SizedBox(height: 24),
+            SizedBox(height: isMobile ? 16 : 24),
             
-            // Title
-            const Text(
+            // Title - responsive font size
+            Text(
               'Share Your Experience',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: isMobile ? 20 : 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
             
-            const SizedBox(height: 12),
+            SizedBox(height: isMobile ? 8 : 12),
             
-            // Description
+            // Description - shorter text on mobile
             Text(
-              'Help other families by sharing your tips and advice about this event. Sign in to contribute to the MyDscvr community!',
+              isMobile 
+                  ? 'Help other families with your tips! Sign in to share your advice.'
+                  : 'Help other families by sharing your tips and advice about this event. Sign in to contribute to the MyDscvr community!',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isMobile ? 14 : 16,
                 color: Colors.white.withOpacity(0.9),
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
             ),
             
-            const SizedBox(height: 32),
+            SizedBox(height: isMobile ? 20 : 32),
             
-            // Benefits list
-            Row(
-              children: [
-                Expanded(
-                  child: _buildBenefit(
-                    Icons.stars_rounded,
-                    'Get helpful\ninsights',
+            // Benefits list - stacked on mobile for better readability
+            if (isMobile)
+              Column(
+                children: [
+                  _buildMobileBenefit(Icons.stars_rounded, 'Get helpful insights'),
+                  const SizedBox(height: 12),
+                  _buildMobileBenefit(Icons.family_restroom_rounded, 'Help other families'),
+                  const SizedBox(height: 12),
+                  _buildMobileBenefit(Icons.thumb_up_rounded, 'Build your reputation'),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildBenefit(
+                      Icons.stars_rounded,
+                      'Get helpful\ninsights',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _buildBenefit(
-                    Icons.family_restroom_rounded,
-                    'Help other\nfamilies',
+                  Expanded(
+                    child: _buildBenefit(
+                      Icons.family_restroom_rounded,
+                      'Help other\nfamilies',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _buildBenefit(
-                    Icons.thumb_up_rounded,
-                    'Build your\nreputation',
+                  Expanded(
+                    child: _buildBenefit(
+                      Icons.thumb_up_rounded,
+                      'Build your\nreputation',
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             
-            const SizedBox(height: 32),
+            SizedBox(height: isMobile ? 20 : 32),
             
             // Action buttons
             Column(
               children: [
-                // Sign In Button
+                // Sign In Button - responsive sizing
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: isMobile ? 48 : 56,
                   child: ElevatedButton(
                     onPressed: onSignInPressed,
                     style: ElevatedButton.styleFrom(
@@ -133,18 +149,18 @@ class AdviceAuthPrompt extends StatelessWidget {
                       elevation: 0,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.login_rounded, size: 20),
-                        SizedBox(width: 8),
+                        Icon(Icons.login_rounded, size: isMobile ? 18 : 20),
+                        const SizedBox(width: 8),
                         Text(
-                          'Sign In to Share Advice',
+                          isMobile ? 'Sign In to Share' : 'Sign In to Share Advice',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: isMobile ? 14 : 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -153,7 +169,7 @@ class AdviceAuthPrompt extends StatelessWidget {
                   ),
                 ),
                 
-                const SizedBox(height: 12),
+                SizedBox(height: isMobile ? 8 : 12),
                 
                 // Sign Up text
                 if (onSignUpPressed != null)
@@ -163,7 +179,7 @@ class AdviceAuthPrompt extends StatelessWidget {
                       "Don't have an account? Sign Up",
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
+                        fontSize: isMobile ? 12 : 14,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -203,6 +219,48 @@ class AdviceAuthPrompt extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  Widget _buildMobileBenefit(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

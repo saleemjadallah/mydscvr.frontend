@@ -46,8 +46,11 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
   }
 
   Widget _buildAuthPrompt() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+    
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 12 : 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -61,7 +64,7 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
               const Spacer(),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isMobile ? 4 : 8),
           
           // Auth Prompt
           AdviceAuthPrompt(
@@ -170,14 +173,21 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isMobile = screenWidth <= 600;
     
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: const BoxConstraints(
-          maxWidth: 600,
-          maxHeight: 600,
+        width: isMobile 
+            ? screenWidth * 0.95  // Use more screen width on mobile
+            : screenWidth * 0.9,
+        constraints: BoxConstraints(
+          maxWidth: isMobile ? double.infinity : 600,
+          maxHeight: isMobile 
+              ? screenHeight * 0.9  // Use more screen height on mobile
+              : 600,
         ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -188,12 +198,12 @@ class _AdviceSubmissionDialogState extends ConsumerState<AdviceSubmissionDialog>
               Colors.white.withOpacity(0.95),
             ],
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(isMobile ? 16 : 24),
           boxShadow: [
             BoxShadow(
               color: AppColors.dubaiTeal.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              blurRadius: isMobile ? 12 : 20,
+              offset: Offset(0, isMobile ? 6 : 10),
             ),
           ],
           border: Border.all(
