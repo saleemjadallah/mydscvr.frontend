@@ -23,6 +23,7 @@ import '../../services/providers/auth_provider_mongodb.dart';
 import '../../services/providers/preferences_provider.dart';
 import '../../models/user.dart';
 import '../../services/events_service.dart';
+import '../../services/mydscvr_choice_service.dart';
 import '../../models/event.dart';
 import '../../widgets/common/footer.dart';
 import '../../widgets/notifications/notification_bell.dart';
@@ -41,10 +42,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   
   // Real API data for MyDscvr's Choice and stats
   late final EventsService _eventsService;
+  late final MyDscvrChoiceService _myDscvrChoiceService;
   List<Event> _upcomingEvents = [];
   List<Event> _featuredEvents = [];
   List<Event> _trendingEvents = [];
   List<Event> _allEventsForCounting = []; // For accurate category counting
+  Event? _myDscvrChoiceEvent; // Today's MyDscvr's Choice
   bool _isLoading = true;
   String? _errorMessage;
   
@@ -56,6 +59,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   void initState() {
     super.initState();
     _eventsService = EventsService();
+    _myDscvrChoiceService = MyDscvrChoiceService();
     _scrollController = ScrollController();
     _loadEvents(); // Re-enabled for final solution
     
@@ -866,23 +870,23 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   /// Load events for MyDscvr's Choice and stats
   Future<void> _loadEvents() async {
     try {
-      // Load total events count for stats
-      final totalCountResponse = await _eventsService.getTotalEventsCount();
+      // Load all data in parallel for better performance
+      final futures = [
+        _eventsService.getTotalEventsCount(),
+        _eventsService.getEvents(perPage: 10, sortBy: 'start_date'),
+        _eventsService.getEvents(perPage: 20, sortBy: 'start_date'),
+        _eventsService.getTrendingEvents(limit: 10),
+        _myDscvrChoiceService.getCurrentChoice(), // Load today's MyDscvr's Choice
+      ];
       
-      // Load featured events (reduced for homepage display)
-      final featuredResponse = await _eventsService.getEvents(
-        perPage: 10,
-        sortBy: 'start_date',
-      );
+      final results = await Future.wait(futures);
+      final totalCountResponse = results[0] as ApiResponse<int>;
+      final featuredResponse = results[1] as ApiResponse<List<Event>>;
+      final upcomingResponse = results[2] as ApiResponse<List<Event>>;
+      final trendingResponse = results[3] as ApiResponse<List<Event>>;
+      final myDscvrChoiceResponse = results[4] as ApiResponse<Event>;
 
-      // Load upcoming events for MyDscvr's Choice
-      final upcomingResponse = await _eventsService.getEvents(
-        perPage: 20,
-        sortBy: 'start_date',
-      );
-
-      // Load trending events
-      final trendingResponse = await _eventsService.getTrendingEvents(limit: 10);
+      print('🎯 DEBUG: MyDscvr\'s Choice response: success=${myDscvrChoiceResponse.isSuccess}, event=${myDscvrChoiceResponse.data?.title}');
 
       if (mounted) {
         setState(() {
@@ -893,6 +897,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           }
           if (featuredResponse.isSuccess) {
             _featuredEvents = featuredResponse.data ?? [];
+          }
+          if (myDscvrChoiceResponse.isSuccess) {
+            _myDscvrChoiceEvent = myDscvrChoiceResponse.data;
+            print('🎯 DEBUG: MyDscvr\'s Choice event loaded: ${_myDscvrChoiceEvent?.title}');
           }
           if (upcomingResponse.isSuccess) {
             final allEvents = upcomingResponse.data ?? [];
@@ -917,7 +925,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             _trendingEvents = trendingResponse.data ?? [];
           }
           _isLoading = false;
-          _errorMessage = upcomingResponse.error ?? totalCountResponse.error ?? featuredResponse.error ?? trendingResponse.error;
+          _errorMessage = upcomingResponse.error ?? totalCountResponse.error ?? featuredResponse.error ?? trendingResponse.error ?? myDscvrChoiceResponse.error;
         });
       }
     } catch (e) {
@@ -939,10 +947,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       return _buildAnimatedMyDscvrChoiceLoading();
     }
     
-    // Use first available event as placeholder
-    final placeholderEvent = _upcomingEvents.isNotEmpty ? _upcomingEvents.first : null;
+    // Use MyDscvr's Choice event if available, otherwise fall back to first upcoming event
+    final featuredEvent = _myDscvrChoiceEvent ?? (_upcomingEvents.isNotEmpty ? _upcomingEvents.first : null);
     
-    if (placeholderEvent == null) {
+    if (featuredEvent == null) {
       return _buildAnimatedMyDscvrChoiceEmpty();
     }
 
@@ -977,7 +985,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   child: MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: InkWell(
-                      onTap: () => _navigateToEventDetails(placeholderEvent),
+                      onTap: () => _navigateToEventDetails(featuredEvent),
                       borderRadius: BorderRadius.circular(borderRadius),
                       hoverColor: Colors.white.withOpacity(0.1),
                       child: Container(
@@ -1040,8 +1048,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                         Padding(
                           padding: EdgeInsets.all(contentPadding),
                           child: isMobile
-                              ? _buildMobileGameshowLayout(placeholderEvent)
-                              : _buildDesktopGameshowLayout(placeholderEvent, isTablet),
+                              ? _buildMobileGameshowLayout(featuredEvent)
+                              : _buildDesktopGameshowLayout(featuredEvent, isTablet),
                         ),
                       ],
                       ),
@@ -1153,7 +1161,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Mobile Gameshow Layout - Centered and Spacious
-  Widget _buildMobileGameshowLayout(Event placeholderEvent) {
+  Widget _buildMobileGameshowLayout(Event featuredEvent) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -1213,9 +1221,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         
         // Event Name - Centered
         Text(
-          placeholderEvent.title.length > 35 
-              ? '${placeholderEvent.title.substring(0, 32)}...'
-              : placeholderEvent.title,
+          featuredEvent.title.length > 35 
+              ? '${featuredEvent.title.substring(0, 32)}...'
+              : featuredEvent.title,
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -1241,7 +1249,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           children: [
             _buildDetailBadge('📅', 'This Week', true),
             const SizedBox(width: 12),
-            _buildDetailBadge('📍', placeholderEvent.venue?.area ?? 'Dubai', true),
+            _buildDetailBadge('📍', featuredEvent.venue?.area ?? 'Dubai', true),
           ],
         ),
         
@@ -1284,7 +1292,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Desktop Gameshow Layout - Expanded and Spectacular
-  Widget _buildDesktopGameshowLayout(Event placeholderEvent, bool isTablet) {
+  Widget _buildDesktopGameshowLayout(Event featuredEvent, bool isTablet) {
     return Row(
       children: [
         // Left Side - Large Trophy with Celebration
@@ -1355,9 +1363,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               
               // Event Name - Large and Prominent
               Text(
-                placeholderEvent.title.length > 50 
-                    ? '${placeholderEvent.title.substring(0, 47)}...'
-                    : placeholderEvent.title,
+                featuredEvent.title.length > 50 
+                    ? '${featuredEvent.title.substring(0, 47)}...'
+                    : featuredEvent.title,
                 style: GoogleFonts.inter(
                   fontSize: isTablet ? 24 : 32,
                   fontWeight: FontWeight.w700,
@@ -1383,7 +1391,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 children: [
                   _buildLargeDetailBadge('📅', 'This Week', isTablet),
                   SizedBox(width: isTablet ? 16 : 20),
-                  _buildLargeDetailBadge('📍', placeholderEvent.venue?.area ?? 'Dubai', isTablet),
+                  _buildLargeDetailBadge('📍', featuredEvent.venue?.area ?? 'Dubai', isTablet),
                 ],
               ),
               
