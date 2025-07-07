@@ -16,6 +16,7 @@ on:
         - production
         - staging
         - development
+        - demo
 
 env:
   FLUTTER_VERSION: '3.32.4'
@@ -90,13 +91,23 @@ jobs:
         cd dxb_events_web
         flutter test --reporter=compact || echo "Tests completed with issues"
 
-    - name: Build Flutter web app for production
+    - name: Build Flutter web app
       run: |
         cd dxb_events_web
+        
+        # Set demo mode flag if building demo
+        DEMO_MODE="false"
+        if [ "${{ github.event.inputs.environment }}" = "demo" ]; then
+          DEMO_MODE="true"
+        fi
+        
         flutter build web \
           --release \
           --no-tree-shake-icons \
           --dart-define=ENVIRONMENT=${{ github.event.inputs.environment || 'production' }} \
+          --dart-define=DEMO_MODE=$DEMO_MODE \
+          --dart-define=DEMO_USERNAME="${{ secrets.DEMO_USERNAME }}" \
+          --dart-define=DEMO_PASSWORD="${{ secrets.DEMO_PASSWORD }}" \
           --dart-define=GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
           --dart-define=API_BASE_URL="/api" \
           --dart-define=BACKEND_URL="${{ secrets.BACKEND_URL }}" \
@@ -108,6 +119,12 @@ jobs:
           --dart-define=CUSTOM_DOMAIN="${{ secrets.CUSTOM_DOMAIN }}" \
           --dart-define=CDN_URL="${{ secrets.CDN_URL }}" \
           --target=lib/main.dart
+          
+        # Use demo HTML template if building demo
+        if [ "${{ github.event.inputs.environment }}" = "demo" ]; then
+          echo "Using demo HTML template (ad-free)"
+          cp web/index_demo.html build/web/index.html
+        fi
 
     - name: Verify build output
       run: |
@@ -130,7 +147,7 @@ jobs:
         overwrites-pull-request-comment: true
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        NETLIFY_SITE_ID: ${{ github.event.inputs.environment == 'demo' && secrets.NETLIFY_DEMO_SITE_ID || secrets.NETLIFY_SITE_ID }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -153,9 +170,15 @@ jobs:
         echo "✅ Deployment completed!"
         echo "🔧 Build Environment: ${{ github.event.inputs.environment || 'production' }}"
         echo "📦 Build Size: $(du -sh dxb_events_web/build/web/ | cut -f1)"
-        echo "🌐 Netlify Site: https://${{ secrets.NETLIFY_SITE_ID }}.netlify.app"
-        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-          echo "🚀 Production deployment to: https://mydscvr.ai"
+        if [ "${{ github.event.inputs.environment }}" = "demo" ]; then
+          echo "🌐 Demo Site: https://${{ secrets.NETLIFY_DEMO_SITE_ID }}.netlify.app"
+          echo "🎭 Demo deployment to: https://demo.mydscvr.ai"
+          echo "🔐 Demo credentials: demo / MyDscvr2024"
+        else
+          echo "🌐 Netlify Site: https://${{ secrets.NETLIFY_SITE_ID }}.netlify.app"
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "🚀 Production deployment to: https://mydscvr.ai"
+          fi
         fi
 
   security-scan:
