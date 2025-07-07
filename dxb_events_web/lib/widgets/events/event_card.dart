@@ -365,22 +365,54 @@ class EventCard extends StatelessWidget {
 
   String _formatEventDate() {
     final now = DateTime.now();
-    final eventDate = event.startDate;
+    final startDate = event.startDate;
+    final endDate = event.endDate;
     
-    if (eventDate.year == now.year && 
-        eventDate.month == now.month && 
-        eventDate.day == now.day) {
-      return 'Today ${_formatTime(eventDate)}';
-    } else if (eventDate.year == now.year && 
-               eventDate.month == now.month && 
-               eventDate.day == now.day + 1) {
-      return 'Tomorrow ${_formatTime(eventDate)}';
-    } else {
+    // Helper function to check if two dates are the same day
+    bool isSameDay(DateTime date1, DateTime date2) {
+      return date1.year == date2.year && 
+             date1.month == date2.month && 
+             date1.day == date2.day;
+    }
+    
+    // Format a date as "15 Mar" or "15 Mar 2024" if different year
+    String formatDateShort(DateTime date) {
       final months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
-      return '${eventDate.day} ${months[eventDate.month - 1]}';
+      final yearSuffix = date.year != now.year ? ' ${date.year}' : '';
+      return '${date.day} ${months[date.month - 1]}$yearSuffix';
+    }
+    
+    // Handle special cases for today/tomorrow
+    if (isSameDay(startDate, now)) {
+      if (endDate != null && !isSameDay(startDate, endDate)) {
+        // Multi-day event starting today
+        return 'Today - ${formatDateShort(endDate)}';
+      } else {
+        // Single day event today
+        return 'Today ${_formatTime(startDate)}';
+      }
+    } else if (startDate.year == now.year && 
+               startDate.month == now.month && 
+               startDate.day == now.day + 1) {
+      if (endDate != null && !isSameDay(startDate, endDate)) {
+        // Multi-day event starting tomorrow
+        return 'Tomorrow - ${formatDateShort(endDate)}';
+      } else {
+        // Single day event tomorrow
+        return 'Tomorrow ${_formatTime(startDate)}';
+      }
+    } else {
+      // Regular dates
+      if (endDate != null && !isSameDay(startDate, endDate)) {
+        // Multi-day event
+        return '${formatDateShort(startDate)} - ${formatDateShort(endDate)}';
+      } else {
+        // Single day event
+        return '${formatDateShort(startDate)} ${_formatTime(startDate)}';
+      }
     }
   }
 
