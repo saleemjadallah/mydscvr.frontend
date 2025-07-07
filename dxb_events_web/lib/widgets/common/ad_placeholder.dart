@@ -204,3 +204,96 @@ class SimpleAdPlaceholder extends StatelessWidget {
     );
   }
 }
+
+/// Clean placeholder that shows nothing - perfect for demo environments
+class CleanAdPlaceholder extends StatelessWidget {
+  final double height;
+  final EdgeInsets margin;
+
+  const CleanAdPlaceholder({
+    Key? key,
+    this.height = 0,
+    this.margin = EdgeInsets.zero,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
+  }
+}
+
+/// Marketing placeholder that shows branded content instead of ads
+class MarketingContentPlaceholder extends StatelessWidget {
+  final double height;
+  final EdgeInsets margin;
+  final String? title;
+  final String? subtitle;
+  final IconData? icon;
+
+  const MarketingContentPlaceholder({
+    Key? key,
+    this.height = 200,
+    this.margin = const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+    this.title,
+    this.subtitle,
+    this.icon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      child: Container(
+        width: double.infinity,
+        height: height,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF17A2B8).withOpacity(0.1),
+              const Color(0xFF6C5CE7).withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF17A2B8).withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon ?? Icons.explore,
+                size: 48,
+                color: const Color(0xFF17A2B8),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title ?? 'Discover Amazing Events',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  color: const Color(0xFF17A2B8),
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                subtitle ?? 'Find perfect family activities in Dubai',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: const Color(0xFF6C5CE7),
+                  fontWeight: FontWeight.w400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
