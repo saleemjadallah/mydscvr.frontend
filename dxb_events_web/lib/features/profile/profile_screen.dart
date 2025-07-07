@@ -372,8 +372,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           
           const SizedBox(height: 32),
           
+          // Favorites Section
+          _buildSectionHeader('My Favorites', LucideIcons.heart),
+          
+          const SizedBox(height: 16),
+          
+          _buildFavoritesCard(),
+          
+          const SizedBox(height: 32),
+          
           // Interests Section
-          _buildSectionHeader('Interests', LucideIcons.heart),
+          _buildSectionHeader('Interests', LucideIcons.star),
           
           const SizedBox(height: 16),
           
@@ -1129,6 +1138,161 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFavoritesCard() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final heartedEvents = ref.watch(heartedEventsProvider);
+        final savedEvents = ref.watch(savedEventsProvider);
+        final totalFavorites = heartedEvents.length + savedEvents.length;
+        
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.dubaiCoral.withOpacity(0.1),
+                AppColors.dubaiTeal.withOpacity(0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.dubaiCoral.withOpacity(0.3),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: () => context.push('/favorites'),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.dubaiCoral.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          LucideIcons.heart,
+                          size: 24,
+                          color: AppColors.dubaiCoral,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'My Favorites',
+                              style: AppTypography.titleMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              totalFavorites == 0 
+                                  ? 'No favorites yet' 
+                                  : '$totalFavorites saved events',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                  if (totalFavorites > 0) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildFavoritesStat(
+                            'Hearted',
+                            heartedEvents.length.toString(),
+                            LucideIcons.heart,
+                            AppColors.dubaiCoral,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildFavoritesStat(
+                            'Saved',
+                            savedEvents.length.toString(),
+                            LucideIcons.bookmark,
+                            AppColors.dubaiTeal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFavoritesStat(String label, String count, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: color,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            count,
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

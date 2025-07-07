@@ -347,6 +347,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       actions: [
         // Family Friendly Indicator
         _buildFamilyFriendlyIndicator(),
+        // Favorites Icon (for authenticated users)
+        if (authState.status == AuthStatus.authenticated && authState.user != null)
+          _buildFavoritesIcon(),
         // Auth Buttons/Profile
         if (authState.status == AuthStatus.authenticated && authState.user != null)
           _buildUserProfile(authState.user!)
@@ -358,6 +361,63 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ),
         const SizedBox(width: 16),
       ],
+    );
+  }
+
+  /// Build favorites icon for authenticated users
+  Widget _buildFavoritesIcon() {
+    final heartedEvents = ref.watch(heartedEventsProvider);
+    final savedEvents = ref.watch(savedEventsProvider);
+    final totalFavorites = heartedEvents.length + savedEvents.length;
+    
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      child: Stack(
+        children: [
+          IconButton(
+            onPressed: () => context.push('/favorites'),
+            icon: const Icon(
+              LucideIcons.heart,
+              color: Colors.white,
+              size: 24,
+            ),
+            tooltip: 'My Favorites',
+          ),
+          // Badge showing count
+          if (totalFavorites > 0)
+            Positioned(
+              right: 6,
+              top: 6,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.dubaiCoral,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  minHeight: 20,
+                ),
+                child: Text(
+                  totalFavorites > 99 ? '99+' : totalFavorites.toString(),
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
