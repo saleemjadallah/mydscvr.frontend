@@ -25,6 +25,7 @@ import '../../models/user.dart';
 import '../../services/events_service.dart';
 import '../../services/mydscvr_choice_service.dart';
 import '../../models/event.dart';
+import '../../models/api_response.dart';
 import '../../widgets/common/footer.dart';
 import '../../widgets/notifications/notification_bell.dart';
 
