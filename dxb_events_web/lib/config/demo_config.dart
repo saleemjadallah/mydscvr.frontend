@@ -72,8 +72,9 @@ class DemoConfig {
   static String get version => isDemoMode ? 'Demo Version' : 'Production';
   
   /// Password protection settings for demo deployment
-  static const String demoPassword = 'mydscvr2024';
-  static const String demoUsername = 'demo';
+  /// These are injected from GitHub Secrets during build
+  static const String demoUsername = String.fromEnvironment('DEMO_USERNAME', defaultValue: 'demo');
+  static const String demoPassword = String.fromEnvironment('DEMO_PASSWORD', defaultValue: '');
   
   /// Demo site configuration
   static const String demoDomain = 'demo.mydscvr.ai';

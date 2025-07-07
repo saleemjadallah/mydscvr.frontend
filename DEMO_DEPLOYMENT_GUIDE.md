@@ -30,16 +30,33 @@ You now have two versions of your site:
 - **File**: `lib/config/demo_config.dart`
 - **Purpose**: Manages demo vs production mode switching
 
+## GitHub Secrets Configuration
+
+The following secrets are configured in your repository for secure demo deployment:
+
+| Secret Name | Value | Purpose |
+|-------------|-------|---------|
+| `DEMO_USERNAME` | `demo` | Demo site username |
+| `DEMO_PASSWORD` | `MyDscvr2024` | Demo site password |
+| `NETLIFY_AUTH_TOKEN` | `[Your Netlify token]` | Netlify deployment auth |
+| `NETLIFY_DEMO_SITE_ID` | `[Your demo site ID]` | Target demo site |
+
+These are injected during the build process and never exposed in the codebase.
+
 ## Deployment Steps
 
 ### Step 1: Build Demo Version
 
+#### Automated via GitHub Actions (Recommended)
+Demo deployment happens automatically when you push to main branch. Credentials are securely managed via GitHub Secrets.
+
+#### Manual Build (if needed)
 ```bash
 # Navigate to your Flutter web project
 cd frontend-repo/dxb_events_web
 
-# Build for demo with the demo HTML file
-flutter build web --dart-define=DEMO_MODE=true
+# Build for demo with credentials from environment
+flutter build web --dart-define=DEMO_MODE=true --dart-define=DEMO_USERNAME=demo --dart-define=DEMO_PASSWORD=MyDscvr2024
 
 # Copy the demo HTML file to replace the default
 cp web/index_demo.html build/web/index.html
@@ -58,7 +75,7 @@ cp web/index_demo.html build/web/index.html
 2. **Add Password Protection**:
    - Go to Site settings → Access control
    - Enable "Password protection"
-   - Set password: `mydscvr2024` (or your preferred password)
+   - Set password: `[YOUR_SECURE_PASSWORD]` (choose a strong password)
 
 #### Option B: Using Vercel
 
@@ -113,7 +130,7 @@ cp web/index_demo.html build/web/index.html
    ```bash
    # Generate password hash
    htpasswd -c .htpasswd demo
-   # Enter password: mydscvr2024
+   # Enter your chosen secure password
    ```
 
 ### Step 3: Configure DNS
@@ -136,7 +153,7 @@ Your demo site will use the same backend API (`api.mydscvr.ai`), so no backend c
 1. **Access Demo Site**: https://demo.mydscvr.ai
 2. **Enter Credentials**:
    - Username: `demo`
-   - Password: `mydscvr2024`
+   - Password: `MyDscvr2024`
 3. **Verify Functionality**:
    - Search works
    - User authentication works
@@ -172,10 +189,10 @@ To update the demo site with new features:
 
 ## Password Management
 
-Current demo credentials:
+Demo access credentials:
 - **URL**: https://demo.mydscvr.ai
 - **Username**: demo
-- **Password**: mydscvr2024
+- **Password**: MyDscvr2024 (stored in GitHub Secrets)
 
 To change the password, update your hosting provider's authentication settings.
 
