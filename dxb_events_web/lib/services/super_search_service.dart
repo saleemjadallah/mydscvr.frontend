@@ -3,6 +3,7 @@ import '../models/event.dart';
 import '../models/api_response.dart';
 import 'api/dio_config.dart';
 import '../core/utils/safe_event_parser.dart';
+import 'dart:math';
 
 /// Super Search filters model
 class SuperSearchFilters {
@@ -13,6 +14,7 @@ class SuperSearchFilters {
   final bool? familyFriendly;
   final bool? isWeekend;
   final bool? isFree;
+  final bool? includePastEvents;
 
   const SuperSearchFilters({
     this.category,
@@ -22,6 +24,7 @@ class SuperSearchFilters {
     this.familyFriendly,
     this.isWeekend,
     this.isFree,
+    this.includePastEvents,
   });
 
   Map<String, dynamic> toQueryParams() {
@@ -33,11 +36,12 @@ class SuperSearchFilters {
     if (familyFriendly != null) params['family_friendly'] = familyFriendly;
     if (isWeekend != null) params['is_weekend'] = isWeekend;
     if (isFree != null) params['is_free'] = isFree;
+    if (includePastEvents != null) params['include_past_events'] = includePastEvents;
     return params;
   }
 }
 
-/// Super Search Result with enhanced metadata
+/// Super Search Result with enhanced metadata and event tracking
 class SuperSearchResult {
   final List<Event> events;
   final int total;
@@ -49,6 +53,7 @@ class SuperSearchResult {
   final List<String> suggestions;
   final SuperSearchMetadata metadata;
   final String? aiResponse;
+  final EventTrackingInfo? trackingInfo;
 
   const SuperSearchResult({
     required this.events,
@@ -61,6 +66,7 @@ class SuperSearchResult {
     required this.suggestions,
     required this.metadata,
     this.aiResponse,
+    this.trackingInfo,
   });
 
   factory SuperSearchResult.fromJson(Map<String, dynamic> json) {
@@ -101,6 +107,13 @@ class SuperSearchResult {
     };
     final metadata = SuperSearchMetadata.fromJson(metadataJson);
 
+    // Parse event tracking info
+    EventTrackingInfo? trackingInfo;
+    final trackingData = metadataJson['event_tracking'] as Map<String, dynamic>?;
+    if (trackingData != null) {
+      trackingInfo = EventTrackingInfo.fromJson(trackingData);
+    }
+
     return SuperSearchResult(
       events: events,
       total: pagination['total'] as int,
@@ -112,6 +125,31 @@ class SuperSearchResult {
       suggestions: suggestions,
       metadata: metadata,
       aiResponse: aiResponse,
+      trackingInfo: trackingInfo,
+    );
+  }
+}
+
+/// Event tracking information from search response
+class EventTrackingInfo {
+  final String? queryId;
+  final String? userToken;
+  final bool searchTracked;
+  final bool viewTracked;
+
+  const EventTrackingInfo({
+    this.queryId,
+    this.userToken,
+    required this.searchTracked,
+    required this.viewTracked,
+  });
+
+  factory EventTrackingInfo.fromJson(Map<String, dynamic> json) {
+    return EventTrackingInfo(
+      queryId: json['query_id'] as String?,
+      userToken: json['user_token'] as String?,
+      searchTracked: json['search_tracked'] as bool? ?? false,
+      viewTracked: json['view_tracked'] as bool? ?? false,
     );
   }
 }
@@ -204,6 +242,8 @@ class SuperSearchStatus {
   final String status;
   final List<String> features;
   final String expectedResponseTime;
+  final EventTrackingStatus eventTracking;
+  final List<String> aiFeatures;
 
   const SuperSearchStatus({
     required this.service,
@@ -213,9 +253,14 @@ class SuperSearchStatus {
     required this.status,
     required this.features,
     required this.expectedResponseTime,
+    required this.eventTracking,
+    required this.aiFeatures,
   });
 
   factory SuperSearchStatus.fromJson(Map<String, dynamic> json) {
+    final eventTrackingData = json['event_tracking'] as Map<String, dynamic>? ?? {};
+    final eventTracking = EventTrackingStatus.fromJson(eventTrackingData);
+
     return SuperSearchStatus(
       service: json['service'] as String,
       enabled: json['enabled'] as bool,
@@ -224,22 +269,182 @@ class SuperSearchStatus {
       status: json['status'] as String,
       features: (json['features'] as List<dynamic>).cast<String>(),
       expectedResponseTime: json['expected_response_time'] as String,
+      eventTracking: eventTracking,
+      aiFeatures: (json['ai_features_unlocked'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 }
 
-/// MyDscvr Super Search Service - Powered by Algolia
+/// Event tracking status
+class EventTrackingStatus {
+  final bool insightsApiEnabled;
+  final bool clickTracking;
+  final bool conversionTracking;
+  final bool viewTracking;
+  final bool personalization;
+
+  const EventTrackingStatus({
+    required this.insightsApiEnabled,
+    required this.clickTracking,
+    required this.conversionTracking,
+    required this.viewTracking,
+    required this.personalization,
+  });
+
+  factory EventTrackingStatus.fromJson(Map<String, dynamic> json) {
+    return EventTrackingStatus(
+      insightsApiEnabled: json['insights_api_enabled'] as bool? ?? false,
+      clickTracking: json['click_tracking'] as bool? ?? false,
+      conversionTracking: json['conversion_tracking'] as bool? ?? false,
+      viewTracking: json['view_tracking'] as bool? ?? false,
+      personalization: json['personalization'] as bool? ?? false,
+    );
+  }
+}
+
+/// Event tracking request models
+class ClickTrackingRequest {
+  final String query;
+  final String objectId;
+  final int position;
+  final String? queryId;
+  final String? userToken;
+
+  const ClickTrackingRequest({
+    required this.query,
+    required this.objectId,
+    required this.position,
+    this.queryId,
+    this.userToken,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'query': query,
+      'object_id': objectId,
+      'position': position,
+      if (queryId != null) 'query_id': queryId,
+      if (userToken != null) 'user_token': userToken,
+    };
+  }
+}
+
+class ConversionTrackingRequest {
+  final String objectId;
+  final String eventName;
+  final String? queryId;
+  final String? userToken;
+
+  const ConversionTrackingRequest({
+    required this.objectId,
+    required this.eventName,
+    this.queryId,
+    this.userToken,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'object_id': objectId,
+      'event_name': eventName,
+      if (queryId != null) 'query_id': queryId,
+      if (userToken != null) 'user_token': userToken,
+    };
+  }
+}
+
+class ViewTrackingRequest {
+  final List<String> objectIds;
+  final String eventName;
+  final String? userToken;
+
+  const ViewTrackingRequest({
+    required this.objectIds,
+    required this.eventName,
+    this.userToken,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'object_ids': objectIds,
+      'event_name': eventName,
+      if (userToken != null) 'user_token': userToken,
+    };
+  }
+}
+
+/// MyDscvr Super Search Service - Powered by Algolia with AI Event Tracking
 /// 
 /// Provides instant, intelligent search with typo tolerance,
-/// advanced filtering, and sub-100ms response times.
+/// advanced filtering, sub-100ms response times, and comprehensive
+/// event tracking for AI optimization including NeuralSearch,
+/// Dynamic Re-Ranking, and Personalization.
 class SuperSearchService {
   late final Dio _dio;
+  String? _currentUserToken;
+  EventTrackingInfo? _lastSearchTracking;
 
   SuperSearchService() {
     _dio = DioConfig.createDio(useLocalHost: false);
+    _generateUserToken();
   }
 
-  /// Perform MyDscvr Super Search with intelligent query enhancement
+  /// Generate a user token for event tracking
+  void _generateUserToken() {
+    final random = Random();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    _currentUserToken = 'anonymous-${timestamp.toString()}-${random.nextInt(1000)}';
+  }
+
+  /// Get current user token
+  String get userToken => _currentUserToken ?? 'anonymous';
+
+  /// Set authenticated user token for personalization
+  Future<ApiResponse<bool>> setAuthenticatedUserToken(String userId, {String? customToken}) async {
+    try {
+      final response = await _dio.post(
+        '/algolia-search/user/token',
+        data: {
+          'user_id': userId,
+          if (customToken != null) 'authenticated_token': customToken,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _currentUserToken = response.data['user_token'] as String;
+        return ApiResponse.success(response.data['success'] as bool);
+      } else {
+        return ApiResponse.error('Failed to set user token: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      return ApiResponse.error('Network error setting user token: ${e.message}');
+    } catch (e) {
+      return ApiResponse.error('Unexpected error setting user token: $e');
+    }
+  }
+
+  /// Generate a new user token
+  Future<ApiResponse<String>> generateUserToken({String? userId}) async {
+    try {
+      final response = await _dio.get(
+        '/algolia-search/user/token/generate',
+        queryParameters: userId != null ? {'user_id': userId} : null,
+      );
+
+      if (response.statusCode == 200) {
+        final token = response.data['user_token'] as String;
+        _currentUserToken = token;
+        return ApiResponse.success(token);
+      } else {
+        return ApiResponse.error('Failed to generate token: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      return ApiResponse.error('Network error generating token: ${e.message}');
+    } catch (e) {
+      return ApiResponse.error('Unexpected error generating token: $e');
+    }
+  }
+
+  /// Perform MyDscvr Super Search with intelligent query enhancement and event tracking
   Future<ApiResponse<SuperSearchResult>> search({
     required String query,
     SuperSearchFilters? filters,
@@ -251,6 +456,7 @@ class SuperSearchService {
         'q': query,
         'page': page,
         'per_page': perPage,
+        'user_token': userToken,  // Include user token for tracking
       };
 
       // Add filter parameters
@@ -264,11 +470,20 @@ class SuperSearchService {
         options: Options(
           receiveTimeout: const Duration(seconds: 10), // Fast Algolia AI search
           sendTimeout: const Duration(seconds: 5),
+          headers: {
+            'X-User-Token': userToken,  // Also send in headers
+          },
         ),
       );
 
       if (response.statusCode == 200) {
         final result = SuperSearchResult.fromJson(response.data);
+        
+        // Store tracking info for future click events
+        _lastSearchTracking = result.trackingInfo;
+        
+        print('🎯 Search completed with tracking: queryId=${result.trackingInfo?.queryId}, userToken=${result.trackingInfo?.userToken}');
+        
         return ApiResponse.success(result);
       } else {
         return ApiResponse.error(
@@ -284,6 +499,168 @@ class SuperSearchService {
         'Unexpected error during Super Search: $e',
       );
     }
+  }
+
+  /// Track click event when user clicks on a search result
+  Future<ApiResponse<bool>> trackClickEvent({
+    required String query,
+    required String eventId,
+    required int position,
+    String? queryId,
+    String? userToken,
+  }) async {
+    try {
+      // Use stored tracking info if available
+      final effectiveQueryId = queryId ?? _lastSearchTracking?.queryId;
+      final effectiveUserToken = userToken ?? _lastSearchTracking?.userToken ?? this.userToken;
+
+      final request = ClickTrackingRequest(
+        query: query,
+        objectId: eventId,
+        position: position,
+        queryId: effectiveQueryId,
+        userToken: effectiveUserToken,
+      );
+
+      final response = await _dio.post(
+        '/algolia-search/track/click',
+        data: request.toJson(),
+      );
+
+      if (response.statusCode == 200) {
+        final tracked = response.data['tracked'] as bool;
+        
+        if (tracked) {
+          print('✅ Click event tracked: event=$eventId, position=$position, query="$query"');
+        } else {
+          print('⚠️ Click event tracking failed: ${response.data['message']}');
+        }
+        
+        return ApiResponse.success(tracked);
+      } else {
+        return ApiResponse.error('Failed to track click: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      return ApiResponse.error('Network error tracking click: ${e.message}');
+    } catch (e) {
+      return ApiResponse.error('Unexpected error tracking click: $e');
+    }
+  }
+
+  /// Track conversion event when user performs a meaningful action
+  Future<ApiResponse<bool>> trackConversionEvent({
+    required String eventId,
+    required String eventName,
+    String? queryId,
+    String? userToken,
+  }) async {
+    try {
+      // Use stored tracking info if available
+      final effectiveQueryId = queryId ?? _lastSearchTracking?.queryId;
+      final effectiveUserToken = userToken ?? _lastSearchTracking?.userToken ?? this.userToken;
+
+      final request = ConversionTrackingRequest(
+        objectId: eventId,
+        eventName: eventName,
+        queryId: effectiveQueryId,
+        userToken: effectiveUserToken,
+      );
+
+      final response = await _dio.post(
+        '/algolia-search/track/conversion',
+        data: request.toJson(),
+      );
+
+      if (response.statusCode == 200) {
+        final tracked = response.data['tracked'] as bool;
+        
+        if (tracked) {
+          print('✅ Conversion event tracked: event=$eventId, action="$eventName"');
+        } else {
+          print('⚠️ Conversion event tracking failed: ${response.data['message']}');
+        }
+        
+        return ApiResponse.success(tracked);
+      } else {
+        return ApiResponse.error('Failed to track conversion: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      return ApiResponse.error('Network error tracking conversion: ${e.message}');
+    } catch (e) {
+      return ApiResponse.error('Unexpected error tracking conversion: $e');
+    }
+  }
+
+  /// Track view event when user views content
+  Future<ApiResponse<bool>> trackViewEvent({
+    required List<String> eventIds,
+    required String eventName,
+    String? userToken,
+  }) async {
+    try {
+      final effectiveUserToken = userToken ?? this.userToken;
+
+      final request = ViewTrackingRequest(
+        objectIds: eventIds,
+        eventName: eventName,
+        userToken: effectiveUserToken,
+      );
+
+      final response = await _dio.post(
+        '/algolia-search/track/view',
+        data: request.toJson(),
+      );
+
+      if (response.statusCode == 200) {
+        final tracked = response.data['tracked'] as bool;
+        
+        if (tracked) {
+          print('✅ View event tracked: events=${eventIds.length}, action="$eventName"');
+        } else {
+          print('⚠️ View event tracking failed: ${response.data['message']}');
+        }
+        
+        return ApiResponse.success(tracked);
+      } else {
+        return ApiResponse.error('Failed to track view: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      return ApiResponse.error('Network error tracking view: ${e.message}');
+    } catch (e) {
+      return ApiResponse.error('Unexpected error tracking view: $e');
+    }
+  }
+
+  /// Track when user views event details (conversion event)
+  Future<ApiResponse<bool>> trackEventDetailsViewed(String eventId) async {
+    return trackConversionEvent(
+      eventId: eventId,
+      eventName: 'Event Details Viewed',
+    );
+  }
+
+  /// Track when user bookmarks/saves an event (conversion event)
+  Future<ApiResponse<bool>> trackEventBookmarked(String eventId) async {
+    return trackConversionEvent(
+      eventId: eventId,
+      eventName: 'Event Bookmarked',
+    );
+  }
+
+  /// Track when user shares an event (conversion event)
+  Future<ApiResponse<bool>> trackEventShared(String eventId) async {
+    return trackConversionEvent(
+      eventId: eventId,
+      eventName: 'Event Shared',
+    );
+  }
+
+  /// Track when user views search results (view event)
+  Future<ApiResponse<bool>> trackSearchResultsViewed(List<String> eventIds) async {
+    return trackViewEvent(
+      eventIds: eventIds,
+      eventName: 'Search Results Viewed',
+    );
   }
 
   /// Get search suggestions based on partial query
@@ -344,7 +721,7 @@ class SuperSearchService {
     }
   }
 
-  /// Get Super Search service status
+  /// Get Super Search service status with event tracking info
   Future<ApiResponse<SuperSearchStatus>> getStatus() async {
     try {
       final response = await _dio.get('/algolia-search/status');
@@ -441,6 +818,54 @@ class SuperSearchService {
     );
   }
 
+  /// Search for historical/past events
+  Future<ApiResponse<SuperSearchResult>> searchHistoricalEvents({
+    required String query,
+    String? area,
+    String? category,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    return search(
+      query: query,
+      filters: SuperSearchFilters(
+        area: area,
+        category: category,
+        includePastEvents: true, // Include past events
+      ),
+      page: page,
+      perPage: perPage,
+    );
+  }
+
+  /// Search with explicit date filtering control
+  Future<ApiResponse<SuperSearchResult>> searchWithDateControl({
+    required String query,
+    required bool includePastEvents,
+    SuperSearchFilters? additionalFilters,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    // Merge additional filters with date control
+    final filters = SuperSearchFilters(
+      category: additionalFilters?.category,
+      area: additionalFilters?.area,
+      priceMin: additionalFilters?.priceMin,
+      priceMax: additionalFilters?.priceMax,
+      familyFriendly: additionalFilters?.familyFriendly,
+      isWeekend: additionalFilters?.isWeekend,
+      isFree: additionalFilters?.isFree,
+      includePastEvents: includePastEvents,
+    );
+
+    return search(
+      query: query,
+      filters: filters,
+      page: page,
+      perPage: perPage,
+    );
+  }
+
   /// Popular search shortcuts for quick access
   static const Map<String, String> popularSearches = {
     'Kids Activities': 'kids children family activities',
@@ -465,5 +890,63 @@ class SuperSearchService {
   /// Get query for popular search
   static String getPopularSearchQuery(String searchTerm) {
     return popularSearches[searchTerm] ?? searchTerm;
+  }
+
+  /// Helper method to track click with automatic position calculation
+  Future<ApiResponse<bool>> trackSearchResultClick({
+    required String query,
+    required String eventId,
+    required List<Event> searchResults,
+  }) async {
+    // Find position of event in search results
+    final position = searchResults.indexWhere((event) => event.id == eventId) + 1;
+    
+    if (position > 0) {
+      return trackClickEvent(
+        query: query,
+        eventId: eventId,
+        position: position,
+      );
+    } else {
+      print('⚠️ Event not found in search results for click tracking');
+      return ApiResponse.error('Event not found in search results');
+    }
+  }
+
+  /// Get last search tracking info (for debugging/monitoring)
+  EventTrackingInfo? get lastSearchTracking => _lastSearchTracking;
+
+  /// Check if date filtering is active (for UI display)
+  bool get isDateFilteringActive => true; // Always active now
+
+  /// Get search tips for users
+  static List<String> getSearchTips() {
+    return [
+      'Use natural language: "kids activities this weekend"',
+      'Search by area: "concerts in Marina"',
+      'Find free events: "free family activities"',
+      'Combine filters: "outdoor activities kids free"',
+      'Search past events: Use historical search option',
+      'Be specific: "cooking classes for beginners"',
+    ];
+  }
+
+  /// Get information about date filtering for help/info screens
+  static Map<String, dynamic> getDateFilteringInfo() {
+    return {
+      'title': 'Smart Date Filtering',
+      'description': 'By default, only current and upcoming events are shown to help you find relevant activities.',
+      'features': [
+        'Automatic filtering of expired events',
+        'Shows only current and future events',
+        'Option to include historical events when needed',
+        'Optimized for finding events you can actually attend',
+      ],
+      'usage': [
+        'Default searches show only upcoming events',
+        'Use "Include Past Events" option for historical searches',
+        'Perfect for finding events you can still attend',
+      ],
+    };
   }
 }

@@ -12,8 +12,7 @@ import '../../core/widgets/dubai_app_bar.dart';
 import '../../models/event.dart';
 import '../../services/events_service.dart';
 import '../../services/enhanced_events_service.dart';
-import '../../widgets/events/event_card_enhanced.dart';
-import '../../widgets/events/enhanced_event_card.dart';
+import '../../widgets/events/event_card_simple.dart';
 import '../../widgets/events/search_bar_glassmorphic.dart';
 import '../../widgets/events/enhanced_events_search.dart';
 // import '../../widgets/events/event_list_item.dart';
@@ -1718,27 +1717,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   Widget _buildEventCard(Event event) {
     return Container(
       margin: _currentViewMode == ViewMode.list ? EdgeInsets.only(bottom: 16) : EdgeInsets.zero,
-      child: _useEnhancedCard 
-          ? EnhancedEventCard(
-              event: event,
-              showQualityMetrics: _showQualityMetrics,
-              showSocialMedia: true,
-              onTap: () => _navigateToEventDetail(event),
-            )
-          : EventCardEnhanced(
-              event: event,
-              onTap: () => _navigateToEventDetail(event),
-              onFavorite: () {
-                // TODO: Implement favorite functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added ${event.title} to favorites'),
-                    backgroundColor: AppColors.dubaiTeal,
-                  ),
-                );
-              },
-              isFavorite: false, // TODO: Get from favorites provider
-            ),
+      child: EventCardSimple(
+        event: event,
+        onTap: () => _navigateToEventDetail(event),
+      ),
     );
   }
 
