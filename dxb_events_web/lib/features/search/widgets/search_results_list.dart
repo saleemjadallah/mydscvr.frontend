@@ -9,6 +9,7 @@ import '../../../core/themes/app_typography.dart';
 import '../../../core/widgets/glass_morphism.dart';
 import '../../../models/event.dart';
 import '../../../services/providers/preferences_provider.dart';
+import '../../../utils/duration_formatter.dart';
 
 /// Search results list with infinite scroll and beautiful animations
 class SearchResultsList extends ConsumerStatefulWidget {
@@ -274,6 +275,50 @@ class SearchEventCard extends ConsumerWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
+                            ],
+                          ),
+                          
+                          const SizedBox(height: 4),
+                          
+                          // Duration and End Date
+                          Row(
+                            children: [
+                              // Duration
+                              Icon(
+                                LucideIcons.clock,
+                                size: 16,
+                                color: AppColors.dubaiTeal,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                DurationFormatter.formatForCard(event.startDate, event.endDate),
+                                style: AppTypography.body2.copyWith(
+                                  color: AppColors.dubaiTeal,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              // End Date (if different from start)
+                              if (event.endDate != null && _shouldShowEndDate(event.startDate, event.endDate!)) ...[
+                                Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                                  width: 1,
+                                  height: 12,
+                                  color: AppColors.textSecondaryDark.withOpacity(0.3),
+                                ),
+                                Icon(
+                                  LucideIcons.calendarDays,
+                                  size: 16,
+                                  color: AppColors.dubaiPurple,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Ends ${_formatEndDate(event.endDate!)}',
+                                  style: AppTypography.body2.copyWith(
+                                    color: AppColors.dubaiPurple,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],
@@ -605,17 +650,57 @@ class SearchEventCard extends ConsumerWidget {
     final today = DateTime(now.year, now.month, now.day);
     final eventDay = DateTime(startDate.year, startDate.month, startDate.day);
     
+    String dateText;
     if (eventDay == today) {
-      return 'Today';
+      dateText = 'Today';
     } else if (eventDay == today.add(const Duration(days: 1))) {
-      return 'Tomorrow';
+      dateText = 'Tomorrow';
     } else if (eventDay.isBefore(today.add(const Duration(days: 7)))) {
       final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      return weekdays[startDate.weekday - 1];
+      dateText = weekdays[startDate.weekday - 1];
     } else {
       final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return '${startDate.day} ${months[startDate.month - 1]}';
+      dateText = '${startDate.day} ${months[startDate.month - 1]}';
+    }
+    
+    // Add time if it's not an all-day event
+    final startTime = _formatTime(startDate);
+    return '$dateText at $startTime';
+  }
+  
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final minuteStr = minute.toString().padLeft(2, '0');
+    return '$displayHour:$minuteStr $period';
+  }
+  
+  bool _shouldShowEndDate(DateTime startDate, DateTime endDate) {
+    // Show end date if the event spans multiple days
+    final startDay = DateTime(startDate.year, startDate.month, startDate.day);
+    final endDay = DateTime(endDate.year, endDate.month, endDate.day);
+    return !startDay.isAtSameMomentAs(endDay);
+  }
+  
+  String _formatEndDate(DateTime endDate) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final endDay = DateTime(endDate.year, endDate.month, endDate.day);
+    
+    if (endDay == today) {
+      return 'today';
+    } else if (endDay == today.add(const Duration(days: 1))) {
+      return 'tomorrow';
+    } else if (endDay.isBefore(today.add(const Duration(days: 7)))) {
+      final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return weekdays[endDate.weekday - 1];
+    } else {
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${endDate.day} ${months[endDate.month - 1]}';
     }
   }
 
