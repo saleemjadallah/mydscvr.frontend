@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/event.dart';
 import '../models/api_response.dart';
-import '../services/featured_events_service.dart';
+import '../services/featured_events_service_new.dart';
 import '../services/events_service.dart';
 
 /// Provider for managing Featured Events state and refresh cycles
 class FeaturedEventsProvider extends ChangeNotifier {
-  final FeaturedEventsService _featuredEventsService;
+  final FeaturedEventsServiceNew _featuredEventsService;
   
   List<Event> _featuredEvents = [];
   bool _isLoading = false;
@@ -29,7 +29,7 @@ class FeaturedEventsProvider extends ChangeNotifier {
   static const int _maxConsecutiveFailures = 3;
   static const Duration _backoffDuration = Duration(minutes: 15);
 
-  FeaturedEventsProvider() : _featuredEventsService = FeaturedEventsService(EventsService()) {
+  FeaturedEventsProvider() : _featuredEventsService = FeaturedEventsServiceNew(EventsService()) {
     _initializeRefreshCycle();
     loadFeaturedEvents();
   }
@@ -182,16 +182,13 @@ class FeaturedEventsProvider extends ChangeNotifier {
   }
 
   /// Calculate and get the score for a specific event (for debugging/analytics)
+  /// Note: Simplified service doesn't support local scoring
   double getEventScore(Event event, {
     UserContext? userContext,
     EnvironmentalFactors? environmentalFactors,
   }) {
-    return _featuredEventsService.calculateFeaturedScore(
-      event,
-      userContext: userContext?.toMap(),
-      environmentalFactors: environmentalFactors?.toMap(),
-      currentFeaturedEvents: _featuredEvents,
-    );
+    // Return a default score since the new service uses backend algorithm
+    return 0.0;
   }
 
   /// Force refresh featured events

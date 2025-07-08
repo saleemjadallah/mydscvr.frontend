@@ -545,27 +545,32 @@ class EventsService {
   /// Get events for featured selection (using main events endpoint)
   Future<ApiResponse<List<Event>>> getFeaturedEventsFromBackend({int limit = 12}) async {
     try {
-      print('🎯 Featured Events Backend: Fetching events for scoring algorithm');
+      print('🎯 Featured Events Backend: Calling /api/events/featured/list with limit=$limit');
       
-      // Fetch more events than needed so the scoring algorithm has a good pool to choose from
-      final fetchLimit = limit * 4; // Get 4x more events for better selection
-      
-      final response = await getEventsWithTotal(
-        page: 1,
-        perPage: fetchLimit,
-        sortBy: 'start_date',
+      // Call the backend featured events endpoint directly
+      final response = await _dio.get(
+        '/events/featured/list',
+        queryParameters: {'limit': limit},
       );
 
-      if (response.isSuccess && response.data != null) {
-        final events = response.data!.events;
-        print('🎯 Featured Events Backend: Successfully fetched ${events.length} events for scoring');
+      if (response.statusCode == 200) {
+        final responseData = response.data as Map<String, dynamic>;
+        final eventsData = responseData['events'] as List<dynamic>;
+        
+        final events = eventsData
+            .map((eventJson) => SafeEventParser.parseEvent(eventJson))
+            .where((event) => event != null)
+            .cast<Event>()
+            .toList();
+        
+        print('🎯 Featured Events Backend: Successfully fetched ${events.length} featured events from backend');
         return ApiResponse.success(events);
       } else {
-        return ApiResponse.error('Failed to fetch events for scoring: ${response.error}');
+        return ApiResponse.error('Backend returned status ${response.statusCode}');
       }
     } catch (e) {
       print('🎯 Featured Events Backend Error: $e');
-      return ApiResponse.error('Unexpected error fetching events for scoring: $e');
+      return ApiResponse.error('Unexpected error fetching featured events: $e');
     }
   }
 
