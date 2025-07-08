@@ -1,2 +1,3 @@
 /api/* https://mydscvr.xyz/api/:splat 200
+/ads.txt https://srv.adstxtmanager.com/19390/mydscvr.ai 301
 /* /index.html 200
