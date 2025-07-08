@@ -235,6 +235,7 @@ class EventsService {
     String? category,
     String? location,
     String? area,
+    String? dateFilter,
     DateTime? dateFrom,
     DateTime? dateTo,
     double? priceMax,
@@ -259,6 +260,7 @@ class EventsService {
       if (category != null) queryParams['category'] = category;
       if (location != null) queryParams['location'] = location;
       if (area != null) queryParams['area'] = area;
+      if (dateFilter != null) queryParams['date_filter'] = dateFilter;
       if (dateFrom != null) queryParams['date_from'] = dateFrom.toIso8601String();
       if (dateTo != null) queryParams['date_to'] = dateTo.toIso8601String();
       if (priceMax != null) queryParams['price_max'] = priceMax;
@@ -331,6 +333,7 @@ class EventsService {
     String? category,
     String? location,
     String? area,
+    String? dateFilter,
     DateTime? dateFrom,
     DateTime? dateTo,
     double? priceMax,
@@ -348,6 +351,7 @@ class EventsService {
       category: category,
       location: location,
       area: area,
+      dateFilter: dateFilter,
       dateFrom: dateFrom,
       dateTo: dateTo,
       priceMax: priceMax,

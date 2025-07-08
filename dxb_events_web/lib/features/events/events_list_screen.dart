@@ -72,6 +72,28 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   // Add total count from database
   int _totalEventsInDb = 0;
   
+  // Helper function to map frontend filter names to backend parameter names
+  String? _mapDateFilterToBackend(String? frontendFilter) {
+    if (frontendFilter == null) return null;
+    
+    switch (frontendFilter) {
+      case 'Today':
+        return 'today';
+      case 'Tomorrow':
+        return 'tomorrow';
+      case 'This Weekend':
+        return 'this_weekend';
+      case 'This Week':
+        return 'this_week';
+      case 'Next Week':
+        return 'next_week';
+      case 'This Month':
+        return 'this_month';
+      default:
+        return null;
+    }
+  }
+  
   String? selectedCategory;
   String? selectedLocation;
   String? searchQuery;
@@ -147,6 +169,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         
         // Load ALL events to filter from (EXACT same as homepage does)
         final response = await _eventsService.getEvents(
+          dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
           perPage: 100, // Use EXACT same parameters as homepage
           sortBy: 'start_date',
         );
@@ -187,6 +210,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         final response = await _eventsService.getEventsWithTotal(
           category: selectedCategory,
           location: selectedLocation,
+          dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
           page: _currentPage,
           perPage: 20,
         );
@@ -811,9 +835,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             child: EventsFilterSidebarGlassmorphic(
               filters: _currentFilters,
               onFiltersChanged: (filters) {
+                final oldDateRange = _currentFilters.dateRange;
                 setState(() {
                   _currentFilters = filters;
                 });
+                // Reload events if date filter changed
+                if (oldDateRange != filters.dateRange) {
+                  print('🔄 Date filter changed from "$oldDateRange" to "${filters.dateRange}", reloading events');
+                  _loadEvents();
+                }
               },
               isExpanded: _isFilterExpanded,
               onToggle: () {
@@ -866,9 +896,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             child: EventsFilterSidebarGlassmorphic(
               filters: _currentFilters,
               onFiltersChanged: (filters) {
+                final oldDateRange = _currentFilters.dateRange;
                 setState(() {
                   _currentFilters = filters;
                 });
+                // Reload events if date filter changed
+                if (oldDateRange != filters.dateRange) {
+                  print('🔄 Date filter changed from "$oldDateRange" to "${filters.dateRange}", reloading events');
+                  _loadEvents();
+                }
               },
               isExpanded: _isFilterExpanded,
               onToggle: () {
