@@ -25,27 +25,31 @@ class DioConfig {
     // Check if we're running on mobile platforms (Android/iOS)
     if (!kIsWeb) {
       // For mobile platforms, we need absolute URLs
-      // Default to production backend for mobile
+      // Use the production backend for mobile
       print('🔧 DioConfig: Mobile platform detected, using: $productionUrl');
       return productionUrl;
     }
     
-    // For web platforms, check the current domain and use Netlify proxy
+    // For web platforms, always use relative API paths
+    // This works whether served from mydscvr.xyz directly or via Netlify proxy
     try {
-      if (Uri.base.host.contains('mydscvr.xyz') || Uri.base.host.contains('mydscvr.ai')) {
-        print('🔧 DioConfig: Production domain detected, using Netlify proxy: /api');
-        return '/api'; // Use Netlify proxy for CORS handling
+      if (Uri.base.host.contains('mydscvr.xyz')) {
+        print('🔧 DioConfig: Production domain mydscvr.xyz detected, using: /api');
+        return '/api'; // Direct API calls on same domain
+      } else if (Uri.base.host.contains('mydscvr.ai')) {
+        print('🔧 DioConfig: Production domain mydscvr.ai detected, using Netlify proxy: /api');
+        return '/api'; // Netlify proxy for CORS handling
       } else if (Uri.base.host.contains('localhost')) {
-        print('🔧 DioConfig: Localhost detected, using: $localUrl');
-        return localUrl;
+        print('🔧 DioConfig: Localhost detected, using production: $productionUrl');
+        return productionUrl; // Point to production backend for local development
       }
     } catch (e) {
       print('Error detecting environment: $e');
     }
     
-    // For web development and other cases, use Netlify proxy
-    print('🔧 DioConfig: Default fallback, using Netlify proxy: /api');
-    return '/api'; // Use Netlify proxy for CORS handling
+    // Default fallback to production backend
+    print('🔧 DioConfig: Default fallback, using production: $productionUrl');
+    return productionUrl;
   }
   
   /// Create configured Dio instance with interceptors
