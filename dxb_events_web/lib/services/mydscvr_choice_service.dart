@@ -16,7 +16,7 @@ class MyDscvrChoiceService {
   /// Get today's MyDscvr's Choice featured event
   Future<ApiResponse<Event>> getCurrentChoice() async {
     try {
-      final response = await _dio.get('/api/mydscvr-choice/current');
+      final response = await _dio.get('/mydscvr-choice/current');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -47,7 +47,7 @@ class MyDscvrChoiceService {
   /// Manually refresh today's MyDscvr's Choice (for testing)
   Future<ApiResponse<Event>> refreshChoice() async {
     try {
-      final response = await _dio.post('/api/mydscvr-choice/refresh');
+      final response = await _dio.post('/mydscvr-choice/refresh');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -79,7 +79,7 @@ class MyDscvrChoiceService {
   Future<ApiResponse<List<Event>>> getChoiceHistory({int days = 7}) async {
     try {
       final response = await _dio.get(
-        '/api/mydscvr-choice/history',
+        '/mydscvr-choice/history',
         queryParameters: {'days': days},
       );
 
