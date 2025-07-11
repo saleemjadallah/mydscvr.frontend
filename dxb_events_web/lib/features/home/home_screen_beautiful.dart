@@ -266,10 +266,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: _buildAdSenseContainer('3', Colors.green[50]),
           ),
           
-          // MyDscvr's Choice Section - TEMPORARILY COMMENTED OUT FOR TESTING
-          // SliverToBoxAdapter(
-          //   child: _buildAnimatedMyDscvrChoice(),
-          // ),
+          // MyDscvr's Choice Section - Final solution
+          SliverToBoxAdapter(
+            child: _buildAnimatedMyDscvrChoice(),
+          ),
           
           // Explore All Events CTA Button
           SliverToBoxAdapter(
@@ -888,6 +888,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       final myDscvrChoiceResponse = results[4] as ApiResponse<Event>;
 
       print('🎯 DEBUG: MyDscvr\'s Choice response: success=${myDscvrChoiceResponse.isSuccess}, event=${myDscvrChoiceResponse.data?.title}');
+      if (!myDscvrChoiceResponse.isSuccess) {
+        print('🚨 DEBUG: MyDscvr\'s Choice API failed: ${myDscvrChoiceResponse.error}');
+      }
 
       if (mounted) {
         setState(() {
@@ -950,6 +953,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     
     // Use MyDscvr's Choice event if available, otherwise fall back to first upcoming event
     final featuredEvent = _myDscvrChoiceEvent ?? (_upcomingEvents.isNotEmpty ? _upcomingEvents.first : null);
+    
+    print('🎯 DEBUG: Displaying event in MyDscvr\'s Choice:');
+    print('   - MyDscvr\'s Choice Event: ${_myDscvrChoiceEvent?.title} (ID: ${_myDscvrChoiceEvent?.id})');
+    print('   - Fallback Event: ${_upcomingEvents.isNotEmpty ? _upcomingEvents.first.title : 'none'} (ID: ${_upcomingEvents.isNotEmpty ? _upcomingEvents.first.id : 'none'})');
+    print('   - Final Event Used: ${featuredEvent?.title} (ID: ${featuredEvent?.id})');
     
     if (featuredEvent == null) {
       return _buildAnimatedMyDscvrChoiceEmpty();
