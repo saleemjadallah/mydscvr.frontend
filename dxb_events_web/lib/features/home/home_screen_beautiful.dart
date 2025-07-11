@@ -266,10 +266,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: _buildAdSenseContainer('3', Colors.green[50]),
           ),
           
-          // MyDscvr's Choice Section - Final solution
-          SliverToBoxAdapter(
-            child: _buildAnimatedMyDscvrChoice(),
-          ),
+          // MyDscvr's Choice Section - TEMPORARILY COMMENTED OUT FOR TESTING
+          // SliverToBoxAdapter(
+          //   child: _buildAnimatedMyDscvrChoice(),
+          // ),
           
           // Explore All Events CTA Button
           SliverToBoxAdapter(
