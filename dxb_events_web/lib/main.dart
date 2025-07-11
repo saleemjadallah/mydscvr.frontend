@@ -21,6 +21,7 @@ import 'features/legal/terms_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/legal/cookies_screen.dart';
 import 'features/help/faq_screen.dart';
+import 'features/legal/contact_screen.dart';
 import 'features/favorites/favorites_screen.dart';
 
 // Comprehensive router with beautiful home screen
@@ -218,6 +219,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/faq',
       builder: (context, state) => const FAQScreen(),
+    ),
+    GoRoute(
+      path: '/contact',
+      builder: (context, state) => const ContactScreen(),
     ),
   ],
 );
