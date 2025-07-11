@@ -37,8 +37,8 @@ class DioConfig {
         print('🔧 DioConfig: Production domain mydscvr.xyz detected, using: /api');
         return '/api'; // Direct API calls on same domain
       } else if (Uri.base.host.contains('mydscvr.ai')) {
-        print('🔧 DioConfig: Production domain mydscvr.ai detected, using Netlify proxy: empty base');
-        return ''; // Netlify proxy handles /api prefix automatically
+        print('🔧 DioConfig: Production domain mydscvr.ai detected, using Netlify proxy: /api');
+        return '/api'; // Netlify proxy will redirect /api/* to backend
       } else if (Uri.base.host.contains('localhost')) {
         print('🔧 DioConfig: Localhost detected, using production: $productionUrl');
         return productionUrl; // Point to production backend for local development

@@ -16,12 +16,7 @@ class MyDscvrChoiceService {
   /// Get today's MyDscvr's Choice featured event
   Future<ApiResponse<Event>> getCurrentChoice() async {
     try {
-      // Adjust API path based on base URL configuration
-      final apiPath = _dio.options.baseUrl.isEmpty 
-          ? 'mydscvr-choice/current'  // For Netlify proxy (mydscvr.ai)
-          : '/api/mydscvr-choice/current';  // For direct backend (mydscvr.xyz)
-      
-      final response = await _dio.get(apiPath);
+      final response = await _dio.get('/api/mydscvr-choice/current');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -52,12 +47,7 @@ class MyDscvrChoiceService {
   /// Manually refresh today's MyDscvr's Choice (for testing)
   Future<ApiResponse<Event>> refreshChoice() async {
     try {
-      // Adjust API path based on base URL configuration
-      final apiPath = _dio.options.baseUrl.isEmpty 
-          ? 'mydscvr-choice/refresh'  // For Netlify proxy (mydscvr.ai)
-          : '/api/mydscvr-choice/refresh';  // For direct backend (mydscvr.xyz)
-      
-      final response = await _dio.post(apiPath);
+      final response = await _dio.post('/api/mydscvr-choice/refresh');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -88,13 +78,8 @@ class MyDscvrChoiceService {
   /// Get MyDscvr's Choice history for the last N days
   Future<ApiResponse<List<Event>>> getChoiceHistory({int days = 7}) async {
     try {
-      // Adjust API path based on base URL configuration
-      final apiPath = _dio.options.baseUrl.isEmpty 
-          ? 'mydscvr-choice/history'  // For Netlify proxy (mydscvr.ai)
-          : '/api/mydscvr-choice/history';  // For direct backend (mydscvr.xyz)
-      
       final response = await _dio.get(
-        apiPath,
+        '/api/mydscvr-choice/history',
         queryParameters: {'days': days},
       );
 
