@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 
 enum SortOption {
+  latest('Latest', LucideIcons.clock, 'Show recently added events first'),
   date('Date', LucideIcons.calendar, 'Sort events by date'),
   popularity('Popularity', LucideIcons.trendingUp, 'Sort by popularity and ratings'),
   priceLowToHigh('Price: Low to High', LucideIcons.arrowUp, 'Sort by price ascending'),

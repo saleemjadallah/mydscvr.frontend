@@ -53,7 +53,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   
   // View and sort state
   ViewMode _currentViewMode = ViewMode.grid;
-  SortOption _currentSortOption = SortOption.date;
+  SortOption _currentSortOption = SortOption.latest; // Default to latest events first
   
   // Filter state
   EventFilterData _currentFilters = const EventFilterData();
@@ -163,7 +163,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         final response = await _eventsService.getEvents(
           dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
           perPage: 100, // Use EXACT same parameters as homepage
-          sortBy: 'start_date',
+          sortBy: '-created_at', // Sort by creation date descending (latest first)
         );
         
         if (response.isSuccess && response.data != null) {
@@ -205,6 +205,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
           page: pageToLoad,
           perPage: _eventsPerPage,
+          sortBy: '-created_at', // Sort by creation date descending (latest first)
         );
         
         if (response.isSuccess && response.data != null) {
@@ -1544,6 +1545,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     List<Event> sorted = List.from(events);
     
     switch (_currentSortOption) {
+      case SortOption.latest:
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Latest first
+        break;
       case SortOption.date:
         sorted.sort((a, b) => a.startDate.compareTo(b.startDate));
         break;
