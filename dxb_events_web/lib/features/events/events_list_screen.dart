@@ -24,6 +24,7 @@ import '../../widgets/common/breadcrumb_navigation.dart';
 import '../../widgets/common/glassmorphic_background.dart';
 import '../../widgets/common/footer.dart';
 import '../event_details/event_details_screen.dart';
+import '../../widgets/pagination_widget.dart';
 
 class EventsListScreen extends ConsumerStatefulWidget {
   final String? initialCategory;
@@ -61,9 +62,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   // Search state
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
   int _currentPage = 1;
+  int _totalPages = 1;
+  static const int _eventsPerPage = 20;
 
   List<Event> events = [];
   String? errorMessage;
@@ -118,9 +119,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       vsync: this,
     );
     
-    // Add scroll listener for infinite scroll
-    _scrollController.addListener(_onScroll);
-    
     // Initialize with provided filters
     selectedCategory = widget.initialCategory;
     selectedLocation = widget.initialLocation;
@@ -138,23 +136,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     _loadEvents();
   }
 
-  void _onScroll() {
-    // Improved scroll detection for footer compatibility
-    final double triggerPoint = _scrollController.position.maxScrollExtent - 400;
-    if (_scrollController.position.pixels >= triggerPoint) {
-      if (!_isLoadingMore && _hasMore) {
-        _loadMoreEvents();
-      }
-    }
-  }
 
-  Future<void> _loadEvents() async {
+  Future<void> _loadEvents({int? page}) async {
+    final pageToLoad = page ?? 1;
+    
     setState(() {
       _isLoading = true;
       errorMessage = null;
-      events.clear();
-      _currentPage = 1;
-      _hasMore = true;
+      if (page == null || page == 1) {
+        events.clear();
+        _currentPage = 1;
+      }
     });
 
     try {
@@ -193,8 +185,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           print('✅ Found ${allFilteredEvents.length} events matching enhanced criteria for $selectedCategory');
           
           // Apply pagination to filtered results
-          final startIndex = (_currentPage - 1) * 20;
-          filteredEvents = allFilteredEvents.skip(startIndex).take(20).toList();
+          final startIndex = (pageToLoad - 1) * _eventsPerPage;
+          filteredEvents = allFilteredEvents.skip(startIndex).take(_eventsPerPage).toList();
           totalCount = allFilteredEvents.length;
           
           print('📄 Showing page $_currentPage: ${filteredEvents.length} events (${startIndex + 1}-${startIndex + filteredEvents.length} of $totalCount)');
@@ -211,8 +203,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           category: selectedCategory,
           location: selectedLocation,
           dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
-          page: _currentPage,
-          perPage: 20,
+          page: pageToLoad,
+          perPage: _eventsPerPage,
         );
         
         if (response.isSuccess && response.data != null) {
@@ -230,10 +222,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         setState(() {
           events = filteredEvents;
           _totalEventsInDb = totalCount; // Store total count
+          _totalPages = (totalCount / _eventsPerPage).ceil();
+          _currentPage = pageToLoad;
           _isLoading = false;
-          _hasMore = filteredEvents.length >= 20;
-          _currentPage++;
-          print('🔍 DEBUG: Total events available: $_totalEventsInDb');
+          print('🔍 DEBUG: Total events available: $_totalEventsInDb, pages: $_totalPages');
         });
         
         _animationController.forward();
@@ -254,43 +246,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     }
   }
 
-  Future<void> _loadMoreEvents() async {
-    if (_isLoadingMore || !_hasMore) return;
-
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    try {
-      print('🔍 DEBUG: Loading more events, page $_currentPage...');
-      final response = await _eventsService.getEvents(
-        category: selectedCategory,
-        location: selectedLocation,
-        page: _currentPage,
-        perPage: 20,
+  void _onPageChanged(int page) {
+    if (page != _currentPage && page >= 1 && page <= _totalPages) {
+      _loadEvents(page: page);
+      // Scroll to top when page changes
+      _scrollController.animateTo(
+        0,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       );
-
-      if (response.isSuccess) {
-        final newEvents = response.data ?? [];
-        print('🔍 DEBUG: Loaded ${newEvents.length} more events');
-        
-        setState(() {
-          events.addAll(newEvents);
-          _isLoadingMore = false;
-          _hasMore = newEvents.length >= 20;
-          _currentPage++;
-          print('🔍 DEBUG: Total events now: ${events.length}');
-        });
-      } else {
-        setState(() {
-          _isLoadingMore = false;
-        });
-      }
-    } catch (e) {
-      print('🔍 DEBUG: Exception in _loadMoreEvents: $e');
-      setState(() {
-        _isLoadingMore = false;
-      });
     }
   }
 
@@ -787,6 +751,14 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                     child: isLargeScreen ? _buildDesktopLayout() : _buildMobileLayout(),
                   ),
                   
+                  // Pagination for desktop view only
+                  if (isLargeScreen && !_isLoading && events.isNotEmpty)
+                    PaginationWidget(
+                      currentPage: _currentPage,
+                      totalPages: _totalPages,
+                      onPageChanged: _onPageChanged,
+                    ),
+                  
                   // Ad Placeholder 2 - Between Events Collection and Footer
                   _buildAdSenseContainer('2', Colors.green[50]),
                   
@@ -1155,20 +1127,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: filteredEvents.length + (_isLoadingMore ? 1 : 0),
+        itemCount: filteredEvents.length,
         itemBuilder: (context, index) {
-          if (index == filteredEvents.length) {
-            // Show loading indicator
-            return Center(
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: CircularProgressIndicator(
-                  color: AppColors.dubaiTeal,
-                ),
-              ),
-            );
-          }
-          
           final event = filteredEvents[index];
           return _buildEventCard(event)
               .animate()
@@ -1233,21 +1193,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             scrollDirection: Axis.horizontal,
             physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: filteredEvents.length + (_isLoadingMore ? 1 : 0),
+            itemCount: filteredEvents.length,
             itemBuilder: (context, index) {
-              if (index == filteredEvents.length) {
-                // Show loading indicator
-                return Container(
-                  width: 320, // Slightly wider cards
-                  margin: const EdgeInsets.only(right: 16),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.dubaiTeal,
-                    ),
-                  ),
-                );
-              }
-              
               final event = filteredEvents[index];
               return Container(
                 width: 320, // Increased width from 280 to 320 for more content space
@@ -1270,25 +1217,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             },
           ),
         ),
-        
-        // Load more indicator or end message
-        if (_hasMore && !_isLoadingMore)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: TextButton.icon(
-                onPressed: _loadMoreEvents,
-                icon: Icon(LucideIcons.moreHorizontal, color: AppColors.dubaiTeal),
-                label: Text(
-                  'Load More Events',
-                  style: GoogleFonts.inter(
-                    color: AppColors.dubaiTeal,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -1298,20 +1226,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
-      itemCount: filteredEvents.length + (_isLoadingMore ? 1 : 0),
+      itemCount: filteredEvents.length,
       itemBuilder: (context, index) {
-        if (index == filteredEvents.length) {
-          // Show loading indicator
-          return Center(
-            child: Container(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(
-                color: AppColors.dubaiTeal,
-              ),
-            ),
-          );
-        }
-        
         final event = filteredEvents[index];
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
