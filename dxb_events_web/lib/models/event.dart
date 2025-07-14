@@ -115,6 +115,10 @@ class Event {
   @JsonKey(name: 'ai_highlights')
   final List<String>? aiHighlights;
 
+  // New field for AI image flag
+  @JsonKey(name: 'has_ai_image')
+  final bool hasAiImage;
+
   const Event({
     required this.id,
     required this.title,
@@ -179,6 +183,7 @@ class Event {
     this.aiScore,
     this.aiReasoning,
     this.aiHighlights,
+    this.hasAiImage = false, // Default to false
   });
 
   // Use fromBackendApi instead of generated fromJson
@@ -274,6 +279,12 @@ class Event {
     final sourceData = sourceValue is Map<String, dynamic> ? sourceValue : null;
     final sourceName = sourceValue is String ? sourceValue : sourceData?['name'];
     
+    // Determine if the event has an AI-generated image
+    final imagesData = json['images'] as Map<String, dynamic>?;
+    final bool hasAiImage = imagesData != null && 
+                            imagesData['ai_generated'] != null && 
+                            (imagesData['ai_generated'] as String).isNotEmpty;
+
     final organizerInfo = OrganizerInfo(
       name: organizerData?['name'] ?? sourceName ?? json['source_name'] ?? 'Dubai Events',
       description: organizerData?['description'] ?? 'Verified event organizer',
@@ -464,6 +475,7 @@ class Event {
       aiScore: json['ai_score']?.toDouble(),
       aiReasoning: json['ai_reasoning'],
       aiHighlights: (json['ai_highlights'] as List<dynamic>?)?.cast<String>(),
+      hasAiImage: hasAiImage,
     );
   }
 

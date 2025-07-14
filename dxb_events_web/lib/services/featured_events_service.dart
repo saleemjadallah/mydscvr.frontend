@@ -296,6 +296,7 @@ class FeaturedEventsService {
       // Use the backend featured events endpoint (with enhanced algorithm)
       final response = await _eventsService.getFeaturedEventsFromBackend(
         limit: limit,
+        aiImagesOnly: true, // Fetch only events with AI images
       );
 
       print('🔄 FeaturedEventsService: Backend API response isSuccess: ${response.isSuccess}');

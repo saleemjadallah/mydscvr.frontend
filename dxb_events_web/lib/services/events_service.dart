@@ -544,14 +544,20 @@ class EventsService {
   }
 
   /// Get events for featured selection (using main events endpoint)
-  Future<ApiResponse<List<Event>>> getFeaturedEventsFromBackend({int limit = 12}) async {
+  Future<ApiResponse<List<Event>>> getFeaturedEventsFromBackend({
+    int limit = 12,
+    bool aiImagesOnly = false,
+  }) async {
     try {
-      print('🎯 Featured Events Backend: Calling /api/events/featured/list with limit=$limit');
+      print('🎯 Featured Events Backend: Calling /api/events/featured/list with limit=$limit and aiImagesOnly=$aiImagesOnly');
       
       // Call the backend featured events endpoint directly
       final response = await _dio.get(
         '/events/featured/list',
-        queryParameters: {'limit': limit},
+        queryParameters: {
+          'limit': limit,
+          'ai_images_only': aiImagesOnly,
+        },
       );
 
       if (response.statusCode == 200) {
