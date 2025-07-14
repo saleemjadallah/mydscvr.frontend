@@ -424,82 +424,92 @@ class EnhancedEventCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Date and time
-        Row(
-          children: [
-            Icon(
-              LucideIcons.calendar,
-              size: 16,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _formatEventDate(),
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
+        // Left Column: Date, Time, and Venue
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date and time
+              _buildDetailRow(
+                icon: LucideIcons.calendar,
+                text: _formatEventDate(),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              // Venue information
+              _buildDetailRow(
+                icon: LucideIcons.mapPin,
+                text: '${event.venue.name}, ${event.venue.area}',
+              ),
+            ],
+          ),
         ),
         
-        const SizedBox(height: 8),
-        
-        // Venue information
-        Row(
-          children: [
-            Icon(
-              LucideIcons.mapPin,
-              size: 16,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.venue.name,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '${event.venue.area}, Dubai',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Transportation badges
-            Row(
+        // Right Column: Transportation Badges (if available)
+        if (event.metroAccessible == true || event.venue.parkingAvailable)
+          Expanded(
+            flex: 2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (event.metroAccessible == true)
-                  Icon(
-                    LucideIcons.train,
-                    size: 16,
-                    color: AppColors.dubaiTeal,
-                  ),
+                  _buildTransportBadge(LucideIcons.train, 'METRO'),
                 if (event.venue.parkingAvailable)
-                  Icon(
-                    LucideIcons.car,
-                    size: 16,
-                    color: AppColors.dubaiGold,
-                  ),
+                  _buildTransportBadge(LucideIcons.car, 'PARKING'),
               ],
             ),
-          ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow({required IconData icon, required String text}) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTransportBadge(IconData icon, String label) {
+    return Container(
+      margin: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.borderLight, width: 1),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: AppColors.textSecondary),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -587,44 +597,51 @@ class EnhancedEventCard extends StatelessWidget {
 
   Widget _buildBottomSection(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // Price and family score
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              event.displayPrice,
-              style: GoogleFonts.comfortaa(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: event.isFree ? AppColors.dubaiTeal : AppColors.textPrimary,
+        // Left Column: Price and Family Score
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                event.displayPrice,
+                style: GoogleFonts.comfortaa(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: event.isFree ? AppColors.dubaiTeal : AppColors.textPrimary,
+                ),
               ),
-            ),
-            if (event.familyScore != null)
-              Row(
-                children: [
-                  Icon(
-                    LucideIcons.heart,
-                    size: 14,
-                    color: event.familyScoreColor,
+              if (event.familyScore != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        LucideIcons.heart,
+                        size: 14,
+                        color: event.familyScoreColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Family ${event.familyScore}%',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: event.familyScoreColor,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Family ${event.familyScore}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: event.familyScoreColor,
-                    ),
-                  ),
-                ],
-              ),
-          ],
+                ),
+            ],
+          ),
         ),
         
-        // Action buttons
+        // Right Column: Action Buttons
         Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             // Quality info button
             if (showQualityMetrics && event.qualityMetrics != null)
