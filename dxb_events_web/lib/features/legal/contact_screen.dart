@@ -349,7 +349,8 @@ class _ContactScreenState extends State<ContactScreen> with TickerProviderStateM
                   ),
                 ),
                 InkWell(
-                  onTap: onCopy,
+                  onTap:
+                   onCopy,
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
