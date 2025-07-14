@@ -42,9 +42,9 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/ai-search',
-      builder: (context, state) {
+      redirect: (context, state) {
         final query = state.uri.queryParameters['query'];
-        return AISearchScreen(initialQuery: query);
+        return '/super-search${query != null ? "?query=$query" : ""}';
       },
     ),
     GoRoute(

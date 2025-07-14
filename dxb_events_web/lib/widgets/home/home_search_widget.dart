@@ -330,7 +330,7 @@ class _HomeSearchWidgetState extends ConsumerState<HomeSearchWidget> {
 
   void _navigateToSearch(String query) {
     _removeOverlay();
-    context.go('/ai-search?query=${Uri.encodeComponent(query)}');
+    context.go('/super-search?query=${Uri.encodeComponent(query)}');
   }
 
   @override
@@ -377,7 +377,7 @@ class _HomeSearchWidgetState extends ConsumerState<HomeSearchWidget> {
           GestureDetector(
             onTap: () {
               _removeOverlay();
-              context.go('/ai-search');
+              context.go('/super-search');
             },
             child: Container(
               margin: const EdgeInsets.all(4),
