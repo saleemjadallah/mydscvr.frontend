@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/ai_search_provider.dart';
 import '../../models/ai_search.dart';
-import '../../widgets/events/event_card_simple.dart';
+import '../../widgets/events/enhanced_event_card.dart';
 
 class AISearchScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
@@ -360,7 +360,12 @@ class _AISearchScreenState extends ConsumerState<AISearchScreen> {
       ),
       child: Column(
         children: [
-          EventCardSimple(event: rankedEvent.event),
+          EnhancedEventCard(
+            event: rankedEvent.event,
+            showQualityMetrics: MediaQuery.of(context).size.width > 768,
+            showSocialMedia: MediaQuery.of(context).size.width > 480,
+            onTap: () => context.go('/event/${rankedEvent.event.id}'),
+          ),
           if (rankedEvent.reasoning != null) ...[
             Container(
               width: double.infinity,
