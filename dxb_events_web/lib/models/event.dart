@@ -354,16 +354,25 @@ class Event {
     }
 
     // Parse image URLs using permanent AI image storage priority system
-    // Priority: images.ai_generated > image_url > filtered image_urls (no OpenAI URLs)
+    // Priority: images.ai_generated > ai_image_url > image_url > filtered image_urls
     final List<String> imageUrls = [];
     final defaultImageUrl = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
     
-    // Check for permanent AI generated image first (highest priority)
-    if (imagesData != null && imagesData['ai_generated'] != null) {
+    // Highest priority: permanent AI generated image
+    final imagesData = json['images'] as Map<String, dynamic>?;
+    if (imagesData != null && imagesData['ai_generated'] != null && (imagesData['ai_generated'] as String).isNotEmpty) {
       imageUrls.add(imagesData['ai_generated'] as String);
     }
     
-    // Check for regular image_url field (second priority)
+    // Second priority: ai_image_url field
+    if (json['ai_image_url'] != null && json['ai_image_url'].toString().isNotEmpty) {
+      final aiImageUrl = json['ai_image_url'].toString();
+      if (!imageUrls.contains(aiImageUrl)) {
+        imageUrls.add(aiImageUrl);
+      }
+    }
+    
+    // Third priority: regular image_url field
     if (json['image_url'] != null && json['image_url'].toString().isNotEmpty) {
       final regularImageUrl = json['image_url'].toString();
       if (!imageUrls.contains(regularImageUrl)) {
@@ -371,7 +380,7 @@ class Event {
       }
     }
     
-    // Finally, add filtered image_urls array (exclude OpenAI DALL-E URLs to prevent CORS errors)
+    // Finally, add other images from image_urls array (excluding OpenAI URLs)
     final rawImageUrls = (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? <String>[];
     for (final url in rawImageUrls) {
       if (!url.contains('oaidalleapiprodscus.blob.core.windows.net') && !imageUrls.contains(url)) {
