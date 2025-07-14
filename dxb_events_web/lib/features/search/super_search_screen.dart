@@ -7,7 +7,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math';
 import '../../services/super_search_service.dart';
-import '../../widgets/events/event_card.dart';
+import '../../widgets/events/enhanced_event_card.dart';
 
 // State Management
 final searchQueryProvider = StateProvider<String>((ref) => '');
@@ -1622,7 +1622,7 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
               child: FadeInAnimation(
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  child: EventCard(
+                  child: EnhancedEventCard(
                     event: event,
                     onTap: () {
                       context.go('/event/${event.id}');
@@ -1634,6 +1634,111 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
           );
         }).toList(),
       ],
+    );
+  }
+  
+  Widget _buildResultsHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Found ${_searchResult!.total} results',
+            style: GoogleFonts.nunito(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: MyDscvrColors.textSecondary,
+            ),
+          ),
+          // Add sort/filter buttons here if needed
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildResultsGrid(List<Event> events) {
+    return AnimationLimiter(
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.7,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: events.length,
+        itemBuilder: (context, index) {
+          final event = events[index];
+          return AnimationConfiguration.staggeredGrid(
+            position: index,
+            duration: const Duration(milliseconds: 500),
+            columnCount: 2,
+            child: ScaleAnimation(
+              child: FadeInAnimation(
+                child: EnhancedEventCard(event: event),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+  
+  Widget _buildNoResults() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Icon(
+            LucideIcons.searchX,
+            size: 48,
+            color: MyDscvrColors.textSecondary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Events Found',
+            style: GoogleFonts.comfortaa(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: MyDscvrColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try searching with different keywords or explore our popular searches below.',
+            style: GoogleFonts.nunito(
+              fontSize: 14,
+              color: MyDscvrColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _showResults = false;
+                _searchController.clear();
+                ref.read(searchQueryProvider.notifier).state = '';
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MyDscvrColors.dubaiTeal,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Browse Popular Searches',
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
