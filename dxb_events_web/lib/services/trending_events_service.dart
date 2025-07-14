@@ -127,8 +127,7 @@ class TrendingEventsService {
     score += socialScore * _socialProofWeight;
 
     // Weekly randomization factor (small) to prevent same events always appearing
-    final weekSeed = _getWeeksSinceEpoch();
-    final randomFactor = Random(event.id.hashCode + weekSeed).nextDouble() * 5; // Max 5 points
+    final randomFactor = Random(event.id.hashCode + DateTime.now().millisecondsSinceEpoch).nextDouble() * 5; // Max 5 points
     score += randomFactor;
 
     return score.clamp(0.0, 100.0);
@@ -198,14 +197,29 @@ class TrendingEventsService {
 
   /// Generate realistic "interested" count based on trending score
   int _generateSimulatedInterestCount(Event event, double trendingScore) {
-    final weekSeed = _getWeeksSinceEpoch();
     // Use event ID hash to ensure each event gets a unique seed
     final eventSeed = event.id.hashCode.abs();
-    final random = Random(DateTime.now().millisecondsSinceEpoch + weekSeed + eventSeed);
+    final random = Random(DateTime.now().millisecondsSinceEpoch + eventSeed);
     
     // Vary range based on trending score for more realistic distribution
     int baseMin, baseMax;
     if (trendingScore >= 0.8) {
+      // High trending: 700-900 interested
+      baseMin = 70; baseMax = 90;
+    } else if (trendingScore >= 0.6) {
+      // Medium trending: 600-800 interested  
+      baseMin = 60; baseMax = 80;
+    } else {
+      // Lower trending: 500-700 interested
+      baseMin = 50; baseMax = 70;
+    }
+    
+    final range = baseMax - baseMin;
+    final baseCount = random.nextInt(range) + baseMin;
+    final total = baseCount * 10; // Results in multiples of 10
+    
+    return total;
+  }
       // High trending: 700-900 interested
       baseMin = 70; baseMax = 90;
     } else if (trendingScore >= 0.6) {
@@ -232,8 +246,7 @@ class TrendingEventsService {
     ];
     
     // Randomly select from the 3 options for new app realism
-    final weekSeed = _getWeeksSinceEpoch();
-    final random = Random(event.id.hashCode + weekSeed);
+    final random = Random(event.id.hashCode + DateTime.now().millisecondsSinceEpoch);
     final selectedIndex = random.nextInt(timeOptions.length);
     
     return timeOptions[selectedIndex];
