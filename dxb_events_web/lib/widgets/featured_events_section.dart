@@ -924,7 +924,7 @@ class FilteredEventsSheet extends StatelessWidget {
                       final event = events[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        child: EventCard(
+                        child: EventCardEnhanced(
                           event: event,
                           onTap: () {
                             Navigator.pop(context);
