@@ -33,37 +33,35 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
 
   void _registerViewFactory() {
     ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
-      final adContainer = html.DivElement()
-        ..id = 'adsterra-container-$viewId'
-        ..style.width = '${widget.width}px'
-        ..style.height = '${widget.height}px'
-        ..style.backgroundColor = '#f8f9fa'
-        ..style.border = '1px solid #dee2e6'
-        ..style.borderRadius = '8px'
-        ..style.display = 'flex'
-        ..style.alignItems = 'center'
-        ..style.justifyContent = 'center';
-
-      // Create script elements properly
-      final script1 = html.ScriptElement()
-        ..type = 'text/javascript'
-        ..text = '''
-          atOptions = {
+      final iframeElement = html.IFrameElement()
+        ..width = '${widget.width}'
+        ..height = '${widget.height}'
+        ..style.border = 'none'
+        ..srcdoc = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        atOptions = {
             'key' : '${widget.adKey}',
             'format' : 'iframe',
             'height' : ${widget.height},
             'width' : ${widget.width},
             'params' : {}
-          };
+        };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/${widget.adKey}/invoke.js"></script>
+</body>
+</html>
         ''';
 
-      final script2 = html.ScriptElement()
-        ..type = 'text/javascript'
-        ..src = '//www.highperformanceformat.com/${widget.adKey}/invoke.js';
-
-      adContainer.children.addAll([script1, script2]);
-
-      return adContainer;
+      return iframeElement;
     });
   }
 
@@ -106,13 +104,10 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
                 ),
               ],
             ),
-            child: Center(
-              child: SizedBox(
-                width: widget.width,
-                height: widget.height,
-                child: HtmlElementView(
-                  viewType: viewType,
-                ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+              child: HtmlElementView(
+                viewType: viewType,
               ),
             ),
           ),
