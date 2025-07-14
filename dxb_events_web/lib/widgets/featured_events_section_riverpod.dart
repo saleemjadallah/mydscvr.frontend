@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/event.dart';
 import '../services/providers/featured_events_provider.dart';
-import '../widgets/events/event_card_enhanced.dart';
+import '../widgets/events/enhanced_event_card.dart';
 import '../core/constants/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
@@ -396,7 +396,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildEventCard(Event event, int index) {
-    return EventCardEnhanced(
+    return EnhancedEventCard(
       event: event,
       onTap: () {
         widget.onEventTap?.call(event);
@@ -632,7 +632,7 @@ class FilteredEventsSheet extends StatelessWidget {
                       final event = events[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        child: EventCardEnhanced(
+                        child: EnhancedEventCard(
                           event: event,
                           onTap: () {
                             Navigator.pop(context);

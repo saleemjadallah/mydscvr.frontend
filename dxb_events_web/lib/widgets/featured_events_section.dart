@@ -10,7 +10,7 @@ import '../core/constants/app_colors.dart';
 import '../models/event.dart';
 import '../services/events_service.dart';
 import '../models/api_response.dart';
-import '../widgets/events/event_card_enhanced.dart';
+import '../widgets/events/enhanced_event_card.dart';
 import '../core/animations/fade_in_slide_up.dart';
 import '../core/theme/app_text_styles.dart';
 import '../providers/featured_events_provider.dart';
@@ -786,7 +786,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
       tag: 'featured_event_${event.id}',
       child: GestureDetector(
         onTap: () => widget.onEventTap?.call(event),
-        child: EventCardEnhanced(
+        child: EnhancedEventCard(
           event: event,
           onTap: () => widget.onEventTap?.call(event),
         ),
@@ -924,7 +924,7 @@ class FilteredEventsSheet extends StatelessWidget {
                       final event = events[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        child: EventCardEnhanced(
+                        child: EnhancedEventCard(
                           event: event,
                           onTap: () {
                             Navigator.pop(context);
