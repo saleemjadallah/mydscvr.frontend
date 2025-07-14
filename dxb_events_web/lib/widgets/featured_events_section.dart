@@ -278,27 +278,38 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   Widget _buildUniversalCarousel(BuildContext context, List<Event> events, double screenWidth) {
     if (events.isEmpty) return const SizedBox.shrink();
     
-    // Determine optimal height based on screen size
+    // Determine optimal height and viewport fraction based on screen size
     double carouselHeight;
     EdgeInsets cardMargin;
+    double viewportFraction;
     
     if (screenWidth <= 480) {
-      // Mobile phones
+      // Mobile phones - show 1 card
       carouselHeight = 500;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 12);
+      cardMargin = const EdgeInsets.symmetric(horizontal: 8);
+      viewportFraction = 0.9;
     } else if (screenWidth <= 768) {
-      // Tablets and small screens
+      // Tablets and small screens - show 1.5 cards
       carouselHeight = 550;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
+      cardMargin = const EdgeInsets.symmetric(horizontal: 12);
+      viewportFraction = 0.7;
     } else if (screenWidth <= 1200) {
-      // Medium screens
+      // Medium screens - show 2 cards
       carouselHeight = 600;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 20);
+      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
+      viewportFraction = 0.5;
     } else {
-      // Large screens
+      // Large screens - show 2.5 to 3 cards
       carouselHeight = 650;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 24);
+      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
+      viewportFraction = 0.35; // Shows about 2.5-3 cards
     }
+    
+    // Create PageController with viewport fraction
+    _pageController = PageController(
+      viewportFraction: viewportFraction,
+      initialPage: _currentIndex,
+    );
     
     return Container(
       height: carouselHeight,

@@ -220,22 +220,6 @@ class TrendingEventsService {
     
     return total;
   }
-      // High trending: 700-900 interested
-      baseMin = 70; baseMax = 90;
-    } else if (trendingScore >= 0.6) {
-      // Medium trending: 600-800 interested  
-      baseMin = 60; baseMax = 80;
-    } else {
-      // Lower trending: 500-700 interested
-      baseMin = 50; baseMax = 70;
-    }
-    
-    final range = baseMax - baseMin;
-    final baseCount = random.nextInt(range) + baseMin;
-    final total = baseCount * 10; // Results in multiples of 10
-    
-    return total;
-  }
 
   /// Generate realistic "time ago" based on event and score
   String _generateSimulatedTimeAgo(Event event, double trendingScore) {
