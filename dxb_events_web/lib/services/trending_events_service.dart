@@ -83,13 +83,26 @@ class TrendingEventsService {
       // Sort by trending score descending
       scoredEvents.sort((a, b) => b.trendingScore.compareTo(a.trendingScore));
       
-      // Update weekly ranks after sorting
-      for (int i = 0; i < scoredEvents.length; i++) {
-        scoredEvents[i] = scoredEvents[i].copyWith(weeklyRank: i + 1);
+      // NEW: Rotate the top events for variability on each load
+      final topCount = (limit * 3).clamp(3, scoredEvents.length);
+      var topEvents = scoredEvents.take(topCount).toList();
+      
+      // Rotate based on current minute for per-session changes
+      final now = DateTime.now();
+      final rotationOffset = (now.minute + now.second) % topEvents.length;
+      
+      final rotated = topEvents.sublist(rotationOffset) + topEvents.sublist(0, rotationOffset);
+      
+      // Take the first 'limit' from rotated list
+      final selectedEvents = rotated.take(limit).toList();
+      
+      // Update ranks
+      for (int i = 0; i < selectedEvents.length; i++) {
+        selectedEvents[i] = selectedEvents[i].copyWith(weeklyRank: i + 1);
       }
       
-      // Take top events with some diversity
-      final selectedEvents = _applyDiversityRules(scoredEvents, limit);
+      // Apply diversity if needed
+      // final selectedEvents = _applyDiversityRules(rotatedScoredEvents, limit);
       
       print('🔥 TrendingEventsService: Top 5 trending events:');
       for (int i = 0; i < 5 && i < selectedEvents.length; i++) {
