@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
 import '../models/event.dart';
@@ -12,6 +13,7 @@ import '../models/api_response.dart';
 import '../widgets/events/event_card_enhanced.dart';
 import '../core/animations/fade_in_slide_up.dart';
 import '../core/theme/app_text_styles.dart';
+import '../providers/featured_events_provider.dart';
 
 /// Featured Events section for the homepage
 class FeaturedEventsSection extends ConsumerStatefulWidget {
@@ -784,7 +786,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
       tag: 'featured_event_${event.id}',
       child: GestureDetector(
         onTap: () => widget.onEventTap?.call(event),
-        child: EventCard(
+        child: EventCardEnhanced(
           event: event,
           onTap: () => widget.onEventTap?.call(event),
         ),
