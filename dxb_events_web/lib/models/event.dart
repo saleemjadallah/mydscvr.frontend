@@ -343,7 +343,7 @@ class Event {
     }
 
     // Parse image URLs using permanent AI image storage priority system
-    // Priority: images.ai_generated > ai_image_url > image_url > filtered image_urls (no OpenAI URLs)
+    // Priority: images.ai_generated > image_url > filtered image_urls (no OpenAI URLs)
     final List<String> imageUrls = [];
     final defaultImageUrl = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
     
@@ -353,15 +353,7 @@ class Event {
       imageUrls.add(imagesData['ai_generated'] as String);
     }
     
-    // Check for legacy ai_image_url field (second priority)
-    if (json['ai_image_url'] != null && json['ai_image_url'].toString().isNotEmpty) {
-      final aiImageUrl = json['ai_image_url'].toString();
-      if (!imageUrls.contains(aiImageUrl)) {
-        imageUrls.add(aiImageUrl);
-      }
-    }
-    
-    // Check for regular image_url field (third priority)
+    // Check for regular image_url field (second priority)
     if (json['image_url'] != null && json['image_url'].toString().isNotEmpty) {
       final regularImageUrl = json['image_url'].toString();
       if (!imageUrls.contains(regularImageUrl)) {
