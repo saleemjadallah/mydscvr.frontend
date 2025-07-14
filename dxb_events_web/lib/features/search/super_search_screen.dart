@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:math';
 import '../../services/super_search_service.dart';
 import '../../widgets/events/enhanced_event_card.dart';
+import '../../models/event.dart';
 
 // State Management
 final searchQueryProvider = StateProvider<String>((ref) => '');
