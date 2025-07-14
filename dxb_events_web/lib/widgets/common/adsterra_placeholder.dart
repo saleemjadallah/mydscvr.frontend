@@ -27,20 +27,27 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
   @override
   void initState() {
     super.initState();
-    viewType = 'adsterra-banner-${widget.adKey}';
+    viewType = 'adsterra-banner-${widget.adKey}-${DateTime.now().millisecondsSinceEpoch}';
     _registerViewFactory();
   }
 
   void _registerViewFactory() {
     ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final adContainer = html.DivElement()
-        ..id = 'adsterra-container-${widget.adKey}'
-        ..style.width = '100%'
-        ..style.height = '100%';
+        ..id = 'adsterra-container-$viewId'
+        ..style.width = '${widget.width}px'
+        ..style.height = '${widget.height}px'
+        ..style.backgroundColor = '#f8f9fa'
+        ..style.border = '1px solid #dee2e6'
+        ..style.borderRadius = '8px'
+        ..style.display = 'flex'
+        ..style.alignItems = 'center'
+        ..style.justifyContent = 'center';
 
+      // Create script elements properly
       final script1 = html.ScriptElement()
         ..type = 'text/javascript'
-        ..innerHtml = """
+        ..text = '''
           atOptions = {
             'key' : '${widget.adKey}',
             'format' : 'iframe',
@@ -48,13 +55,14 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
             'width' : ${widget.width},
             'params' : {}
           };
-        """;
+        ''';
 
       final script2 = html.ScriptElement()
         ..type = 'text/javascript'
         ..src = '//www.highperformanceformat.com/${widget.adKey}/invoke.js';
 
       adContainer.children.addAll([script1, script2]);
+
       return adContainer;
     });
   }
@@ -84,7 +92,7 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
             ),
           ),
           Container(
-            width: widget.width,
+            width: double.infinity,
             height: widget.height,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -98,8 +106,14 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
                 ),
               ],
             ),
-            child: HtmlElementView(
-              viewType: viewType,
+            child: Center(
+              child: SizedBox(
+                width: widget.width,
+                height: widget.height,
+                child: HtmlElementView(
+                  viewType: viewType,
+                ),
+              ),
             ),
           ),
         ],
