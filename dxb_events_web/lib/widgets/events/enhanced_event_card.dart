@@ -421,7 +421,7 @@ class EnhancedEventCard extends StatelessWidget {
   }
 
   Widget _buildVenueSection() {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Left Column: Date, Time, and Venue
@@ -430,13 +430,11 @@ class EnhancedEventCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date and time
               _buildDetailRow(
                 icon: LucideIcons.calendar,
                 text: _formatEventDate(),
               ),
               const SizedBox(height: 8),
-              // Venue information
               _buildDetailRow(
                 icon: LucideIcons.mapPin,
                 text: '${event.venue.name}, ${event.venue.area}',
@@ -445,7 +443,7 @@ class EnhancedEventCard extends StatelessWidget {
           ),
         ),
         
-        // Right Column: Transportation Badges (if available)
+        // Right Column: Transportation Badges
         if (event.metroAccessible == true || event.venue.parkingAvailable)
           Expanded(
             flex: 2,
@@ -601,6 +599,7 @@ class EnhancedEventCard extends StatelessWidget {
       children: [
         // Left Column: Price and Family Score
         Expanded(
+          flex: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -640,51 +639,54 @@ class EnhancedEventCard extends StatelessWidget {
         ),
         
         // Right Column: Action Buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            // Quality info button
-            if (showQualityMetrics && event.qualityMetrics != null)
-              IconButton(
-                onPressed: () => _showQualityInfo(context),
-                icon: Icon(
-                  LucideIcons.info,
-                  size: 20,
-                  color: AppColors.textSecondary,
+        Expanded(
+          flex: 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // Quality info button
+              if (showQualityMetrics && event.qualityMetrics != null)
+                IconButton(
+                  onPressed: () => _showQualityInfo(context),
+                  icon: Icon(
+                    LucideIcons.info,
+                    size: 20,
+                    color: AppColors.textSecondary,
+                  ),
+                  tooltip: 'Quality Info',
                 ),
-                tooltip: 'Quality Info',
-              ),
-            
-            // Book/Details button
-            ElevatedButton(
-              onPressed: () => _navigateToDetails(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.dubaiTeal,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+              
+              // Book/Details button
+              ElevatedButton(
+                onPressed: () => _navigateToDetails(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.dubaiTeal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'View More',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View More',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    LucideIcons.arrowRight,
-                    size: 14,
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Icon(
+                      LucideIcons.arrowRight,
+                      size: 14,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
