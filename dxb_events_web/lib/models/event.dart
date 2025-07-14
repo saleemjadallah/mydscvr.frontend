@@ -359,7 +359,6 @@ class Event {
     final defaultImageUrl = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
     
     // Check for permanent AI generated image first (highest priority)
-    final imagesData = json['images'] as Map<String, dynamic>?;
     if (imagesData != null && imagesData['ai_generated'] != null) {
       imageUrls.add(imagesData['ai_generated'] as String);
     }
