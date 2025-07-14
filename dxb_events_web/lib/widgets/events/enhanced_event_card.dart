@@ -653,7 +653,7 @@ class EnhancedEventCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    event.eventUrl != null ? 'Book Now' : 'View Details',
+                    'View More',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -661,7 +661,7 @@ class EnhancedEventCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    event.eventUrl != null ? LucideIcons.externalLink : LucideIcons.arrowRight,
+                    LucideIcons.arrowRight,
                     size: 14,
                   ),
                 ],
