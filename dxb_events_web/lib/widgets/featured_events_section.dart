@@ -263,13 +263,8 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
         _buildQuickFilters(provider),
         const SizedBox(height: 16),
         
-        // Events display - carousel for mobile, grid for larger screens
-        if (isMobile) 
-          _buildMobileCarousel(context, events)
-        else if (isTablet)
-          _buildTabletGrid(context, events)
-        else
-          _buildDesktopGrid(context, events),
+        // Events display - universal carousel for all screen sizes
+        _buildUniversalCarousel(context, events, screenWidth),
         
         // Load more button if there are more events
         if (provider.featuredEvents.length > widget.maxEventsToShow) ...[
@@ -277,6 +272,135 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
           _buildViewAllButton(context),
         ],
       ],
+    );
+  }
+
+  Widget _buildUniversalCarousel(BuildContext context, List<Event> events, double screenWidth) {
+    if (events.isEmpty) return const SizedBox.shrink();
+    
+    // Determine optimal height based on screen size
+    double carouselHeight;
+    EdgeInsets cardMargin;
+    
+    if (screenWidth <= 480) {
+      // Mobile phones
+      carouselHeight = 500;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 12);
+    } else if (screenWidth <= 768) {
+      // Tablets and small screens
+      carouselHeight = 550;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
+    } else if (screenWidth <= 1200) {
+      // Medium screens
+      carouselHeight = 600;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 20);
+    } else {
+      // Large screens
+      carouselHeight = 650;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 24);
+    }
+    
+    return Container(
+      height: carouselHeight,
+      child: Column(
+        children: [
+          // Main carousel
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: cardMargin,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: EnhancedEventCard(
+                      event: events[index],
+                      showQualityMetrics: screenWidth > 768, // Hide quality metrics on small screens
+                      showSocialMedia: screenWidth > 480, // Hide social media on very small screens
+                      onTap: () => widget.onEventTap?.call(events[index]),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Navigation controls and progress indicator
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Previous button
+              IconButton(
+                onPressed: _currentIndex > 0 
+                    ? () => _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      )
+                    : null,
+                icon: Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: _currentIndex > 0 
+                      ? AppColors.dubaiTeal 
+                      : AppColors.textTertiary,
+                ),
+              ),
+              
+              // Progress indicators
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    events.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 8,
+                      width: index == _currentIndex ? 24 : 8,
+                      decoration: BoxDecoration(
+                        color: index == _currentIndex 
+                            ? AppColors.dubaiTeal 
+                            : AppColors.textTertiary.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ).take(10).toList(), // Limit to 10 indicators
+                ),
+              ),
+              
+              // Next button
+              IconButton(
+                onPressed: _currentIndex < events.length - 1 
+                    ? () => _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      )
+                    : null,
+                icon: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: _currentIndex < events.length - 1 
+                      ? AppColors.dubaiTeal 
+                      : AppColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
+          
+          // Counter
+          Text(
+            '${_currentIndex + 1} of ${events.length}',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
