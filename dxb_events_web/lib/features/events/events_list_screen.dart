@@ -25,6 +25,7 @@ import '../../widgets/common/glassmorphic_background.dart';
 import '../../widgets/common/footer.dart';
 import '../event_details/event_details_screen.dart';
 import '../../widgets/pagination_widget.dart';
+import '../../widgets/search/super_search_button.dart';
 
 class EventsListScreen extends ConsumerStatefulWidget {
   final String? initialCategory;
@@ -596,6 +597,11 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                       ),
                       
                       SizedBox(width: isMobile ? 8 : 12),
+                      
+                      // Super Search Button
+                      const SizedBox(width: 12),
+                      const SuperSearchButtonCompact(),
+                      const SizedBox(width: 12),
                       
                       // Advanced Filter button
                       Material(

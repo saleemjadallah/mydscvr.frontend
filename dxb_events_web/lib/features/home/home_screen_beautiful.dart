@@ -15,6 +15,7 @@ import '../../widgets/home/weekend_highlights.dart';
 import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/home/hidden_gem_card.dart';
 import '../../core/animations/animations.dart';
+import '../../widgets/search/super_search_button.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -294,6 +295,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
         ],
       ),
+      floatingActionButton: MediaQuery.of(context).size.width <= 600 
+          ? const SuperSearchFAB()
+          : null,
     );
   }
 
@@ -361,6 +365,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ),
       ),
       actions: [
+        // Super Search Button
+        const SuperSearchButtonCompact(),
+        const SizedBox(width: 8),
         // Family Friendly Indicator
         _buildFamilyFriendlyIndicator(),
         // Favorites Icon (for authenticated users)
