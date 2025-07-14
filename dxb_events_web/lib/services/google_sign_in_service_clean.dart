@@ -19,14 +19,26 @@ class GoogleSignInServiceClean {
     // Initialization logic if needed
   }
   
-  /// Sign in with Google
-  Future<GoogleSignInAccount?> signInWithGoogle() async {
+  /// Sign in with Google and return auth data as Map
+  Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
       if (account != null) {
         // Get authentication details
         final GoogleSignInAuthentication auth = await account.authentication;
-        return account;
+        
+        // Return data in the format expected by auth provider
+        return {
+          'access_token': auth.accessToken,
+          'refresh_token': auth.idToken, // Using idToken as refresh token
+          'session_token': auth.idToken,
+          'user': {
+            'id': account.id,
+            'email': account.email,
+            'name': account.displayName ?? '',
+            'photoUrl': account.photoUrl,
+          }
+        };
       }
       return null;
     } catch (e) {

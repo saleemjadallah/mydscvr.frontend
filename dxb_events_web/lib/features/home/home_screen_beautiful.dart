@@ -759,7 +759,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const SimpleHomeSearchWidget(),
+                          child: const HomeSearchWidget(),
                         ),
                       ),
                     ).animate(

@@ -20,7 +20,8 @@ class EventCardSimple extends StatelessWidget {
     return EventCard(
       event: event,
       onTap: onTap,
-      showSaveButton: showSaveButton,
+      // showSaveButton parameter doesn't exist in EventCard
+      // The save functionality is handled internally by EventCard
     );
   }
 }
