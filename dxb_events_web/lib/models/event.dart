@@ -342,10 +342,46 @@ class Event {
       }
     }
 
-    // Parse image URLs - handle array of URLs
-    final imageUrls = (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? <String>[];
+    // Parse image URLs using permanent AI image storage priority system
+    // Priority: images.ai_generated > ai_image_url > image_url > filtered image_urls (no OpenAI URLs)
+    final List<String> imageUrls = [];
     final defaultImageUrl = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
+    
+    // Check for permanent AI generated image first (highest priority)
+    final imagesData = json['images'] as Map<String, dynamic>?;
+    if (imagesData != null && imagesData['ai_generated'] != null) {
+      imageUrls.add(imagesData['ai_generated'] as String);
+    }
+    
+    // Check for legacy ai_image_url field (second priority)
+    if (json['ai_image_url'] != null && json['ai_image_url'].toString().isNotEmpty) {
+      final aiImageUrl = json['ai_image_url'].toString();
+      if (!imageUrls.contains(aiImageUrl)) {
+        imageUrls.add(aiImageUrl);
+      }
+    }
+    
+    // Check for regular image_url field (third priority)
+    if (json['image_url'] != null && json['image_url'].toString().isNotEmpty) {
+      final regularImageUrl = json['image_url'].toString();
+      if (!imageUrls.contains(regularImageUrl)) {
+        imageUrls.add(regularImageUrl);
+      }
+    }
+    
+    // Finally, add filtered image_urls array (exclude OpenAI DALL-E URLs to prevent CORS errors)
+    final rawImageUrls = (json['image_urls'] as List<dynamic>?)?.cast<String>() ?? <String>[];
+    for (final url in rawImageUrls) {
+      if (!url.contains('oaidalleapiprodscus.blob.core.windows.net') && !imageUrls.contains(url)) {
+        imageUrls.add(url);
+      }
+    }
+    
+    // Use default if no valid images found
     final imageUrl = imageUrls.isNotEmpty ? imageUrls.first : defaultImageUrl;
+    if (imageUrls.isEmpty) {
+      imageUrls.add(defaultImageUrl);
+    }
 
     // Parse social media links
     final socialMediaData = json['social_media'] as Map<String, dynamic>?;
