@@ -475,7 +475,7 @@ class EventsService {
   Future<ApiResponse<List<Event>>> getFirecrawlEvents({
     int limit = 20,
     String? area,
-    String sortBy = 'trending_score',
+    String sortBy = 'start_date',
   }) async {
     try {
       final queryParams = <String, dynamic>{

@@ -25,9 +25,13 @@ class EnhancedEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 480;
+    final isTablet = screenWidth <= 768;
+    
     return Card(
-      elevation: 8,
-      margin: const EdgeInsets.all(8),
+      elevation: isMobile ? 4 : 8,
+      margin: EdgeInsets.all(isMobile ? 4 : 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -38,38 +42,39 @@ class EnhancedEventCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Event Image with Quality Badge
-            _buildImageSection(),
+            _buildImageSection(context),
             
             // Event Content
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isMobile ? 12 : 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Title and Category
-                    _buildTitleSection(),
+                    _buildTitleSection(context),
                     
-                    const SizedBox(height: 8),
+                    SizedBox(height: isMobile ? 4 : 8),
                     
                     // Enhanced Description
-                    _buildDescriptionSection(),
+                    _buildDescriptionSection(context),
                     
-                    const SizedBox(height: 12),
+                    SizedBox(height: isMobile ? 6 : 12),
                     
-                    // Event Details Row
+                    // Event Details Row - simplified on mobile
                     _buildEventDetailsRow(),
                     
-                    const SizedBox(height: 12),
+                    // Venue section - only show on larger screens
+                    if (!isMobile) ...[
+                      const SizedBox(height: 12),
+                      _buildVenueSection(),
+                    ],
                     
-                    // Venue and Transportation
-                    _buildVenueSection(),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Social Media Links (if available)
-                    if (showSocialMedia && event.socialMedia?.hasAnyLinks == true)
+                    // Social Media Links - hide on mobile and tablet
+                    if (showSocialMedia && !isTablet && event.socialMedia?.hasAnyLinks == true) ...[
+                      const SizedBox(height: 12),
                       _buildSocialMediaSection(),
+                    ],
                     
                     const Spacer(),
                     
@@ -85,9 +90,12 @@ class EnhancedEventCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection() {
+  Widget _buildImageSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 480;
+    
     return Container(
-      height: 180,
+      height: isMobile ? 140 : 180,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -239,14 +247,20 @@ class EnhancedEventCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTitleSection() {
+  Widget _buildTitleSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 480;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Category chip
+        // Category chip - smaller on mobile
         if (event.primaryCategory != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 6 : 8, 
+              vertical: isMobile ? 2 : 4
+            ),
             decoration: BoxDecoration(
               color: AppColors.dubaiCoral.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -258,43 +272,51 @@ class EnhancedEventCard extends StatelessWidget {
             child: Text(
               event.primaryCategory!.replaceAll('_', ' ').toUpperCase(),
               style: GoogleFonts.inter(
-                fontSize: 10,
+                fontSize: isMobile ? 9 : 10,
                 fontWeight: FontWeight.w600,
                 color: AppColors.dubaiCoral,
               ),
             ),
           ),
         
-        const SizedBox(height: 8),
+        SizedBox(height: isMobile ? 4 : 8),
         
-        // Event Title
+        // Event Title - single line on mobile
         Text(
           event.title,
           style: GoogleFonts.comfortaa(
-            fontSize: 18,
+            fontSize: isMobile ? 14 : 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
             height: 1.2,
           ),
-          maxLines: 2,
+          maxLines: isMobile ? 1 : 2,
           overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 
-  Widget _buildDescriptionSection() {
+  Widget _buildDescriptionSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 480;
+    
     // Use AI summary if available, otherwise description
     String displayText = event.aiSummary ?? event.description;
+    
+    // Skip description on very small screens to save space
+    if (isMobile && screenWidth <= 380) {
+      return const SizedBox.shrink();
+    }
     
     return Text(
       displayText,
       style: GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: isMobile ? 12 : 14,
         color: AppColors.textSecondary,
-        height: 1.4,
+        height: 1.3,
       ),
-      maxLines: 3,
+      maxLines: isMobile ? 2 : 3,
       overflow: TextOverflow.ellipsis,
     );
   }
