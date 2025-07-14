@@ -319,6 +319,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
           Expanded(
             child: PageView.builder(
               controller: _pageController,
+              padEnds: false, // Prevent padding at the beginning and end
               onPageChanged: (index) {
                 setState(() {
                   _currentIndex = index;

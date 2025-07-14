@@ -34,7 +34,8 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   void initState() {
     super.initState();
     // Initialize page controller with default viewport fraction
-    _pageController = PageController(viewportFraction: 0.85);
+    // Start with a common default that will be updated based on screen size
+    _pageController = PageController(viewportFraction: 0.35);
     
     // Load featured events only if not already loaded to prevent infinite loops
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -496,6 +497,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
           Expanded(
             child: PageView.builder(
               controller: _pageController,
+              padEnds: false, // Prevent padding at the beginning and end
               onPageChanged: (index) {
                 setState(() {
                   _currentPage = index;
