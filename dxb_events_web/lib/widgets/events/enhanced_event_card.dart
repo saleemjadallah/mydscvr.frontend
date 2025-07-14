@@ -70,12 +70,6 @@ class EnhancedEventCard extends StatelessWidget {
                       _buildVenueSection(),
                     ],
                     
-                    // Social Media Links - hide on mobile and tablet
-                    if (showSocialMedia && !isTablet && event.socialMedia?.hasAnyLinks == true) ...[
-                      const SizedBox(height: 12),
-                      _buildSocialMediaSection(),
-                    ],
-                    
                     const Spacer(),
                     
                     // Bottom section with price and actions
@@ -528,6 +522,7 @@ class EnhancedEventCard extends StatelessWidget {
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
+          alignment: WrapAlignment.end,
           children: [
             if (socialMedia.instagram != null)
               _buildSocialButton(
@@ -561,7 +556,6 @@ class EnhancedEventCard extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 12),
       ],
     );
   }
@@ -594,100 +588,102 @@ class EnhancedEventCard extends StatelessWidget {
   }
 
   Widget _buildBottomSection(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width <= 768;
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // Left Column: Price and Family Score
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                event.displayPrice,
-                style: GoogleFonts.comfortaa(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: event.isFree ? AppColors.dubaiTeal : AppColors.textPrimary,
-                ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              event.displayPrice,
+              style: GoogleFonts.comfortaa(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: event.isFree ? AppColors.dubaiTeal : AppColors.textPrimary,
               ),
-              if (event.familyScore != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.heart,
-                        size: 14,
-                        color: event.familyScoreColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Family ${event.familyScore}%',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: event.familyScoreColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        
-        // Right Column: Action Buttons
-        Expanded(
-          flex: 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // Quality info button
-              if (showQualityMetrics && event.qualityMetrics != null)
-                IconButton(
-                  onPressed: () => _showQualityInfo(context),
-                  icon: Icon(
-                    LucideIcons.info,
-                    size: 20,
-                    color: AppColors.textSecondary,
-                  ),
-                  tooltip: 'Quality Info',
-                ),
-              
-              // Book/Details button
-              ElevatedButton(
-                onPressed: () => _navigateToDetails(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.dubaiTeal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+            ),
+            if (event.familyScore != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Icon(
+                      LucideIcons.heart,
+                      size: 14,
+                      color: event.familyScoreColor,
+                    ),
+                    const SizedBox(width: 4),
                     Text(
-                      'View More',
+                      'Family ${event.familyScore}%',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
+                        color: event.familyScoreColor,
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      LucideIcons.arrowRight,
-                      size: 14,
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+          ],
         ),
+        
+        // Right Column: Social links and Action Buttons
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (showSocialMedia && !isTablet && event.socialMedia?.hasAnyLinks == true)
+              _buildSocialMediaSection(),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                // Quality info button
+                if (showQualityMetrics && event.qualityMetrics != null)
+                  IconButton(
+                    onPressed: () => _showQualityInfo(context),
+                    icon: Icon(
+                      LucideIcons.info,
+                      size: 20,
+                      color: AppColors.textSecondary,
+                    ),
+                    tooltip: 'Quality Info',
+                  ),
+                
+                // Book/Details button
+                ElevatedButton(
+                  onPressed: () => _navigateToDetails(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.dubaiTeal,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'View More',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        LucideIcons.arrowRight,
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        )
       ],
     );
   }
