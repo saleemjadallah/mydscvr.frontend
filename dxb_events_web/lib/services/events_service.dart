@@ -481,6 +481,7 @@ class EventsService {
       final queryParams = <String, dynamic>{
         'limit': limit,
         'sort_by': sortBy,
+        '_': DateTime.now().millisecondsSinceEpoch.toString(),
       };
       
       if (area != null) {
