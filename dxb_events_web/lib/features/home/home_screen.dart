@@ -2928,4 +2928,4 @@ class ShimmerEventCard extends StatelessWidget {
         ],
       ),
     );
-  } 
+  } }
