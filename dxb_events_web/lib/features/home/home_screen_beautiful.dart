@@ -209,9 +209,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: const Duration(milliseconds: 200),
-              child: const FeaturedEventsSection(
+              child: FeaturedEventsSection(
                 showHeader: true,
                 maxEventsToShow: 8,
+                onEventTap: (event) {
+                  // Navigate to event details page
+                  context.go('/event/${event.id}');
+                },
               ),
             ),
           ),
