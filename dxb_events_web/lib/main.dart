@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 // Feature imports
-import 'features/home/home_screen.dart';
+import 'features/home/home_screen_beautiful.dart';
 import 'features/events/events_list_screen.dart';
 import 'features/event_details/event_details_screen.dart';
 import 'features/search/ai_search_screen.dart';
@@ -29,7 +29,7 @@ final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) => const BeautifulHomeScreen(),
     ),
     GoRoute(
       path: '/events',
