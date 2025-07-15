@@ -394,6 +394,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     final isMobile = screenWidth <= 800;
 
     return Scaffold(
+      floatingActionButton: const SuperSearchFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Column(
         children: [
           // Header with navigation and controls

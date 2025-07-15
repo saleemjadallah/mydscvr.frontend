@@ -296,9 +296,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
         ],
       ),
-      floatingActionButton: MediaQuery.of(context).size.width <= 600 
-          ? const SuperSearchFAB()
-          : null,
+      floatingActionButton: const SuperSearchFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -366,9 +365,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         ),
       ),
       actions: [
-        // Super Search Button
-        const SuperSearchButtonCompact(),
-        const SizedBox(width: 8),
+        // Super Search Button - only show on desktop
+        if (screenWidth > 600) ...[
+          const SuperSearchButtonCompact(),
+          const SizedBox(width: 8),
+        ],
         // Family Friendly Indicator
         _buildFamilyFriendlyIndicator(),
         // Favorites Icon (for authenticated users)
