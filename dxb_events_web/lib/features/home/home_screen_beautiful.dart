@@ -16,7 +16,7 @@ import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/home/hidden_gem_card.dart';
 import '../../core/animations/animations.dart';
 import '../../widgets/search/super_search_button.dart';
-import '../../widgets/common/adsterra_final_banner.dart';
+import '../../widgets/common/adsterra_cross_platform.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -224,7 +224,17 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 1 - Between Featured Events and Hidden Gem
           SliverToBoxAdapter(
-            child: AdsterraFinalBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraAd(
+              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+              width: 300,
+              height: 250,
+              onAdLoaded: () {
+                print('Ad loaded successfully');
+              },
+              onAdFailed: () {
+                print('Ad failed to load');
+              },
+            ),
           ),
           
           // Hidden Gem - Using actual component
@@ -240,7 +250,17 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 2 - Between Hidden Gem and Categories
           SliverToBoxAdapter(
-            child: AdsterraFinalBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraAd(
+              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+              width: 300,
+              height: 250,
+              onAdLoaded: () {
+                print('Ad loaded successfully');
+              },
+              onAdFailed: () {
+                print('Ad failed to load');
+              },
+            ),
           ),
           
           // Categories Section - Using actual component
@@ -269,7 +289,17 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
           SliverToBoxAdapter(
-            child: AdsterraFinalBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraAd(
+              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+              width: 300,
+              height: 250,
+              onAdLoaded: () {
+                print('Ad loaded successfully');
+              },
+              onAdFailed: () {
+                print('Ad failed to load');
+              },
+            ),
           ),
           
           // MyDscvr's Choice Section - Final solution
@@ -284,7 +314,17 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 4 - Between Explore All Events and Footer
           SliverToBoxAdapter(
-            child: AdsterraFinalBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraAd(
+              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+              width: 300,
+              height: 250,
+              onAdLoaded: () {
+                print('Ad loaded successfully');
+              },
+              onAdFailed: () {
+                print('Ad failed to load');
+              },
+            ),
           ),
           
           // Footer
