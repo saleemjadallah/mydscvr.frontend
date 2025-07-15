@@ -341,69 +341,85 @@
     });
     
     // Native Banner Ad Management
-    let nativeBannerReloadFunction = null;
     let nativeBannerLoaded = false;
-    let reloadCheckInterval = null;
+    let adScriptLoaded = false;
+    const adKey = 'e1bd304e9b4f790ab61f30e117275a37';
+    const adScriptUrl = '//pl27139224.profitableratecpm.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js';
     
-    // Function to initialize and get reload function
-    function initializeNativeBanner() {
-      const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37');
+    // Function to recreate the ad container and reload the ad
+    function reloadNativeBanner() {
+      const bannerContainer = document.getElementById('native-banner-container');
+      if (!bannerContainer || !nativeBannerLoaded) {
+        console.log('Banner container not ready or not loaded');
+        return;
+      }
       
-      if (container) {
-        // Check if reload function is available
-        if (container.reload) {
-          nativeBannerReloadFunction = container.reload.bind(container);
-          console.log('Native banner reload function cached');
-          return true;
-        }
-        
-        // If not available yet, set up interval to check
-        if (!reloadCheckInterval) {
-          reloadCheckInterval = setInterval(() => {
-            if (container.reload) {
-              nativeBannerReloadFunction = container.reload.bind(container);
-              console.log('Native banner reload function found and cached');
-              clearInterval(reloadCheckInterval);
-              reloadCheckInterval = null;
-            }
-          }, 100);
-          
-          // Stop checking after 10 seconds
-          setTimeout(() => {
-            if (reloadCheckInterval) {
-              clearInterval(reloadCheckInterval);
-              reloadCheckInterval = null;
-              console.warn('Native banner reload function not found after timeout');
-            }
-          }, 10000);
+      // Method 1: Try to use the reload function if available
+      const container = document.getElementById(`container-${adKey}`);
+      if (container && typeof container.reload === 'function') {
+        try {
+          container.reload();
+          console.log('Native banner reloaded using reload function');
+          return;
+        } catch (error) {
+          console.log('Reload function failed, trying alternative method');
         }
       }
-      return false;
-    }
-    
-    // Enhanced reload function with retry logic
-    function reloadNativeBanner() {
-      if (nativeBannerReloadFunction) {
-        try {
-          nativeBannerReloadFunction();
-          console.log('Native banner reloaded successfully');
-        } catch (error) {
-          console.error('Error reloading native banner:', error);
-          // Try to reinitialize
-          initializeNativeBanner();
+      
+      // Method 2: Re-inject the ad by recreating the container
+      console.log('Reloading native banner by re-injecting');
+      
+      // Clear the current ad content
+      bannerContainer.innerHTML = '';
+      
+      // Recreate the ad container
+      const newContainer = document.createElement('div');
+      newContainer.id = `container-${adKey}`;
+      bannerContainer.appendChild(newContainer);
+      
+      // Re-inject the ad script
+      if (adScriptLoaded) {
+        // If script was already loaded, trigger a re-render
+        // Some ad networks expose a global function to reinitialize ads
+        if (window.atOptions) {
+          // Try to reinitialize with existing options
+          const tempScript = document.createElement('script');
+          tempScript.textContent = `
+            if (typeof window['__${adKey}_reinit'] === 'function') {
+              window['__${adKey}_reinit']();
+            } else {
+              // Force re-evaluation of the ad
+              var script = document.createElement('script');
+              script.src = '${adScriptUrl}?t=' + Date.now();
+              script.async = true;
+              script.setAttribute('data-cfasync', 'false');
+              document.getElementById('native-banner-container').appendChild(script);
+            }
+          `;
+          document.body.appendChild(tempScript);
+          document.body.removeChild(tempScript);
+        } else {
+          // Reload the script with a cache buster
+          const script = document.createElement('script');
+          script.src = adScriptUrl + '?t=' + Date.now();
+          script.async = true;
+          script.setAttribute('data-cfasync', 'false');
+          bannerContainer.appendChild(script);
         }
       } else {
-        // Try to get the reload function again
-        const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37');
-        if (container && container.reload) {
-          nativeBannerReloadFunction = container.reload.bind(container);
-          nativeBannerReloadFunction();
-          console.log('Native banner reload function re-acquired and executed');
-        } else {
-          console.warn('Native banner reload function not available');
-          initializeNativeBanner();
-        }
+        // First time loading
+        const script = document.createElement('script');
+        script.src = adScriptUrl;
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.onload = () => {
+          adScriptLoaded = true;
+          console.log('Ad script loaded successfully');
+        };
+        bannerContainer.appendChild(script);
       }
+      
+      console.log('Native banner reload initiated');
     }
     
     // Show native banner after Flutter loads
@@ -413,10 +429,11 @@
         bannerContainer.style.display = 'block';
         nativeBannerLoaded = true;
         
-        // Initialize reload function after showing banner
-        setTimeout(() => {
-          initializeNativeBanner();
-        }, 500);
+        // Mark the initial script as loaded if it exists
+        const existingScript = bannerContainer.querySelector('script');
+        if (existingScript) {
+          adScriptLoaded = true;
+        }
       }
     });
     
@@ -520,9 +537,6 @@
       }
       if (navigationCheckInterval) {
         clearInterval(navigationCheckInterval);
-      }
-      if (reloadCheckInterval) {
-        clearInterval(reloadCheckInterval);
       }
     });
   </script>
