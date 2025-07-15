@@ -57,25 +57,63 @@
             }
         }, 5000);
         
-        // Load the ad script
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = '//www.highperformanceformat.com/' + adKey + '/invoke.js';
-        script.onload = function() {
-            var loading = document.getElementById('loading');
-            if (loading) {
-                loading.style.display = 'none';
+        // Load the ad script with fallback
+        function loadAdScript() {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            
+            // Try multiple URL formats (using correct Adsterra domains)
+            var urls = [
+                'https://www.profitablecreativeformat.com/' + adKey + '/invoke.js',
+                '//www.profitablecreativeformat.com/' + adKey + '/invoke.js',
+                'https://www.highperformancedformats.com/' + adKey + '/invoke.js',
+                '//www.highperformancedformats.com/' + adKey + '/invoke.js',
+                'https://www.effectivecreativeformats.com/' + adKey + '/invoke.js',
+                '//www.effectivecreativeformats.com/' + adKey + '/invoke.js'
+            ];
+            
+            var currentUrlIndex = 0;
+            
+            function tryNextUrl() {
+                if (currentUrlIndex >= urls.length) {
+                    // All URLs failed
+                    var loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.innerHTML = 'Ad temporarily unavailable';
+                        loading.style.color = '#dc3545';
+                        loading.style.fontSize = '12px';
+                    }
+                    return;
+                }
+                
+                script.src = urls[currentUrlIndex];
+                currentUrlIndex++;
+                
+                script.onload = function() {
+                    var loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
+                };
+                
+                script.onerror = function() {
+                    // Remove failed script and try next URL
+                    if (script.parentNode) {
+                        script.parentNode.removeChild(script);
+                    }
+                    script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    setTimeout(tryNextUrl, 100);
+                };
+                
+                document.head.appendChild(script);
             }
-        };
-        script.onerror = function() {
-            var loading = document.getElementById('loading');
-            if (loading) {
-                loading.innerHTML = 'Ad temporarily unavailable';
-                loading.style.color = '#dc3545';
-                loading.style.fontSize = '12px';
-            }
-        };
-        document.head.appendChild(script);
+            
+            tryNextUrl();
+        }
+        
+        // Start loading after a short delay
+        setTimeout(loadAdScript, 100);
     </script>
 </body>
 </html>
