@@ -341,14 +341,68 @@
     });
     
     // Native Banner Ad Management
+    let nativeBannerReloadFunction = null;
     let nativeBannerLoaded = false;
+    let reloadCheckInterval = null;
     
-    // Function to reload native banner
-    function reloadNativeBanner() {
+    // Function to initialize and get reload function
+    function initializeNativeBanner() {
       const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37');
-      if (container && container.reload) {
-        container.reload();
-        console.log('Native banner reloaded');
+      
+      if (container) {
+        // Check if reload function is available
+        if (container.reload) {
+          nativeBannerReloadFunction = container.reload.bind(container);
+          console.log('Native banner reload function cached');
+          return true;
+        }
+        
+        // If not available yet, set up interval to check
+        if (!reloadCheckInterval) {
+          reloadCheckInterval = setInterval(() => {
+            if (container.reload) {
+              nativeBannerReloadFunction = container.reload.bind(container);
+              console.log('Native banner reload function found and cached');
+              clearInterval(reloadCheckInterval);
+              reloadCheckInterval = null;
+            }
+          }, 100);
+          
+          // Stop checking after 10 seconds
+          setTimeout(() => {
+            if (reloadCheckInterval) {
+              clearInterval(reloadCheckInterval);
+              reloadCheckInterval = null;
+              console.warn('Native banner reload function not found after timeout');
+            }
+          }, 10000);
+        }
+      }
+      return false;
+    }
+    
+    // Enhanced reload function with retry logic
+    function reloadNativeBanner() {
+      if (nativeBannerReloadFunction) {
+        try {
+          nativeBannerReloadFunction();
+          console.log('Native banner reloaded successfully');
+        } catch (error) {
+          console.error('Error reloading native banner:', error);
+          // Try to reinitialize
+          initializeNativeBanner();
+        }
+      } else {
+        // Try to get the reload function again
+        const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37');
+        if (container && container.reload) {
+          nativeBannerReloadFunction = container.reload.bind(container);
+          nativeBannerReloadFunction();
+          console.log('Native banner reload function re-acquired and executed');
+        } else {
+          console.warn('Native banner reload function not available');
+          initializeNativeBanner();
+        }
       }
     }
     
@@ -358,35 +412,117 @@
       if (bannerContainer) {
         bannerContainer.style.display = 'block';
         nativeBannerLoaded = true;
+        
+        // Initialize reload function after showing banner
+        setTimeout(() => {
+          initializeNativeBanner();
+        }, 500);
       }
     });
     
-    // Listen for URL changes (Flutter navigation)
+    // Enhanced navigation detection for SPAs
     let lastUrl = window.location.href;
-    const urlObserver = new MutationObserver(() => {
+    let lastPathname = window.location.pathname;
+    let lastHash = window.location.hash;
+    
+    // Function to check if navigation occurred
+    function checkNavigation() {
       const currentUrl = window.location.href;
-      if (currentUrl !== lastUrl) {
+      const currentPathname = window.location.pathname;
+      const currentHash = window.location.hash;
+      
+      if (currentUrl !== lastUrl || currentPathname !== lastPathname || currentHash !== lastHash) {
         lastUrl = currentUrl;
-        console.log('Route changed, reloading native banner');
-        setTimeout(reloadNativeBanner, 100); // Small delay to ensure DOM is ready
+        lastPathname = currentPathname;
+        lastHash = currentHash;
+        
+        console.log('Navigation detected, reloading native banner');
+        
+        // Delay reload to ensure DOM is ready
+        setTimeout(() => {
+          if (nativeBannerLoaded) {
+            reloadNativeBanner();
+          }
+        }, 200);
       }
+    }
+    
+    // Multiple navigation detection strategies
+    
+    // 1. MutationObserver for DOM changes
+    const urlObserver = new MutationObserver(() => {
+      checkNavigation();
     });
+    
+    // 2. Interval-based checking as fallback
+    let navigationCheckInterval = null;
     
     // Start observing once Flutter is ready
     window.addEventListener('flutter-first-frame', function() {
-      urlObserver.observe(document.body, { childList: true, subtree: true });
+      // Start MutationObserver
+      urlObserver.observe(document.body, { 
+        childList: true, 
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['href']
+      });
+      
+      // Start interval checking as backup
+      navigationCheckInterval = setInterval(checkNavigation, 1000);
     });
     
-    // Also listen for popstate events (browser back/forward)
+    // 3. Listen for History API events
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    history.pushState = function() {
+      originalPushState.apply(history, arguments);
+      setTimeout(checkNavigation, 100);
+    };
+    
+    history.replaceState = function() {
+      originalReplaceState.apply(history, arguments);
+      setTimeout(checkNavigation, 100);
+    };
+    
+    // 4. Popstate for browser back/forward
     window.addEventListener('popstate', () => {
-      console.log('Browser navigation detected, reloading native banner');
-      setTimeout(reloadNativeBanner, 100);
+      console.log('Browser navigation detected');
+      setTimeout(checkNavigation, 100);
+    });
+    
+    // 5. Hashchange event
+    window.addEventListener('hashchange', () => {
+      console.log('Hash change detected');
+      setTimeout(checkNavigation, 100);
     });
     
     // Handle visibility changes
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && nativeBannerLoaded) {
-        reloadNativeBanner();
+        console.log('Page became visible, reloading native banner');
+        setTimeout(reloadNativeBanner, 500);
+      }
+    });
+    
+    // Handle focus events
+    window.addEventListener('focus', () => {
+      if (nativeBannerLoaded) {
+        console.log('Window focused, reloading native banner');
+        setTimeout(reloadNativeBanner, 500);
+      }
+    });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (urlObserver) {
+        urlObserver.disconnect();
+      }
+      if (navigationCheckInterval) {
+        clearInterval(navigationCheckInterval);
+      }
+      if (reloadCheckInterval) {
+        clearInterval(reloadCheckInterval);
       }
     });
   </script>
