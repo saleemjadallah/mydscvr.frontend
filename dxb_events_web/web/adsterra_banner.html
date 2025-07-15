@@ -62,15 +62,17 @@
             var script = document.createElement('script');
             script.type = 'text/javascript';
             
-            // Try multiple URL formats (using correct working Adsterra domains)
-            var urls = [
-                '//paltryheadline.com/' + adKey + '/invoke.js',
-                'https://paltryheadline.com/' + adKey + '/invoke.js',
-                '//www.profitablecreativeformat.com/' + adKey + '/invoke.js',
-                'https://www.profitablecreativeformat.com/' + adKey + '/invoke.js',
-                '//www.highperformancedformats.com/' + adKey + '/invoke.js',
-                'https://www.highperformancedformats.com/' + adKey + '/invoke.js'
-            ];
+            // Check your actual Adsterra publisher account for the correct JSAsync code
+        // The domain may be different for your specific ad unit
+        // Common Adsterra domains include:
+        var urls = [
+            'https://a.adtng.com/' + adKey + '/invoke.js',
+            '//a.adtng.com/' + adKey + '/invoke.js',
+            'https://cdn.adtng.com/' + adKey + '/invoke.js', 
+            '//cdn.adtng.com/' + adKey + '/invoke.js',
+            'https://js.adtng.com/' + adKey + '/invoke.js',
+            '//js.adtng.com/' + adKey + '/invoke.js'
+        ];
             
             var currentUrlIndex = 0;
             
