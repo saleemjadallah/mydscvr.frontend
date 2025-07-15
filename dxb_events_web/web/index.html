@@ -242,6 +242,12 @@
     This is an Ad. Please scroll to proceed with content
   </div>
   
+  <!-- Native Banner Ad Container -->
+  <div id="native-banner-container" style="display: none; text-align: center; padding: 10px; background-color: #f9f9f9;">
+    <script async="async" data-cfasync="false" src="//pl27139224.profitableratecpm.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js"></script>
+    <div id="container-e1bd304e9b4f790ab61f30e117275a37"></div>
+  </div>
+  
   <!-- Loading Screen -->
   <div class="loading-container" id="loading">
     <div class="loading-logo">
@@ -332,6 +338,56 @@
         'send_to': 'AW-17261831821/YmOuCPSTxfAaEI3NiqdA',
         'value': 1.0,
         'currency': 'AED'
+    });
+    
+    // Native Banner Ad Management
+    let nativeBannerLoaded = false;
+    
+    // Function to reload native banner
+    function reloadNativeBanner() {
+      const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37');
+      if (container && container.reload) {
+        container.reload();
+        console.log('Native banner reloaded');
+      }
+    }
+    
+    // Show native banner after Flutter loads
+    window.addEventListener('flutter-first-frame', function() {
+      const bannerContainer = document.getElementById('native-banner-container');
+      if (bannerContainer) {
+        bannerContainer.style.display = 'block';
+        nativeBannerLoaded = true;
+      }
+    });
+    
+    // Listen for URL changes (Flutter navigation)
+    let lastUrl = window.location.href;
+    const urlObserver = new MutationObserver(() => {
+      const currentUrl = window.location.href;
+      if (currentUrl !== lastUrl) {
+        lastUrl = currentUrl;
+        console.log('Route changed, reloading native banner');
+        setTimeout(reloadNativeBanner, 100); // Small delay to ensure DOM is ready
+      }
+    });
+    
+    // Start observing once Flutter is ready
+    window.addEventListener('flutter-first-frame', function() {
+      urlObserver.observe(document.body, { childList: true, subtree: true });
+    });
+    
+    // Also listen for popstate events (browser back/forward)
+    window.addEventListener('popstate', () => {
+      console.log('Browser navigation detected, reloading native banner');
+      setTimeout(reloadNativeBanner, 100);
+    });
+    
+    // Handle visibility changes
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && nativeBannerLoaded) {
+        reloadNativeBanner();
+      }
     });
   </script>
   
