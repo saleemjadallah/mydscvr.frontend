@@ -35,7 +35,7 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
       final iframe = html.IFrameElement()
         ..width = '${widget.width}'
         ..height = '${widget.height}'
-        ..src = 'adsterra_ad.html' // Path is relative to the web/ directory
+        ..src = '/adsterra_ad.html' // Absolute path from web root
         ..style.border = 'none'
         ..style.pointerEvents = 'none'; // Disable pointer events by default
 
