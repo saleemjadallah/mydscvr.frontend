@@ -1,133 +1,192 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adsterra Banner</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        
+        #ad-container {
+            position: relative;
+            width: 300px;
+            height: 250px;
+            background-color: #ffffff;
+            border-radius: 8px;
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .ad-label {
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            font-size: 10px;
-            color: #999999;
-            background-color: #f5f5f5;
-            padding: 2px 6px;
-            border-radius: 4px;
-            z-index: 10;
-        }
-        .loading {
+        
+        #ad-placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
             height: 100%;
-            color: #666666;
+            background-color: #f8f8f8;
+            color: #666;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .error-message {
+            padding: 20px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            color: #856404;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="ad-label">Advertisement</div>
-    <div id="loading" class="loading">Loading ad...</div>
-    
+    <div id="ad-container">
+        <div id="ad-placeholder">Loading advertisement...</div>
+    </div>
+
     <script type="text/javascript">
-        // Get ad key from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const adKey = urlParams.get('key') || '0c346d8dd7b206d16df3d22d25820f9e';
-        const width = parseInt(urlParams.get('width') || '300');
-        const height = parseInt(urlParams.get('height') || '250');
-        
-        atOptions = {
-            'key' : adKey,
-            'format' : 'iframe',
-            'height' : height,
-            'width' : width,
-            'params' : {}
+        // Enhanced error handling and retry mechanism
+        const AD_CONFIG = {
+            key: '0c346d8dd7b206d16df3d22d25820f9e',
+            format: 'iframe',
+            height: 250,
+            width: 300,
+            maxRetries: 3,
+            retryDelay: 2000,
+            params: {}
         };
-        
-        // Hide loading after script loads or on timeout
-        setTimeout(function() {
-            var loading = document.getElementById('loading');
-            if (loading) {
-                loading.style.display = 'none';
-            }
-        }, 5000);
-        
-        // Load the ad script with fallback
-        function loadAdScript() {
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            
-            // Check your actual Adsterra publisher account for the correct JSAsync code
-        // The domain may be different for your specific ad unit
-        // Common Adsterra domains include:
-        var urls = [
-            'https://a.adtng.com/' + adKey + '/invoke.js',
-            '//a.adtng.com/' + adKey + '/invoke.js',
-            'https://cdn.adtng.com/' + adKey + '/invoke.js', 
-            '//cdn.adtng.com/' + adKey + '/invoke.js',
-            'https://js.adtng.com/' + adKey + '/invoke.js',
-            '//js.adtng.com/' + adKey + '/invoke.js'
+
+        // Primary and fallback script URLs
+        const SCRIPT_URLS = [
+            'https://www.highperformanceformat.com/' + AD_CONFIG.key + '/invoke.js',
+            'https://www.topcreativeformat.com/' + AD_CONFIG.key + '/invoke.js',
+            'https://www.integratedadvertising.top/' + AD_CONFIG.key + '/invoke.js'
         ];
-            
-            var currentUrlIndex = 0;
-            
-            function tryNextUrl() {
-                if (currentUrlIndex >= urls.length) {
-                    // All URLs failed
-                    var loading = document.getElementById('loading');
-                    if (loading) {
-                        loading.innerHTML = 'Ad temporarily unavailable';
-                        loading.style.color = '#dc3545';
-                        loading.style.fontSize = '12px';
-                    }
-                    return;
-                }
+
+        let currentUrlIndex = 0;
+        let retryCount = 0;
+
+        // Set global options for Adsterra
+        window.atOptions = {
+            'key': AD_CONFIG.key,
+            'format': AD_CONFIG.format,
+            'height': AD_CONFIG.height,
+            'width': AD_CONFIG.width,
+            'params': AD_CONFIG.params
+        };
+
+        function loadAdScript(url) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = url;
+                script.async = true;
                 
-                script.src = urls[currentUrlIndex];
-                currentUrlIndex++;
-                
-                script.onload = function() {
-                    console.log('Adsterra script loaded successfully from:', script.src);
-                    var loading = document.getElementById('loading');
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
-                    // Give ad time to render
-                    setTimeout(function() {
-                        // Check if ad container was created
-                        var adElements = document.querySelectorAll('[id*="adsterra"], iframe');
-                        if (adElements.length > 0) {
-                            console.log('Ad elements found:', adElements.length);
-                        } else {
-                            console.log('No ad elements found, ad may not have loaded properly');
-                        }
-                    }, 2000);
+                script.onload = () => {
+                    console.log('Ad script loaded successfully from:', url);
+                    resolve();
                 };
                 
-                script.onerror = function() {
-                    console.log('Failed to load script from:', script.src);
-                    // Remove failed script and try next URL
-                    if (script.parentNode) {
-                        script.parentNode.removeChild(script);
-                    }
-                    script = document.createElement('script');
-                    script.type = 'text/javascript';
-                    setTimeout(tryNextUrl, 100);
+                script.onerror = () => {
+                    console.error('Failed to load ad script from:', url);
+                    reject(new Error('Script load failed'));
+                };
+                
+                // Add timeout
+                const timeout = setTimeout(() => {
+                    script.remove();
+                    reject(new Error('Script load timeout'));
+                }, 10000);
+                
+                script.onload = () => {
+                    clearTimeout(timeout);
+                    resolve();
                 };
                 
                 document.head.appendChild(script);
+            });
+        }
+
+        async function tryLoadAds() {
+            const placeholder = document.getElementById('ad-placeholder');
+            
+            while (currentUrlIndex < SCRIPT_URLS.length && retryCount < AD_CONFIG.maxRetries) {
+                try {
+                    placeholder.innerHTML = 'Loading advertisement...';
+                    await loadAdScript(SCRIPT_URLS[currentUrlIndex]);
+                    
+                    // Check if ad loaded successfully
+                    setTimeout(() => {
+                        const adFrame = document.querySelector('iframe[src*="adsterra"]');
+                        if (adFrame) {
+                            placeholder.style.display = 'none';
+                        } else {
+                            throw new Error('Ad frame not found');
+                        }
+                    }, 2000);
+                    
+                    return; // Success
+                } catch (error) {
+                    console.error('Ad load attempt failed:', error);
+                    currentUrlIndex++;
+                    
+                    if (currentUrlIndex >= SCRIPT_URLS.length) {
+                        currentUrlIndex = 0;
+                        retryCount++;
+                        
+                        if (retryCount < AD_CONFIG.maxRetries) {
+                            placeholder.innerHTML = `Retrying... (${retryCount}/${AD_CONFIG.maxRetries})`;
+                            await new Promise(resolve => setTimeout(resolve, AD_CONFIG.retryDelay));
+                        }
+                    }
+                }
             }
             
-            tryNextUrl();
+            // All attempts failed
+            placeholder.innerHTML = '<div class="error-message">Advertisement temporarily unavailable. Please check your internet connection.</div>';
         }
-        
-        // Start loading after a short delay
-        setTimeout(loadAdScript, 100);
+
+        // Network connectivity check
+        function checkConnectivity() {
+            if (!navigator.onLine) {
+                document.getElementById('ad-placeholder').innerHTML = 
+                    '<div class="error-message">No internet connection</div>';
+                return false;
+            }
+            return true;
+        }
+
+        // Initialize ad loading
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkConnectivity()) {
+                tryLoadAds();
+            }
+            
+            // Listen for connectivity changes
+            window.addEventListener('online', () => {
+                if (retryCount < AD_CONFIG.maxRetries) {
+                    tryLoadAds();
+                }
+            });
+        });
+
+        // Handle messages from Flutter
+        window.addEventListener('message', (event) => {
+            if (event.data === 'reloadAd' && checkConnectivity()) {
+                retryCount = 0;
+                currentUrlIndex = 0;
+                tryLoadAds();
+            }
+        });
     </script>
 </body>
 </html>

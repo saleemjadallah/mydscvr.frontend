@@ -55,8 +55,8 @@ class _AdsterraFinalBannerState extends State<AdsterraFinalBanner> {
         ..allowFullscreen = true
         ..src = '/adsterra_banner.html?key=${widget.adKey}&width=${widget.width.toInt()}&height=${widget.height.toInt()}';
 
-      // Set timeout for loading state
-      _loadingTimer = Timer(const Duration(seconds: 10), () {
+      // Set timeout for loading state - increased to allow for retries
+      _loadingTimer = Timer(const Duration(seconds: 15), () {
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -88,6 +88,35 @@ class _AdsterraFinalBannerState extends State<AdsterraFinalBanner> {
       });
 
       return iframe;
+    });
+  }
+
+  void _reloadAd() {
+    // Reset state and try to reload the ad
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    
+    // Send message to iframe to reload ad
+    if (kIsWeb) {
+      try {
+        final iframe = html.document.querySelector('iframe[src*="adsterra_banner.html"]') as html.IFrameElement?;
+        iframe?.contentWindow?.postMessage('reloadAd', '*');
+      } catch (e) {
+        print('Error sending reload message: $e');
+      }
+    }
+    
+    // Reset timer
+    _loadingTimer?.cancel();
+    _loadingTimer = Timer(const Duration(seconds: 15), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     });
   }
 
@@ -149,13 +178,33 @@ class _AdsterraFinalBannerState extends State<AdsterraFinalBanner> {
                 color: Colors.grey[50],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text(
-                  'Ad temporarily unavailable',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Ad temporarily unavailable',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: _reloadAd,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
+                      child: const Text(
+                        'Retry',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
