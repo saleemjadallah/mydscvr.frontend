@@ -49,144 +49,24 @@
     </style>
 </head>
 <body>
-    <div id="ad-container">
-        <div id="ad-placeholder">Loading advertisement...</div>
-    </div>
+    <!-- Adsterra Ad Container -->
+    <div id="atContainer-0c346d8dd7b206d16df3d22d25820f9e"></div>
 
     <script type="text/javascript">
-        // Enhanced error handling and retry mechanism
-        const AD_CONFIG = {
-            key: '0c346d8dd7b206d16df3d22d25820f9e',
-            format: 'iframe',
-            height: 250,
-            width: 300,
-            maxRetries: 3,
-            retryDelay: 2000,
-            params: {}
-        };
-
-        // Primary and fallback script URLs
-        const SCRIPT_URLS = [
-            'https://www.highperformanceformat.com/' + AD_CONFIG.key + '/invoke.js',
-            'https://www.topcreativeformat.com/' + AD_CONFIG.key + '/invoke.js',
-            'https://www.integratedadvertising.top/' + AD_CONFIG.key + '/invoke.js'
-        ];
-
-        let currentUrlIndex = 0;
-        let retryCount = 0;
-
-        // Set global options for Adsterra
-        window.atOptions = {
-            'key': AD_CONFIG.key,
-            'format': AD_CONFIG.format,
-            'height': AD_CONFIG.height,
-            'width': AD_CONFIG.width,
-            'params': AD_CONFIG.params
-        };
-
-        function loadAdScript(url) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = url;
-                script.async = true;
-                
-                script.onload = () => {
-                    console.log('Ad script loaded successfully from:', url);
-                    resolve();
-                };
-                
-                script.onerror = () => {
-                    console.error('Failed to load ad script from:', url);
-                    reject(new Error('Script load failed'));
-                };
-                
-                // Add timeout
-                const timeout = setTimeout(() => {
-                    script.remove();
-                    reject(new Error('Script load timeout'));
-                }, 10000);
-                
-                script.onload = () => {
-                    clearTimeout(timeout);
-                    resolve();
-                };
-                
-                document.head.appendChild(script);
-            });
-        }
-
-        async function tryLoadAds() {
-            const placeholder = document.getElementById('ad-placeholder');
-            
-            while (currentUrlIndex < SCRIPT_URLS.length && retryCount < AD_CONFIG.maxRetries) {
-                try {
-                    placeholder.innerHTML = 'Loading advertisement...';
-                    await loadAdScript(SCRIPT_URLS[currentUrlIndex]);
-                    
-                    // Check if ad loaded successfully
-                    setTimeout(() => {
-                        const adFrame = document.querySelector('iframe[src*="adsterra"]');
-                        if (adFrame) {
-                            placeholder.style.display = 'none';
-                        } else {
-                            throw new Error('Ad frame not found');
-                        }
-                    }, 2000);
-                    
-                    return; // Success
-                } catch (error) {
-                    console.error('Ad load attempt failed:', error);
-                    currentUrlIndex++;
-                    
-                    if (currentUrlIndex >= SCRIPT_URLS.length) {
-                        currentUrlIndex = 0;
-                        retryCount++;
-                        
-                        if (retryCount < AD_CONFIG.maxRetries) {
-                            placeholder.innerHTML = `Retrying... (${retryCount}/${AD_CONFIG.maxRetries})`;
-                            await new Promise(resolve => setTimeout(resolve, AD_CONFIG.retryDelay));
-                        }
-                    }
-                }
-            }
-            
-            // All attempts failed
-            placeholder.innerHTML = '<div class="error-message">Advertisement temporarily unavailable. Please check your internet connection.</div>';
-        }
-
-        // Network connectivity check
-        function checkConnectivity() {
-            if (!navigator.onLine) {
-                document.getElementById('ad-placeholder').innerHTML = 
-                    '<div class="error-message">No internet connection</div>';
-                return false;
-            }
-            return true;
-        }
-
-        // Initialize ad loading
-        document.addEventListener('DOMContentLoaded', () => {
-            if (checkConnectivity()) {
-                tryLoadAds();
-            }
-            
-            // Listen for connectivity changes
-            window.addEventListener('online', () => {
-                if (retryCount < AD_CONFIG.maxRetries) {
-                    tryLoadAds();
-                }
-            });
+        if (typeof atAsyncOptions !== 'object') var atAsyncOptions = [];
+        atAsyncOptions.push({
+            'key': '0c346d8dd7b206d16df3d22d25820f9e',
+            'format': 'js',
+            'async': true,
+            'container': 'atContainer-0c346d8dd7b206d16df3d22d25820f9e',
+            'params' : {}
         });
-
-        // Handle messages from Flutter
-        window.addEventListener('message', (event) => {
-            if (event.data === 'reloadAd' && checkConnectivity()) {
-                retryCount = 0;
-                currentUrlIndex = 0;
-                tryLoadAds();
-            }
-        });
+        
+        var script = document.createElement('script');
+        script.type = "text/javascript";
+        script.async = true;
+        script.src = 'http' + (location.protocol === 'https:' ? 's' : '') + '://www.highperformanceformat.com/0c346d8dd7b206d16df3d22d25820f9e/invoke.js';
+        document.getElementsByTagName('head')[0].appendChild(script);
     </script>
 </body>
 </html>
