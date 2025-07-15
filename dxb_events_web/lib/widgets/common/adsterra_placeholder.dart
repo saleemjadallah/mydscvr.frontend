@@ -39,6 +39,14 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
         ..style.border = 'none'
         ..style.pointerEvents = 'none'; // Disable pointer events by default
 
+      // Add sandbox attributes to allow the ad script to run correctly
+      iframe.sandbox?.add('allow-scripts');
+      iframe.sandbox?.add('allow-same-origin');
+      iframe.sandbox?.add('allow-forms');
+      iframe.sandbox?.add('allow-popups');
+      iframe.sandbox?.add('allow-popups-to-escape-sandbox');
+      iframe.sandbox?.add('allow-top-navigation');
+
       // Toggle pointer events on hover to allow both scrolling and clicking
       iframe.onMouseEnter.listen((_) => iframe.style.pointerEvents = 'auto');
       iframe.onMouseLeave.listen((_) => iframe.style.pointerEvents = 'none');
