@@ -32,27 +32,12 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
 
   void _registerViewFactory() {
     ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
-      final adContainer = html.DivElement();
-
-      final adOptionsScript = html.ScriptElement()
-        ..type = 'text/javascript'
-        ..text = '''
-          window.atOptions = {
-            'key' : '${widget.adKey}',
-            'format' : 'iframe',
-            'height' : ${widget.height},
-            'width' : ${widget.width},
-            'params' : {}
-          };
-        ''';
-
-      final adScript = html.ScriptElement()
-        ..type = 'text/javascript'
-        ..src = '//www.highperformanceformat.com/${widget.adKey}/invoke.js';
-
-      adContainer.children.addAll([adOptionsScript, adScript]);
-
-      return adContainer;
+      final iframe = html.IFrameElement()
+        ..width = '${widget.width}'
+        ..height = '${widget.height}'
+        ..src = 'assets/web/adsterra_ad.html'
+        ..style.border = 'none';
+      return iframe;
     });
   }
 

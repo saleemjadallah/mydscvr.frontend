@@ -69,3 +69,4 @@ flutter:
     - assets/images/
     - assets/images/mydscvr-logo.png
     - assets/images/google_logo.svg
+    - web/adsterra_ad.html
