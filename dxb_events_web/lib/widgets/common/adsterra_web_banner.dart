@@ -107,24 +107,23 @@ class _AdsterraWebBannerState extends State<AdsterraWebBanner> {
 
   void _injectAdScript(html.DivElement container, html.DivElement loadingDiv, int viewId) {
     try {
-      // Create script to set atOptions
+      // Create script to set atOptions (using exact user-provided format)
       final optionsScript = html.ScriptElement()
         ..type = 'text/javascript'
         ..text = '''
-          window.atOptions = {
-            'key': '${widget.adKey}',
-            'format': 'iframe',
-            'height': ${widget.height.toInt()},
-            'width': ${widget.width.toInt()},
-            'params': {}
+          atOptions = {
+              'key' : '${widget.adKey}',
+              'format' : 'iframe',
+              'height' : ${widget.height.toInt()},
+              'width' : ${widget.width.toInt()},
+              'params' : {}
           };
         ''';
 
-      // Create the ad script
+      // Create the ad script (using protocol-relative URL as provided)
       final adScript = html.ScriptElement()
         ..type = 'text/javascript'
-        ..async = true
-        ..src = 'https://www.highperformanceformat.com/${widget.adKey}/invoke.js';
+        ..src = '//www.highperformanceformat.com/${widget.adKey}/invoke.js';
 
       // Handle successful script load
       adScript.onLoad.listen((_) {
@@ -154,9 +153,9 @@ class _AdsterraWebBannerState extends State<AdsterraWebBanner> {
         }
       });
 
-      // Append scripts to document head
-      html.document.head?.append(optionsScript);
-      html.document.head?.append(adScript);
+      // Append scripts to container instead of document head for better isolation
+      container.append(optionsScript);
+      container.append(adScript);
 
     } catch (e) {
       print('Error injecting ad script: $e');
