@@ -35,8 +35,14 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
       final iframe = html.IFrameElement()
         ..width = '${widget.width}'
         ..height = '${widget.height}'
-        ..src = 'assets/web/adsterra_ad.html'
-        ..style.border = 'none';
+        ..src = 'adsterra_ad.html' // Path is relative to the web/ directory
+        ..style.border = 'none'
+        ..style.pointerEvents = 'none'; // Disable pointer events by default
+
+      // Toggle pointer events on hover to allow both scrolling and clicking
+      iframe.onMouseEnter.listen((_) => iframe.style.pointerEvents = 'auto');
+      iframe.onMouseLeave.listen((_) => iframe.style.pointerEvents = 'none');
+
       return iframe;
     });
   }

@@ -67,6 +67,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/images/mydscvr-logo.png
-    - assets/images/google_logo.svg
-    - web/adsterra_ad.html
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware
