@@ -310,11 +310,20 @@ class EventCard extends StatelessWidget {
         gradient: AppColors.sunsetGradient,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      child: const Center(
-        child: Icon(
-          LucideIcons.image,
-          size: 32,
-          color: Colors.white,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Image.asset(
+            'assets/images/mydscvr-logo.png',
+            width: 100,
+            height: 100,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Icon(
+              LucideIcons.calendar,
+              size: 32,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );

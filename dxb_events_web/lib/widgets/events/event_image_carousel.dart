@@ -223,11 +223,20 @@ class _EventImageCarouselState extends State<EventImageCarousel> {
       decoration: BoxDecoration(
         gradient: AppColors.sunsetGradient,
       ),
-      child: const Center(
-        child: Icon(
-          LucideIcons.image,
-          size: 60,
-          color: Colors.white,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(30),
+          child: Image.asset(
+            'assets/images/mydscvr-logo.png',
+            width: 120,
+            height: 120,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Icon(
+              LucideIcons.calendar,
+              size: 60,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );
@@ -249,24 +258,34 @@ class _EventImageCarouselState extends State<EventImageCarousel> {
       decoration: BoxDecoration(
         gradient: AppColors.sunsetGradient,
       ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LucideIcons.imageOff,
-              size: 40,
-              color: Colors.white,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(30),
+          child: Image.asset(
+            'assets/images/mydscvr-logo.png',
+            width: 100,
+            height: 100,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.calendar,
+                  size: 40,
+                  color: Colors.white,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'mydscvr.ai',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text(
-              'Image not available',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -147,10 +147,21 @@ class EnhancedEventCard extends StatelessWidget {
         gradient: AppColors.sunsetGradient,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      child: Icon(
-        LucideIcons.calendar,
-        size: 48,
-        color: Colors.white.withOpacity(0.7),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Image.asset(
+            'assets/images/mydscvr-logo.png',
+            width: 120,
+            height: 120,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              LucideIcons.calendar,
+              size: 48,
+              color: Colors.white.withOpacity(0.7),
+            ),
+          ),
+        ),
       ),
     );
   }

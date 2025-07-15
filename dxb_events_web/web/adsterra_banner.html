@@ -62,14 +62,14 @@
             var script = document.createElement('script');
             script.type = 'text/javascript';
             
-            // Try multiple URL formats (using correct Adsterra domains)
+            // Try multiple URL formats (using correct working Adsterra domains)
             var urls = [
-                'https://www.profitablecreativeformat.com/' + adKey + '/invoke.js',
+                '//paltryheadline.com/' + adKey + '/invoke.js',
+                'https://paltryheadline.com/' + adKey + '/invoke.js',
                 '//www.profitablecreativeformat.com/' + adKey + '/invoke.js',
-                'https://www.highperformancedformats.com/' + adKey + '/invoke.js',
+                'https://www.profitablecreativeformat.com/' + adKey + '/invoke.js',
                 '//www.highperformancedformats.com/' + adKey + '/invoke.js',
-                'https://www.effectivecreativeformats.com/' + adKey + '/invoke.js',
-                '//www.effectivecreativeformats.com/' + adKey + '/invoke.js'
+                'https://www.highperformancedformats.com/' + adKey + '/invoke.js'
             ];
             
             var currentUrlIndex = 0;
@@ -90,13 +90,25 @@
                 currentUrlIndex++;
                 
                 script.onload = function() {
+                    console.log('Adsterra script loaded successfully from:', script.src);
                     var loading = document.getElementById('loading');
                     if (loading) {
                         loading.style.display = 'none';
                     }
+                    // Give ad time to render
+                    setTimeout(function() {
+                        // Check if ad container was created
+                        var adElements = document.querySelectorAll('[id*="adsterra"], iframe');
+                        if (adElements.length > 0) {
+                            console.log('Ad elements found:', adElements.length);
+                        } else {
+                            console.log('No ad elements found, ad may not have loaded properly');
+                        }
+                    }, 2000);
                 };
                 
                 script.onerror = function() {
+                    console.log('Failed to load script from:', script.src);
                     // Remove failed script and try next URL
                     if (script.parentNode) {
                         script.parentNode.removeChild(script);

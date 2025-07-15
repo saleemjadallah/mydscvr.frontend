@@ -297,11 +297,20 @@ class EventListItem extends StatelessWidget {
         gradient: AppColors.sunsetGradient,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Center(
-        child: Icon(
-          LucideIcons.image,
-          size: 32,
-          color: Colors.white,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Image.asset(
+            'assets/images/mydscvr-logo.png',
+            width: 60,
+            height: 60,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Icon(
+              LucideIcons.calendar,
+              size: 32,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );

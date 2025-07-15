@@ -356,7 +356,7 @@ class Event {
     // Parse image URLs using permanent AI image storage priority system
     // Priority: images.ai_generated > ai_image_url > image_url > filtered image_urls
     final List<String> imageUrls = [];
-    final defaultImageUrl = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
+    final defaultImageUrl = 'assets/images/mydscvr-logo.png';
     
     // Highest priority: permanent AI generated image
     // imagesData already declared above for hasAiImage
