@@ -4,43 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Native Banner Ad</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-        }
-    </style>
 </head>
 <body>
-    <!-- Native Banner Container -->
     <script async="async" data-cfasync="false" src="//pl27139224.profitableratecpm.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js"></script>
     <div id="container-e1bd304e9b4f790ab61f30e117275a37"></div>
-
+    
     <script type="text/javascript">
         // Function to reload the native banner
         function reloadNativeBanner() {
             const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37');
             if (container && container.reload) {
                 container.reload();
-                console.log('Native banner reloaded');
             }
         }
-
+        
         // Listen for messages from Flutter for route changes
         window.addEventListener('message', (event) => {
-            if (event.data === 'routeChanged' || event.data === 'reloadAd') {
-                reloadNativeBanner();
-            }
-        });
-
-        // Also listen for visibility changes
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
+            if (event.data === 'routeChanged') {
                 reloadNativeBanner();
             }
         });
