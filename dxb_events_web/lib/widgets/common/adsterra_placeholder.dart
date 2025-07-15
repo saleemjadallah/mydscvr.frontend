@@ -46,6 +46,7 @@ class _AdsterraBannerState extends State<AdsterraBanner> {
       iframe.sandbox?.add('allow-popups');
       iframe.sandbox?.add('allow-popups-to-escape-sandbox');
       iframe.sandbox?.add('allow-top-navigation');
+      iframe.sandbox?.add('allow-top-navigation-by-user-activation');
 
       // Toggle pointer events on hover to allow both scrolling and clicking
       iframe.onMouseEnter.listen((_) => iframe.style.pointerEvents = 'auto');
