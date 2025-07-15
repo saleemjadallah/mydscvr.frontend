@@ -224,7 +224,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 1 - Between Featured Events and Hidden Gem
           SliverToBoxAdapter(
-            child: AdsterraWebBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraWebBanner(adKey: '27064476'),
           ),
           
           // Hidden Gem - Using actual component
@@ -240,7 +240,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 2 - Between Hidden Gem and Categories
           SliverToBoxAdapter(
-            child: AdsterraWebBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraWebBanner(adKey: '27064476'),
           ),
           
           // Categories Section - Using actual component
@@ -269,7 +269,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
           SliverToBoxAdapter(
-            child: AdsterraWebBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraWebBanner(adKey: '27064476'),
           ),
           
           // MyDscvr's Choice Section - Final solution
@@ -284,7 +284,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 4 - Between Explore All Events and Footer
           SliverToBoxAdapter(
-            child: AdsterraWebBanner(adKey: '0c346d8dd7b206d16df3d22d25820f9e'),
+            child: AdsterraWebBanner(adKey: '27064476'),
           ),
           
           // Footer
