@@ -354,29 +354,42 @@
         return;
       }
       
-      // Method 1: Try to use the reload function if available
+      // Method 1: Try all possible reload methods
       const container = document.getElementById(`container-${adKey}`);
-      if (container && typeof container.reload === 'function') {
-        try {
-          container.reload();
-          console.log('Native banner reloaded using reload function');
-          return;
-        } catch (error) {
-          console.log('Reload function failed, trying alternative method');
-        }
-      }
       
-      // Also check if the container has been modified by the ad script
-      // Some ad networks attach the reload function after initialization
-      try {
-        // Try direct method call as suggested
-        if (container && container.reload) {
-          container.reload();
-          console.log('Native banner reloaded using direct reload call');
-          return;
+      // Check multiple ways to access reload
+      const reloadMethods = [
+        () => container.reload && container.reload(),
+        () => container.reload && container.reload.call(container),
+        () => window[`reload_${adKey}`] && window[`reload_${adKey}`](),
+        () => {
+          // Check if reload is in the prototype
+          const proto = Object.getPrototypeOf(container);
+          if (proto && proto.reload) {
+            proto.reload.call(container);
+          }
+        },
+        () => {
+          // Check all properties for reload-like functions
+          for (let prop in container) {
+            if (prop.toLowerCase().includes('reload') && typeof container[prop] === 'function') {
+              console.log(`Found reload method: ${prop}`);
+              container[prop]();
+              return true;
+            }
+          }
         }
-      } catch (error) {
-        console.log('Direct reload method not available');
+      ];
+      
+      for (let method of reloadMethods) {
+        try {
+          if (method()) {
+            console.log('Native banner reloaded successfully');
+            return;
+          }
+        } catch (error) {
+          console.log('Reload method failed:', error);
+        }
       }
       
       // Method 2: Re-inject the ad by recreating the container

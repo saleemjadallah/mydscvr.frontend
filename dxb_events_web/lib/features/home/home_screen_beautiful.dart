@@ -18,6 +18,9 @@ import '../../core/animations/animations.dart';
 import '../../widgets/search/super_search_button.dart';
 import '../../widgets/common/adsterra_cross_platform.dart';
 import '../../widgets/common/native_banner_vue_style.dart';
+import '../../widgets/common/native_banner_debug.dart';
+import '../../widgets/common/native_banner_simple.dart';
+import '../../widgets/common/native_banner_global_approach.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -223,27 +226,68 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Ad Placeholder 1 - Between Featured Events and Hidden Gem
-          SliverToBoxAdapter(
-            child: kIsWeb 
-              ? NativeBannerVueStyle(
-                  adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                  containerId: 'container-0c346d8dd7b206d16df3d22d25820f9e-1',
-                  width: 300,
-                  height: 250,
-                )
-              : AdsterraAd(
-                  adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                  width: 300,
-                  height: 250,
-                  onAdLoaded: () {
-                    print('Ad loaded successfully');
-                  },
-                  onAdFailed: () {
-                    print('Ad failed to load');
-                  },
+          // Ad Debug Section - Test all approaches
+          if (kIsWeb) ...[
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'Ad Implementation Tests',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-          ),
+              ),
+            ),
+            
+            // Debug widget to understand what's happening
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Debug Widget:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerDebug(
+                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Test different implementations
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Simple Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerSimple(
+                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Global Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerGlobalApproach(
+                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else
+            SliverToBoxAdapter(
+              child: AdsterraAd(
+                adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                width: 300,
+                height: 250,
+                onAdLoaded: () {
+                  print('Ad loaded successfully');
+                },
+                onAdFailed: () {
+                  print('Ad failed to load');
+                },
+              ),
+            ),
           
           // Hidden Gem - Using actual component
           const SliverToBoxAdapter(
