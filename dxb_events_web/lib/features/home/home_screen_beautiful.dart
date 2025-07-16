@@ -21,6 +21,8 @@ import '../../widgets/common/native_banner_vue_style.dart';
 import '../../widgets/common/native_banner_debug.dart';
 import '../../widgets/common/native_banner_simple.dart';
 import '../../widgets/common/native_banner_global_approach.dart';
+import '../../widgets/common/native_banner_nuxt_style.dart';
+import '../../widgets/common/native_banner_exact_copy.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -268,6 +270,16 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     const SizedBox(height: 20),
                     const Text('Global Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
                     NativeBannerGlobalApproach(
+                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Nuxt Style:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerNuxtStyle(
+                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Exact Copy of Vue/Nuxt:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerExactCopy(
                       adKey: '0c346d8dd7b206d16df3d22d25820f9e',
                     ),
                   ],
