@@ -6,6 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
+import 'dart:html' as html;
+import 'dart:ui' as ui;
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -85,8 +87,50 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     context.go('/event/${event.id}');
   }
 
-  /// Build AdSense ad container with header
+  /// Build Adsterra native ad container with header
   Widget _buildAdSenseContainer(String identifier, [Color? backgroundColor]) {
+    // Create unique view ID for each ad placement
+    final String viewId = 'adsterra-native-$identifier';
+    
+    // Register the HTML element view
+    // ignore: undefined_prefixed_name
+    ui.platformViewRegistry.registerViewFactory(
+      viewId,
+      (int viewId) {
+        final container = html.DivElement()
+          ..id = 'adsterra-container-$identifier'
+          ..style.width = '100%'
+          ..style.height = '250px'
+          ..style.textAlign = 'center'
+          ..style.padding = '10px'
+          ..style.backgroundColor = '#f9f9f9';
+        
+        // Create the ad container div
+        final adDiv = html.DivElement()
+          ..id = 'container-e1bd304e9b4f790ab61f30e117275a37-$identifier';
+        
+        container.append(adDiv);
+        
+        // Create and inject the ad script
+        final script = html.ScriptElement()
+          ..async = true
+          ..src = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js'
+          ..setAttribute('data-cfasync', 'false');
+        
+        container.append(script);
+        
+        // Reload ad when script loads
+        script.onLoad.listen((_) {
+          // Try to reload the ad after a short delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            html.window.console.log('Adsterra ad loaded for $identifier');
+          });
+        });
+        
+        return container;
+      },
+    );
+    
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       child: Column(
@@ -111,7 +155,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // AdSense container - Placeholder that will show test ads when AdSense is approved
+          // Adsterra native ad container
           Container(
             width: double.infinity,
             height: 250,
@@ -127,63 +171,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 ),
               ],
             ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.ad_units,
-                    size: 48,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Google AdSense Ad',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.blue[200]!),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Publisher: ca-pub-2361005033053502',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          'Slot: 2625901948',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Test ads will appear here once approved',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+              child: HtmlElementView(
+                viewType: viewId,
               ),
             ),
           ),
