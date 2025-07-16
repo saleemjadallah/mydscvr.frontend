@@ -222,11 +222,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          if (kIsWeb) ...[
-            
-          ] else
+          // Ad Placeholder 1 - After Featured Events (only on web)
+          if (kIsWeb)
             SliverToBoxAdapter(
-              child: SizedBox.shrink(),
+              child: _buildAdSenseContainer('homepage-1', Colors.blue[50]),
             ),
           
           // Hidden Gem - Using actual component
@@ -241,9 +240,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
           
           // Ad Placeholder 2 - Between Hidden Gem and Categories
-          SliverToBoxAdapter(
-            child: SizedBox.shrink(),
-          ),
+          if (kIsWeb)
+            SliverToBoxAdapter(
+              child: _buildAdSenseContainer('homepage-2', Colors.green[50]),
+            ),
           
           // Categories Section - Using actual component
           const SliverToBoxAdapter(
@@ -270,9 +270,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
           
           // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
-          SliverToBoxAdapter(
-            child: SizedBox.shrink(),
-          ),
+          if (kIsWeb)
+            SliverToBoxAdapter(
+              child: _buildAdSenseContainer('homepage-3', Colors.purple[50]),
+            ),
           
           // MyDscvr's Choice Section - Final solution
           SliverToBoxAdapter(
@@ -285,9 +286,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           ),
           
           // Ad Placeholder 4 - Between Explore All Events and Footer
-          SliverToBoxAdapter(
-            child: SizedBox.shrink(),
-          ),
+          if (kIsWeb)
+            SliverToBoxAdapter(
+              child: _buildAdSenseContainer('homepage-4', Colors.orange[50]),
+            ),
           
           // Footer
           SliverToBoxAdapter(
