@@ -23,6 +23,7 @@ import '../../widgets/common/native_banner_simple.dart';
 import '../../widgets/common/native_banner_global_approach.dart';
 import '../../widgets/common/native_banner_nuxt_style.dart';
 import '../../widgets/common/native_banner_exact_copy.dart';
+import '../../widgets/common/native_banner_simple_fixed.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -263,9 +264,14 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Simple Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerSimple(
+                    const Text('Simple Approach Fixed:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerSimpleFixed(
                       adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Simple Approach Fixed (Native Key):', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerSimpleFixed(
+                      adKey: 'e1bd304e9b4f790ab61f30e117275a37',
                     ),
                     const SizedBox(height: 20),
                     const Text('Global Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
