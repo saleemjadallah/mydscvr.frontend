@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    mydscvr.ai - Dubai Events Discovery Platform
+    Discover amazing family-friendly events in the heart of Dubai
+  -->
+  <base href="/">
+
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  
+  <!-- Content Security Policy for Flutter Web with Google Sign-In -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http: https://apis.google.com https://accounts.google.com https://www.highperformanceformat.com https://www.topcreativeformat.com https://www.integratedadvertising.top https://trotscheme.com https://*.trotscheme.com https://pl27139224.profitableratecpm.com https://pl15015147.pvclouds.com https://*.profitableratecpm.com https://*.pvclouds.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: http: https://developers.google.com; font-src 'self' https:; connect-src 'self' https: http: https://accounts.google.com https://api.mydscvr.ai https://trotscheme.com https://*.trotscheme.com; frame-src 'self' data: https: http: https://accounts.google.com https://www.highperformanceformat.com https://www.topcreativeformat.com https://www.integratedadvertising.top https://trotscheme.com https://*.trotscheme.com https://pl27139224.profitableratecpm.com https://pl15015147.pvclouds.com https://*.profitableratecpm.com https://*.pvclouds.com; object-src 'none'; base-uri 'self'">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Discover amazing family-friendly events in Dubai! mydscvr.ai helps busy Dubai families find perfect activities for children of all ages. From beach fun to art workshops, explore the best family events in the UAE.">
+  <meta name="keywords" content="Dubai events, family events, kids activities, Dubai attractions, family fun, children events, UAE events, Dubai entertainment, family outings, mydscvr.ai">
+  <meta name="author" content="mydscvr.ai Team">
+  <meta name="robots" content="index, follow">
+
+  <!-- Algolia Site Verification -->
+  <meta name="algolia-site-verification" content="A974AB0C9EA55243" />
+
+  <!-- Open Graph Meta Tags for Social Sharing -->
+  <meta property="og:title" content="mydscvr.ai - Dubai Events Discovery Platform">
+  <meta property="og:description" content="Discover amazing family-friendly events in Dubai! Find perfect activities for children of all ages in the heart of the UAE.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mydscvr.ai">
+  <meta property="og:image" content="https://mydscvr.ai/images/og-image.jpg">
+  <meta property="og:locale" content="en_AE">
+  <meta property="og:site_name" content="mydscvr.ai">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="mydscvr.ai - Dubai Events Discovery Platform">
+  <meta name="twitter:description" content="Discover amazing family-friendly events in Dubai! Find perfect activities for children of all ages.">
+  <meta name="twitter:image" content="https://mydscvr.ai/images/twitter-card.jpg">
+
+  <!-- iOS Meta Tags & Icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="mydscvr.ai">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/Icon-192.png">
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#17A2B8">
+  <meta name="msapplication-TileColor" content="#17A2B8">
+  <meta name="msapplication-navbutton-color" content="#17A2B8">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.ico"/>
+
+  <!-- Preconnect for Performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Page Title -->
+  <title>mydscvr.ai - Discover Amazing Family Events in Dubai 🎉</title>
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5TPJEHGQ1M"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-5TPJEHGQ1M');
+  </script>
+  
+  <!-- Google Ads Conversion Tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17261831821"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'AW-17261831821');
+  </script>
+  
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1086840866748895');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1086840866748895&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
+  
+  <!-- Google AdSense Removed - Interfering with native ads -->
+
+  <!-- Ezoic Removed - Interfering with native ads -->
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleScriptLoaded()" onerror="onGoogleScriptError()"></script>
+
+  <!-- Loading Styles -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #17A2B8 0%, #6C5CE7 100%);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    /* Ensure Flutter app takes full height with no extra spacing */
+    flt-glass-pane {
+      height: 100vh !important;
+    }
+
+    /* Remove any default spacing from Flutter web */
+    flt-scene-host {
+      height: 100vh !important;
+    }
+
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #FF7B7B 0%, #FFA726 100%);
+      z-index: 9999;
+    }
+
+    .loading-logo {
+      width: 120px;
+      height: 120px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .loading-logo img {
+      width: 100px;
+      height: auto;
+      max-height: 100px;
+      object-fit: contain;
+    }
+
+    .loading-logo-fallback {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #17A2B8 0%, #6C5CE7 100%);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .loading-subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 16px;
+      text-align: center;
+      max-width: 300px;
+      line-height: 1.4;
+    }
+
+    .loading-spinner {
+      margin-top: 30px;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Hide loading when Flutter is ready */
+    .flutter-ready .loading-container {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Ad Header -->
+  <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
+    This is an Ad. Please scroll to proceed with content
+  </div>
+  
+  <!-- Native Banner Ad Container with Anti-Adblock -->
+  <div id="native-banner-container" style="display: block; text-align: center; padding: 10px; background-color: #f9f9f9;">
+    <script async="async" data-cfasync="false" src="//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js"></script>
+    <div id="container-e1bd304e9b4f790ab61f30e117275a37"></div>
+  </div>
+  
+  <!-- Loading Screen -->
+  <div class="loading-container" id="loading">
+    <div class="loading-logo">
+      <img src="assets/assets/images/mydscvr-logo.png" alt="mydscvr.ai logo" id="loading-logo-img" 
+           onerror="handleLogoError()" />
+      <div class="loading-logo-fallback" id="loading-logo-fallback" style="display: none;">
+        M
+      </div>
+    </div>
+    <div class="loading-text">mydscvr.ai</div>
+    <div class="loading-subtitle">Discovering amazing family events in Dubai...</div>
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Flutter App -->
+  <script>
+    // Configure Flutter web for clean URLs
+    window.flutterConfiguration = {
+      canvasKitBaseUrl: "/canvaskit/",
+      // Use path-based routing instead of hash routing
+      usePathUrlStrategy: true
+    };
+    
+    // Google Sign-In Script Loading Handlers
+    function onGoogleScriptLoaded() {
+      console.log('✅ Google Identity Services script loaded successfully');
+      console.log('🔍 Google object available:', typeof google !== 'undefined');
+      console.log('🔍 Google.accounts available:', typeof google?.accounts !== 'undefined');
+      console.log('🔍 Google.accounts.id available:', typeof google?.accounts?.id !== 'undefined');
+      
+      // Set a flag that Flutter can check
+      window.googleScriptLoaded = true;
+      
+      // Dispatch custom event for Flutter to listen to
+      window.dispatchEvent(new CustomEvent('google-script-loaded'));
+    }
+    
+    function onGoogleScriptError() {
+      console.error('❌ Failed to load Google Identity Services script');
+      console.error('🔧 This might be due to:');
+      console.error('   - Ad blockers blocking Google scripts');
+      console.error('   - Network connectivity issues');
+      console.error('   - Google services being unavailable');
+      
+      // Set error flag
+      window.googleScriptError = true;
+      
+      // Dispatch error event
+      window.dispatchEvent(new CustomEvent('google-script-error'));
+    }
+    
+    // Handle logo loading error
+    function handleLogoError() {
+      const img = document.getElementById('loading-logo-img');
+      const fallback = document.getElementById('loading-logo-fallback');
+      if (img && fallback) {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+        console.log('Logo failed to load, showing fallback. Tried path:', img.src);
+      }
+    }
+    
+    // Debug: Check if logo loads successfully
+    document.addEventListener('DOMContentLoaded', function() {
+      const img = document.getElementById('loading-logo-img');
+      if (img) {
+        img.onload = function() {
+          console.log('Logo loaded successfully from:', img.src);
+        };
+        console.log('Attempting to load logo from:', img.src);
+      }
+    });
+    
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.opacity = '0';
+        loading.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          loading.style.display = 'none';
+          document.body.classList.add('flutter-ready');
+        }, 500);
+      }
+    });
+    
+    // Event snippet for Home page conversion page
+    gtag('event', 'conversion', {
+        'send_to': 'AW-17261831821/YmOuCPSTxfAaEI3NiqdA',
+        'value': 1.0,
+        'currency': 'AED'
+    });
+    
+    // Native Banner Ad Management
+    let nativeBannerLoaded = false;
+    let adScriptLoaded = false;
+    const adKey = 'e1bd304e9b4f790ab61f30e117275a37';
+    const adScriptUrl = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js';
+    
+    // Function to recreate the ad container and reload the ad
+    function reloadNativeBanner() {
+      const bannerContainer = document.getElementById('native-banner-container');
+      if (!bannerContainer || !nativeBannerLoaded) {
+        console.log('Banner container not ready or not loaded');
+        return;
+      }
+      
+      // Method 1: Try all possible reload methods
+      const container = document.getElementById(`container-${adKey}`);
+      
+      // Check multiple ways to access reload
+      const reloadMethods = [
+        () => container.reload && container.reload(),
+        () => container.reload && container.reload.call(container),
+        () => window[`reload_${adKey}`] && window[`reload_${adKey}`](),
+        () => {
+          // Check if reload is in the prototype
+          const proto = Object.getPrototypeOf(container);
+          if (proto && proto.reload) {
+            proto.reload.call(container);
+          }
+        },
+        () => {
+          // Check all properties for reload-like functions
+          for (let prop in container) {
+            if (prop.toLowerCase().includes('reload') && typeof container[prop] === 'function') {
+              console.log(`Found reload method: ${prop}`);
+              container[prop]();
+              return true;
+            }
+          }
+        }
+      ];
+      
+      for (let method of reloadMethods) {
+        try {
+          if (method()) {
+            console.log('Native banner reloaded successfully');
+            return;
+          }
+        } catch (error) {
+          console.log('Reload method failed:', error);
+        }
+      }
+      
+      // Method 2: Re-inject the ad by recreating the container
+      console.log('Reloading native banner by re-injecting');
+      
+      // Clear the current ad content
+      bannerContainer.innerHTML = '';
+      
+      // Recreate the ad container
+      const newContainer = document.createElement('div');
+      newContainer.id = `container-${adKey}`;
+      bannerContainer.appendChild(newContainer);
+      
+      // Re-inject the ad script
+      if (adScriptLoaded) {
+        // If script was already loaded, trigger a re-render
+        // Some ad networks expose a global function to reinitialize ads
+        if (window.atOptions) {
+          // Try to reinitialize with existing options
+          const tempScript = document.createElement('script');
+          tempScript.textContent = `
+            if (typeof window['__${adKey}_reinit'] === 'function') {
+              window['__${adKey}_reinit']();
+            } else {
+              // Force re-evaluation of the ad
+              var script = document.createElement('script');
+              script.src = '${adScriptUrl}?t=' + Date.now();
+              script.async = true;
+              script.setAttribute('data-cfasync', 'false');
+              document.getElementById('native-banner-container').appendChild(script);
+            }
+          `;
+          document.body.appendChild(tempScript);
+          document.body.removeChild(tempScript);
+        } else {
+          // Reload the script with a cache buster
+          const script = document.createElement('script');
+          script.src = adScriptUrl + '?t=' + Date.now();
+          script.async = true;
+          script.setAttribute('data-cfasync', 'false');
+          bannerContainer.appendChild(script);
+        }
+      } else {
+        // First time loading
+        const script = document.createElement('script');
+        script.src = adScriptUrl;
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.onload = () => {
+          adScriptLoaded = true;
+          console.log('Ad script loaded successfully');
+        };
+        bannerContainer.appendChild(script);
+      }
+      
+      console.log('Native banner reload initiated');
+    }
+    
+    // Show native banner after Flutter loads
+    window.addEventListener('flutter-first-frame', function() {
+      const bannerContainer = document.getElementById('native-banner-container');
+      if (bannerContainer) {
+        bannerContainer.style.display = 'block';
+        nativeBannerLoaded = true;
+        
+        // Mark the initial script as loaded if it exists
+        const existingScript = bannerContainer.querySelector('script');
+        if (existingScript) {
+          adScriptLoaded = true;
+        }
+      }
+    });
+    
+    // Enhanced navigation detection for SPAs
+    let lastUrl = window.location.href;
+    let lastPathname = window.location.pathname;
+    let lastHash = window.location.hash;
+    
+    // Function to check if navigation occurred
+    function checkNavigation() {
+      const currentUrl = window.location.href;
+      const currentPathname = window.location.pathname;
+      const currentHash = window.location.hash;
+      
+      if (currentUrl !== lastUrl || currentPathname !== lastPathname || currentHash !== lastHash) {
+        lastUrl = currentUrl;
+        lastPathname = currentPathname;
+        lastHash = currentHash;
+        
+        console.log('Navigation detected, reloading native banner');
+        
+        // Delay reload to ensure DOM is ready
+        setTimeout(() => {
+          if (nativeBannerLoaded) {
+            reloadNativeBanner();
+          }
+        }, 200);
+      }
+    }
+    
+    // Multiple navigation detection strategies
+    
+    // 1. MutationObserver for DOM changes
+    const urlObserver = new MutationObserver(() => {
+      checkNavigation();
+    });
+    
+    // 2. Interval-based checking as fallback
+    let navigationCheckInterval = null;
+    
+    // Start observing once Flutter is ready
+    window.addEventListener('flutter-first-frame', function() {
+      // Start MutationObserver
+      urlObserver.observe(document.body, { 
+        childList: true, 
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['href']
+      });
+      
+      // Start interval checking as backup
+      navigationCheckInterval = setInterval(checkNavigation, 1000);
+    });
+    
+    // 3. Listen for History API events
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    history.pushState = function() {
+      originalPushState.apply(history, arguments);
+      setTimeout(checkNavigation, 100);
+    };
+    
+    history.replaceState = function() {
+      originalReplaceState.apply(history, arguments);
+      setTimeout(checkNavigation, 100);
+    };
+    
+    // 4. Popstate for browser back/forward
+    window.addEventListener('popstate', () => {
+      console.log('Browser navigation detected');
+      setTimeout(checkNavigation, 100);
+    });
+    
+    // 5. Hashchange event
+    window.addEventListener('hashchange', () => {
+      console.log('Hash change detected');
+      setTimeout(checkNavigation, 100);
+    });
+    
+    // Handle visibility changes
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && nativeBannerLoaded) {
+        console.log('Page became visible, reloading native banner');
+        setTimeout(reloadNativeBanner, 500);
+      }
+    });
+    
+    // Handle focus events
+    window.addEventListener('focus', () => {
+      if (nativeBannerLoaded) {
+        console.log('Window focused, reloading native banner');
+        setTimeout(reloadNativeBanner, 500);
+      }
+    });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (urlObserver) {
+        urlObserver.disconnect();
+      }
+      if (navigationCheckInterval) {
+        clearInterval(navigationCheckInterval);
+      }
+    });
+  </script>
+  
+  <script src="flutter_bootstrap.js" async></script>
+  
+  <!-- Infolinks Script -->
+  <script type="text/javascript"> 
+    var infolinks_pid = 3438312; 
+    var infolinks_wsid = 0; 
+  </script> 
+  <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
+</body>
+</html>

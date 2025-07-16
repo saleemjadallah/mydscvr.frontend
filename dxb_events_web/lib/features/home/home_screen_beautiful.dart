@@ -7,9 +7,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
-// Conditional imports for web platform
-import 'platform/platform_view_registry_stub.dart'
-    if (dart.library.html) 'platform/platform_view_registry.dart';
+// Import ad widget
+import '../../widgets/common/adsterra_native_ad.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -89,67 +88,6 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     context.go('/event/${event.id}');
   }
 
-  /// Build Adsterra native ad container with header
-  Widget _buildAdSenseContainer(String identifier, [Color? backgroundColor]) {
-    // Create unique view ID for each ad placement
-    final String viewId = 'adsterra-native-$identifier';
-    
-    // Register the ad view for web platform
-    if (kIsWeb) {
-      registerAdView(viewId, identifier);
-    }
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-      child: Column(
-        children: [
-          // Header text
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F0F0),
-              border: Border.all(color: const Color(0xFFDDDDDD)),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            ),
-            child: Text(
-              'This is an Ad. Please scroll to proceed with content',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: const Color(0xFF666666),
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-          
-          // Adsterra native ad container
-          Container(
-            width: double.infinity,
-            height: 250,
-            decoration: BoxDecoration(
-              color: backgroundColor ?? Colors.grey[50],
-              border: Border.all(color: const Color(0xFFDDDDDD)),
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-              child: HtmlElementView(
-                viewType: viewId,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,8 +121,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 1 - After Featured Events (only on web)
           if (kIsWeb)
-            SliverToBoxAdapter(
-              child: _buildAdSenseContainer('homepage-1', Colors.blue[50]),
+            const SliverToBoxAdapter(
+              child: AdsterraNativeAd(
+                identifier: '1',
+                backgroundColor: Color(0xFFE3F2FD), // blue[50]
+              ),
             ),
           
           // Hidden Gem - Using actual component
@@ -200,8 +141,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 2 - Between Hidden Gem and Categories
           if (kIsWeb)
-            SliverToBoxAdapter(
-              child: _buildAdSenseContainer('homepage-2', Colors.green[50]),
+            const SliverToBoxAdapter(
+              child: AdsterraNativeAd(
+                identifier: '2',
+                backgroundColor: Color(0xFFE8F5E9), // green[50]
+              ),
             ),
           
           // Categories Section - Using actual component
@@ -230,8 +174,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
           if (kIsWeb)
-            SliverToBoxAdapter(
-              child: _buildAdSenseContainer('homepage-3', Colors.purple[50]),
+            const SliverToBoxAdapter(
+              child: AdsterraNativeAd(
+                identifier: '3',
+                backgroundColor: Color(0xFFF3E5F5), // purple[50]
+              ),
             ),
           
           // MyDscvr's Choice Section - Final solution
@@ -246,8 +193,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 4 - Between Explore All Events and Footer
           if (kIsWeb)
-            SliverToBoxAdapter(
-              child: _buildAdSenseContainer('homepage-4', Colors.orange[50]),
+            const SliverToBoxAdapter(
+              child: AdsterraNativeAd(
+                identifier: '4',
+                backgroundColor: Color(0xFFFFF3E0), // orange[50]
+              ),
             ),
           
           // Footer

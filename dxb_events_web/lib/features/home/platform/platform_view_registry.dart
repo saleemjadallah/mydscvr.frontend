@@ -8,35 +8,44 @@ void registerAdView(String viewId, String identifier) {
   ui_web.platformViewRegistry.registerViewFactory(
     viewId,
     (int viewId) {
+      // Create container div exactly like Vue example
       final container = html.DivElement()
-        ..id = 'adsterra-container-$identifier'
+        ..id = 'container-e1bd304e9b4f790ab61f30e117275a37-$identifier'
         ..style.width = '100%'
-        ..style.height = '250px'
-        ..style.textAlign = 'center'
-        ..style.padding = '10px'
-        ..style.backgroundColor = '#f9f9f9';
+        ..style.height = '250px';
       
-      // Create the ad container div
-      final adDiv = html.DivElement()
-        ..id = 'container-e1bd304e9b4f790ab61f30e117275a37-$identifier';
+      // Store reload function reference
+      var reloadFunction;
       
-      container.append(adDiv);
-      
-      // Create and inject the ad script
+      // Create and append script
       final script = html.ScriptElement()
         ..async = true
         ..src = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js'
         ..setAttribute('data-cfasync', 'false');
       
-      container.append(script);
-      
-      // Reload ad when script loads
+      // Handle script load event
       script.onLoad.listen((_) {
-        // Try to reload the ad after a short delay
-        Future.delayed(const Duration(milliseconds: 500), () {
-          html.window.console.log('Adsterra ad loaded for $identifier');
-        });
+        // Check for reload function like Vue example
+        html.window.setInterval(() {
+          try {
+            // Check if container has reload method
+            final jsContainer = html.document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37-$identifier');
+            if (jsContainer != null) {
+              // Try to access reload function
+              final dynamic containerJs = jsContainer as dynamic;
+              if (containerJs.reload != null) {
+                reloadFunction = containerJs.reload;
+                html.window.console.log('Ad reload function found for $identifier');
+              }
+            }
+          } catch (e) {
+            // Ignore errors while checking
+          }
+        }, 16);
       });
+      
+      // Append script to container
+      container.append(script);
       
       return container;
     },

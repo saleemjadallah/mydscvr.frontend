@@ -558,6 +558,71 @@
   
   <script src="flutter_bootstrap.js" async></script>
   
+  <!-- Hidden Ad Containers for Flutter -->
+  <div id="flutter-ad-container-1" style="display: none;">
+    <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
+      This is an Ad. Please scroll to proceed with content
+    </div>
+    <div id="container-e1bd304e9b4f790ab61f30e117275a37-flutter-1"></div>
+  </div>
+  
+  <div id="flutter-ad-container-2" style="display: none;">
+    <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
+      This is an Ad. Please scroll to proceed with content
+    </div>
+    <div id="container-e1bd304e9b4f790ab61f30e117275a37-flutter-2"></div>
+  </div>
+  
+  <div id="flutter-ad-container-3" style="display: none;">
+    <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
+      This is an Ad. Please scroll to proceed with content
+    </div>
+    <div id="container-e1bd304e9b4f790ab61f30e117275a37-flutter-3"></div>
+  </div>
+  
+  <div id="flutter-ad-container-4" style="display: none;">
+    <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
+      This is an Ad. Please scroll to proceed with content
+    </div>
+    <div id="container-e1bd304e9b4f790ab61f30e117275a37-flutter-4"></div>
+  </div>
+  
+  <script>
+    // Function to initialize ad in a specific container
+    window.initializeAdsterra = function(containerId) {
+      const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37-' + containerId);
+      if (!container) return;
+      
+      // Check if script already loaded
+      if (container.hasAttribute('data-script-loaded')) {
+        // Try to reload if function exists
+        if (container.reload) {
+          container.reload();
+        }
+        return;
+      }
+      
+      // Create and append script
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js';
+      script.setAttribute('data-cfasync', 'false');
+      
+      script.onload = function() {
+        container.setAttribute('data-script-loaded', 'true');
+        // Check for reload function
+        const ticker = setInterval(() => {
+          if (container.reload) {
+            clearInterval(ticker);
+            console.log('Adsterra reload function found for', containerId);
+          }
+        }, 16);
+      };
+      
+      container.appendChild(script);
+    };
+  </script>
+  
   <!-- Infolinks Script -->
   <script type="text/javascript"> 
     var infolinks_pid = 3438312; 
