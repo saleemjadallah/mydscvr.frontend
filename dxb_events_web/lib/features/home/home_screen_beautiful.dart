@@ -17,6 +17,7 @@ import '../../widgets/home/hidden_gem_card.dart';
 import '../../core/animations/animations.dart';
 import '../../widgets/search/super_search_button.dart';
 import '../../widgets/common/adsterra_cross_platform.dart';
+import '../../widgets/common/native_banner_vue_style.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -224,17 +225,24 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 1 - Between Featured Events and Hidden Gem
           SliverToBoxAdapter(
-            child: AdsterraAd(
-              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-              width: 300,
-              height: 250,
-              onAdLoaded: () {
-                print('Ad loaded successfully');
-              },
-              onAdFailed: () {
-                print('Ad failed to load');
-              },
-            ),
+            child: kIsWeb 
+              ? NativeBannerVueStyle(
+                  adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                  containerId: 'container-0c346d8dd7b206d16df3d22d25820f9e-1',
+                  width: 300,
+                  height: 250,
+                )
+              : AdsterraAd(
+                  adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                  width: 300,
+                  height: 250,
+                  onAdLoaded: () {
+                    print('Ad loaded successfully');
+                  },
+                  onAdFailed: () {
+                    print('Ad failed to load');
+                  },
+                ),
           ),
           
           // Hidden Gem - Using actual component

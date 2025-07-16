@@ -156,8 +156,11 @@ class _AdsterraAdState extends State<AdsterraAd> {
             'params': {}
         };
         
+        // Try multiple ad server patterns
         const AD_DOMAINS = [
-            '//pl27139224.profitableratecpm.com'
+            '//www.topcreativeformat.com',
+            '//pl27139224.profitableratecpm.com',
+            '//pl15015147.pvclouds.com'
         ];
         
         let currentDomainIndex = 0;
