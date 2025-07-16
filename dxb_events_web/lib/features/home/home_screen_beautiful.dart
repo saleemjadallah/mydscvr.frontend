@@ -6,8 +6,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
-import 'dart:html' as html;
-import 'dart:ui' as ui;
+
+// Conditional imports for web platform
+import 'platform/platform_view_registry_stub.dart'
+    if (dart.library.html) 'platform/platform_view_registry.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -92,44 +94,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     // Create unique view ID for each ad placement
     final String viewId = 'adsterra-native-$identifier';
     
-    // Register the HTML element view
-    // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(
-      viewId,
-      (int viewId) {
-        final container = html.DivElement()
-          ..id = 'adsterra-container-$identifier'
-          ..style.width = '100%'
-          ..style.height = '250px'
-          ..style.textAlign = 'center'
-          ..style.padding = '10px'
-          ..style.backgroundColor = '#f9f9f9';
-        
-        // Create the ad container div
-        final adDiv = html.DivElement()
-          ..id = 'container-e1bd304e9b4f790ab61f30e117275a37-$identifier';
-        
-        container.append(adDiv);
-        
-        // Create and inject the ad script
-        final script = html.ScriptElement()
-          ..async = true
-          ..src = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js'
-          ..setAttribute('data-cfasync', 'false');
-        
-        container.append(script);
-        
-        // Reload ad when script loads
-        script.onLoad.listen((_) {
-          // Try to reload the ad after a short delay
-          Future.delayed(const Duration(milliseconds: 500), () {
-            html.window.console.log('Adsterra ad loaded for $identifier');
-          });
-        });
-        
-        return container;
-      },
-    );
+    // Register the ad view for web platform
+    if (kIsWeb) {
+      registerAdView(viewId, identifier);
+    }
     
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
