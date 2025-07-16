@@ -6,7 +6,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/event.dart';
 import '../../utils/duration_formatter.dart';
-import '../../utils/image_loader.dart';
 import 'event_actions.dart';
 
 class EventCard extends StatelessWidget {
@@ -205,13 +204,18 @@ class EventCard extends StatelessWidget {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: event.imageUrls.isNotEmpty
-                ? ImageLoader.loadNetworkImage(
-                    imageUrl: event.imageUrls.first,
+                ? Image.network(
+                    event.imageUrls.first,
                     width: double.infinity,
                     height: 160,
                     fit: BoxFit.cover,
-                    placeholder: _buildImagePlaceholder(),
-                    errorWidget: _buildImagePlaceholder(),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return _buildImagePlaceholder();
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return _buildImagePlaceholder();
+                    },
                   )
                 : _buildImagePlaceholder(),
           ),
