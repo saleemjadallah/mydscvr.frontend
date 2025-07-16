@@ -366,6 +366,19 @@
         }
       }
       
+      // Also check if the container has been modified by the ad script
+      // Some ad networks attach the reload function after initialization
+      try {
+        // Try direct method call as suggested
+        if (container && container.reload) {
+          container.reload();
+          console.log('Native banner reloaded using direct reload call');
+          return;
+        }
+      } catch (error) {
+        console.log('Direct reload method not available');
+      }
+      
       // Method 2: Re-inject the ad by recreating the container
       console.log('Reloading native banner by re-injecting');
       

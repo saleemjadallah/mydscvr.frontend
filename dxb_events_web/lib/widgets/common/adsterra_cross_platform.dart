@@ -144,6 +144,7 @@ class _AdsterraAdState extends State<AdsterraAd> {
 <body>
     <div id="ad-container">
         <div class="loading" id="loading">Loading ad...</div>
+        <div id="container-${widget.adKey}"></div>
     </div>
     
     <script type="text/javascript">
@@ -156,9 +157,7 @@ class _AdsterraAdState extends State<AdsterraAd> {
         };
         
         const AD_DOMAINS = [
-            'https://www.highperformanceformat.com',
-            'https://www.topcreativeformat.com',
-            'https://www.integratedadvertising.top'
+            '//pl27139224.profitableratecpm.com'
         ];
         
         let currentDomainIndex = 0;
@@ -188,8 +187,24 @@ class _AdsterraAdState extends State<AdsterraAd> {
                 console.log('Ad script loaded from: ' + script.src);
                 document.getElementById('loading').style.display = 'none';
                 
-                // Check if ad actually loaded
+                // Check if ad actually loaded and set up reload function
                 setTimeout(function() {
+                    const container = document.getElementById('ad-container');
+                    
+                    // Check for container-specific reload function
+                    const adContainer = document.getElementById('container-${widget.adKey}');
+                    if (adContainer && adContainer.reload) {
+                        // Store reload function for later use
+                        window.adReloadFunction = function() {
+                            try {
+                                adContainer.reload();
+                                console.log('Ad reloaded using container reload function');
+                            } catch (e) {
+                                console.error('Error reloading ad:', e);
+                            }
+                        };
+                    }
+                    
                     const adFrames = document.querySelectorAll('iframe');
                     if (adFrames.length === 0) {
                         // Try next domain
@@ -199,10 +214,14 @@ class _AdsterraAdState extends State<AdsterraAd> {
                 }, 3000);
             };
             
-            script.onerror = function() {
-                console.error('Failed to load ad script from: ' + script.src);
+            script.onerror = function(e) {
+                console.warn('Failed to load ad script from: ' + script.src);
+                // Suppress DNS errors in console
+                if (e && e.message && e.message.includes('ERR_NAME_NOT_RESOLVED')) {
+                    console.log('Domain not accessible, trying next...');
+                }
                 currentDomainIndex++;
-                loadAdScript();
+                setTimeout(loadAdScript, 1000); // Add delay before retry
             };
             
             // Add timeout for each script load
