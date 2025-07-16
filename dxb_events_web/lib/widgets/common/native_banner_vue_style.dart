@@ -1,5 +1,6 @@
 import 'dart:html' as html;
 import 'dart:ui_web' as ui;
+import 'dart:js' as js;
 import 'package:flutter/material.dart';
 
 class NativeBannerVueStyle extends StatefulWidget {
@@ -85,7 +86,7 @@ class _NativeBannerVueStyleState extends State<NativeBannerVueStyle> with Widget
           attempts++;
           
           // Check if container has reload function
-          final jsObject = html.JsObject.fromBrowserObject(_container!);
+          final jsObject = js.JsObject.fromBrowserObject(_container!);
           if (jsObject.hasProperty('reload')) {
             // Store reload function reference
             html.window.localStorage['reload_${widget.adKey}'] = 'true';
@@ -126,7 +127,7 @@ class _NativeBannerVueStyleState extends State<NativeBannerVueStyle> with Widget
   void _callReloadFunction() {
     if (_container != null) {
       try {
-        final jsObject = html.JsObject.fromBrowserObject(_container!);
+        final jsObject = js.JsObject.fromBrowserObject(_container!);
         if (jsObject.hasProperty('reload')) {
           jsObject.callMethod('reload');
           print('Native banner reloaded: ${widget.adKey}');
