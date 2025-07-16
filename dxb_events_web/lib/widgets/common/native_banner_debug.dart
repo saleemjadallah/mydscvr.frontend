@@ -1,6 +1,7 @@
 import 'dart:html' as html;
 import 'dart:ui_web' as ui;
 import 'dart:async';
+import 'dart:js' as js;
 import 'package:flutter/material.dart';
 
 class NativeBannerDebug extends StatefulWidget {
@@ -142,7 +143,7 @@ class _NativeBannerDebugState extends State<NativeBannerDebug> {
       
       // Check for reload function
       try {
-        final hasReload = html.window.context.callMethod('eval', [
+        final hasReload = js.context.callMethod('eval', [
           'document.getElementById("container-${widget.adKey}") && document.getElementById("container-${widget.adKey}").reload ? true : false'
         ]);
         info.add('Has reload: $hasReload');
@@ -160,7 +161,7 @@ class _NativeBannerDebugState extends State<NativeBannerDebug> {
 
       // Check container properties
       try {
-        final props = html.window.context.callMethod('eval', ['''
+        final props = js.context.callMethod('eval', ['''
           (function() {
             var container = document.getElementById("container-${widget.adKey}");
             if (!container) return "No container";

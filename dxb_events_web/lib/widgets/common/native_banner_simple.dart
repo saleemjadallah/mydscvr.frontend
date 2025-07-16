@@ -1,5 +1,6 @@
 import 'dart:html' as html;
 import 'dart:ui_web' as ui;
+import 'dart:js' as js;
 import 'package:flutter/material.dart';
 
 class NativeBannerSimple extends StatefulWidget {
@@ -115,7 +116,7 @@ class _NativeBannerSimpleState extends State<NativeBannerSimple> {
     print('Reloading ad: ${widget.adKey}');
     
     // Try native reload first
-    html.window.context.callMethod('eval', ['''
+    js.context.callMethod('eval', ['''
       if (window['reload_${widget.adKey}']) {
         window['reload_${widget.adKey}']();
       } else {
