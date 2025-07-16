@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
 // Import ad widget
-import '../../widgets/common/adsterra_native_ad.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -119,14 +118,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Ad Placeholder 1 - After Featured Events (only on web)
-          if (kIsWeb)
-            const SliverToBoxAdapter(
-              child: AdsterraNativeAd(
-                identifier: '1',
-                backgroundColor: Color(0xFFE3F2FD), // blue[50]
-              ),
-            ),
+          // Ad placeholder removed - using Monetag service worker instead
           
           // Hidden Gem - Using actual component
           const SliverToBoxAdapter(
@@ -139,14 +131,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Ad Placeholder 2 - Between Hidden Gem and Categories
-          if (kIsWeb)
-            const SliverToBoxAdapter(
-              child: AdsterraNativeAd(
-                identifier: '2',
-                backgroundColor: Color(0xFFE8F5E9), // green[50]
-              ),
-            ),
+          // Ad placeholder removed - using Monetag service worker instead
           
           // Categories Section - Using actual component
           const SliverToBoxAdapter(
@@ -172,14 +157,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
-          if (kIsWeb)
-            const SliverToBoxAdapter(
-              child: AdsterraNativeAd(
-                identifier: '3',
-                backgroundColor: Color(0xFFF3E5F5), // purple[50]
-              ),
-            ),
+          // Ad placeholder removed - using Monetag service worker instead
           
           // MyDscvr's Choice Section - Final solution
           SliverToBoxAdapter(
@@ -191,14 +169,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: _buildExploreAllEventsButton(),
           ),
           
-          // Ad Placeholder 4 - Between Explore All Events and Footer
-          if (kIsWeb)
-            const SliverToBoxAdapter(
-              child: AdsterraNativeAd(
-                identifier: '4',
-                backgroundColor: Color(0xFFFFF3E0), // orange[50]
-              ),
-            ),
+          // Ad placeholder removed - using Monetag service worker instead
           
           // Footer
           SliverToBoxAdapter(
