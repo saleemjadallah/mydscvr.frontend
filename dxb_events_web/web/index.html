@@ -565,7 +565,7 @@
     <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
       This is an Ad. Please scroll to proceed with content
     </div>
-    <div id="container-e1bd304e9b4f790ab61f30e117275a37-flutter-1"></div>
+    <div id="atContainer-0c346d8dd7b206d16df3d22d25820f9e-flutter-1" style="width: 300px; height: 300px; max-width: 100%; margin: 0 auto;"></div>
   </div>
   
   <div id="flutter-ad-container-2" style="display: none;">
@@ -592,6 +592,41 @@
   <script>
     // Function to initialize ad in a specific container
     window.initializeAdsterra = function(containerId) {
+      // Special handling for container 1 with new banner format
+      if (containerId === 'flutter-1') {
+        const container = document.getElementById('atContainer-0c346d8dd7b206d16df3d22d25820f9e-flutter-1');
+        if (!container) return;
+        
+        // Check if already initialized
+        if (container.hasAttribute('data-script-loaded')) {
+          return;
+        }
+        
+        // Initialize new banner format
+        if (typeof atAsyncOptions !== 'object') window.atAsyncOptions = [];
+        window.atAsyncOptions.push({
+            'key': '0c346d8dd7b206d16df3d22d25820f9e',
+            'format': 'js',
+            'async': true,
+            'container': 'atContainer-0c346d8dd7b206d16df3d22d25820f9e-flutter-1',
+            'params' : {}
+        });
+        
+        const script = document.createElement('script');
+        script.type = "text/javascript";
+        script.async = true;
+        script.src = 'http' + (location.protocol === 'https:' ? 's' : '') + '://trotscheme.com/0c346d8dd7b206d16df3d22d25820f9e/invoke.js';
+        
+        script.onload = function() {
+          container.setAttribute('data-script-loaded', 'true');
+          console.log('New banner format loaded for', containerId);
+        };
+        
+        document.getElementsByTagName('head')[0].appendChild(script);
+        return;
+      }
+      
+      // Original logic for other containers
       const container = document.getElementById('container-e1bd304e9b4f790ab61f30e117275a37-' + containerId);
       if (!container) return;
       
