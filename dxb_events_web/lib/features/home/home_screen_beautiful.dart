@@ -224,15 +224,6 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Debug Section - Test all approaches
           if (kIsWeb) ...[
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'Ad Implementation Tests',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
             
             // Debug widget to understand what's happening
             SliverToBoxAdapter(
