@@ -16,16 +16,7 @@ import '../../widgets/home/smart_trending_section.dart';
 import '../../widgets/home/hidden_gem_card.dart';
 import '../../core/animations/animations.dart';
 import '../../widgets/search/super_search_button.dart';
-import '../../widgets/common/adsterra_cross_platform.dart';
-import '../../widgets/common/native_banner_vue_style.dart';
-import '../../widgets/common/native_banner_debug.dart';
-import '../../widgets/common/native_banner_simple.dart';
-import '../../widgets/common/native_banner_global_approach.dart';
-import '../../widgets/common/native_banner_nuxt_style.dart';
-import '../../widgets/common/native_banner_exact_copy.dart';
-import '../../widgets/common/native_banner_simple_fixed.dart';
-import '../../widgets/common/native_banner_exact_html.dart';
-import '../../widgets/common/native_banner_iframe_exact.dart';
+// Ad imports removed - ads are now handled in index.html
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -251,9 +242,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Debug Widget:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerDebug(
-                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                    ),
+                    SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -267,56 +256,32 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Simple Approach Fixed:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerSimpleFixed(
-                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                    ),
+                    SizedBox.shrink(),
                     const SizedBox(height: 20),
                     const Text('Simple Approach Fixed (Native Key):', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerSimpleFixed(
-                      adKey: 'e1bd304e9b4f790ab61f30e117275a37',
-                    ),
+                    SizedBox.shrink(),
                     const SizedBox(height: 20),
                     const Text('Global Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerGlobalApproach(
-                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                    ),
+                    SizedBox.shrink(),
                     const SizedBox(height: 20),
                     const Text('Nuxt Style:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerNuxtStyle(
-                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                    ),
+                    SizedBox.shrink(),
                     const SizedBox(height: 20),
                     const Text('Exact Copy of Vue/Nuxt:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerExactCopy(
-                      adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                    ),
+                    SizedBox.shrink(),
                     const SizedBox(height: 20),
                     const Text('EXACT HTML Structure:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerExactHtml(
-                      adKey: 'e1bd304e9b4f790ab61f30e117275a37',
-                    ),
+                    SizedBox.shrink(),
                     const SizedBox(height: 20),
                     const Text('Iframe with EXACT HTML:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    NativeBannerIframeExact(
-                      adKey: 'e1bd304e9b4f790ab61f30e117275a37',
-                    ),
+                    SizedBox.shrink(),
                   ],
                 ),
               ),
             ),
           ] else
             SliverToBoxAdapter(
-              child: AdsterraAd(
-                adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-                width: 300,
-                height: 250,
-                onAdLoaded: () {
-                  print('Ad loaded successfully');
-                },
-                onAdFailed: () {
-                  print('Ad failed to load');
-                },
-              ),
+              child: SizedBox.shrink(),
             ),
           
           // Hidden Gem - Using actual component
@@ -332,17 +297,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 2 - Between Hidden Gem and Categories
           SliverToBoxAdapter(
-            child: AdsterraAd(
-              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-              width: 300,
-              height: 250,
-              onAdLoaded: () {
-                print('Ad loaded successfully');
-              },
-              onAdFailed: () {
-                print('Ad failed to load');
-              },
-            ),
+            child: SizedBox.shrink(),
           ),
           
           // Categories Section - Using actual component
@@ -371,17 +326,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 3 - Between Trending Now and MyDscvr's Choice
           SliverToBoxAdapter(
-            child: AdsterraAd(
-              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-              width: 300,
-              height: 250,
-              onAdLoaded: () {
-                print('Ad loaded successfully');
-              },
-              onAdFailed: () {
-                print('Ad failed to load');
-              },
-            ),
+            child: SizedBox.shrink(),
           ),
           
           // MyDscvr's Choice Section - Final solution
@@ -396,17 +341,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           
           // Ad Placeholder 4 - Between Explore All Events and Footer
           SliverToBoxAdapter(
-            child: AdsterraAd(
-              adKey: '0c346d8dd7b206d16df3d22d25820f9e',
-              width: 300,
-              height: 250,
-              onAdLoaded: () {
-                print('Ad loaded successfully');
-              },
-              onAdFailed: () {
-                print('Ad failed to load');
-              },
-            ),
+            child: SizedBox.shrink(),
           ),
           
           // Footer
