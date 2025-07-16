@@ -24,6 +24,8 @@ import '../../widgets/common/native_banner_global_approach.dart';
 import '../../widgets/common/native_banner_nuxt_style.dart';
 import '../../widgets/common/native_banner_exact_copy.dart';
 import '../../widgets/common/native_banner_simple_fixed.dart';
+import '../../widgets/common/native_banner_exact_html.dart';
+import '../../widgets/common/native_banner_iframe_exact.dart';
 
 // Import header and orange section components
 import '../../core/widgets/curved_container.dart';
@@ -287,6 +289,16 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     const Text('Exact Copy of Vue/Nuxt:', style: TextStyle(fontWeight: FontWeight.bold)),
                     NativeBannerExactCopy(
                       adKey: '0c346d8dd7b206d16df3d22d25820f9e',
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('EXACT HTML Structure:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerExactHtml(
+                      adKey: 'e1bd304e9b4f790ab61f30e117275a37',
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Iframe with EXACT HTML:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    NativeBannerIframeExact(
+                      adKey: 'e1bd304e9b4f790ab61f30e117275a37',
                     ),
                   ],
                 ),
