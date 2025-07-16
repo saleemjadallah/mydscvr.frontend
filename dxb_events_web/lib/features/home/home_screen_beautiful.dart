@@ -1924,9 +1924,9 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
-                    child: placeholderEvent.imageUrl.isNotEmpty
+                    child: placeholderEvent.imageUrls.isNotEmpty
                       ? Image.network(
-                          placeholderEvent.imageUrl,
+                          placeholderEvent.imageUrls.first,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
                             color: Colors.white.withOpacity(0.2),
@@ -2085,9 +2085,9 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(21),
-            child: placeholderEvent.imageUrl.isNotEmpty
+            child: placeholderEvent.imageUrls.isNotEmpty
               ? Image.network(
-                  placeholderEvent.imageUrl,
+                  placeholderEvent.imageUrls.first,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: Colors.white.withOpacity(0.2),

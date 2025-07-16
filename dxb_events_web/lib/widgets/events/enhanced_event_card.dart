@@ -87,9 +87,10 @@ class EnhancedEventCard extends StatelessWidget {
   Widget _buildImageSection(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 480;
+    final imageHeight = isMobile ? 140.0 : 180.0;
     
     return Container(
-      height: isMobile ? 140 : 180,
+      height: imageHeight,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -104,7 +105,7 @@ class EnhancedEventCard extends StatelessWidget {
                 ? Image.network(
                     event.imageUrls.first,
                     width: double.infinity,
-                    height: 180,
+                    height: imageHeight,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
                   )
@@ -142,7 +143,7 @@ class EnhancedEventCard extends StatelessWidget {
   Widget _buildImagePlaceholder() {
     return Container(
       width: double.infinity,
-      height: 180,
+      height: double.infinity,
       decoration: BoxDecoration(
         gradient: AppColors.sunsetGradient,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
