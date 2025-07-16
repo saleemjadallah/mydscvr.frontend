@@ -13,6 +13,7 @@ import '../models/api_response.dart';
 import '../widgets/events/enhanced_event_card.dart';
 import '../core/animations/fade_in_slide_up.dart';
 import '../core/theme/app_text_styles.dart';
+import '../utils/image_utils.dart';
 import '../providers/featured_events_provider.dart';
 
 /// Featured Events section for the homepage
@@ -538,23 +539,21 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
               height: 200,
               width: double.infinity,
               child: event.imageUrls.isNotEmpty
-                  ? Image.network(
-                      event.imageUrls.first,
+                  ? ImageUtils.buildNetworkImage(
+                      imageUrl: event.imageUrls.first,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            gradient: AppColors.oceanGradient,
+                      errorWidget: Container(
+                        decoration: BoxDecoration(
+                          gradient: AppColors.oceanGradient,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.event,
+                            size: 48,
+                            color: Colors.white,
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.event,
-                              size: 48,
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      },
+                        ),
+                      ),
                     )
                   : Container(
                       decoration: BoxDecoration(
