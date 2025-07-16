@@ -20,7 +20,7 @@ void registerAdView(String viewId, String identifier) {
       // Create and append script
       final script = html.ScriptElement()
         ..async = true
-        ..src = '//pl27139224.profitableratecpm.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js'
+        ..src = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js'
         ..setAttribute('data-cfasync', 'false');
       
       // Handle script load event
