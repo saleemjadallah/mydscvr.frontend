@@ -297,19 +297,21 @@ class EventCardEnhanced extends StatelessWidget {
           // Image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              event.imageUrl,
-              width: double.infinity,
-              height: 140,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return _buildImagePlaceholder();
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return _buildImagePlaceholder();
-              },
-            ),
+            child: event.imageUrls.isNotEmpty
+                ? Image.network(
+                    event.imageUrls.first,
+                    width: double.infinity,
+                    height: 140,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return _buildImagePlaceholder();
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return _buildImagePlaceholder();
+                    },
+                  )
+                : _buildImagePlaceholder(),
           ),
           
           // Gradient overlay

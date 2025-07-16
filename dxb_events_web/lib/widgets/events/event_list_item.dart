@@ -233,19 +233,21 @@ class EventListItem extends StatelessWidget {
           // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              event.imageUrl,
-              width: 120,
-              height: 100,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return _buildImagePlaceholder();
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return _buildImagePlaceholder();
-              },
-            ),
+            child: event.imageUrls.isNotEmpty
+                ? Image.network(
+                    event.imageUrls.first,
+                    width: 120,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return _buildImagePlaceholder();
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return _buildImagePlaceholder();
+                    },
+                  )
+                : _buildImagePlaceholder(),
           ),
           
           // Gradient overlay for better text visibility

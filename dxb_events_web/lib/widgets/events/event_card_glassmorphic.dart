@@ -107,10 +107,12 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
                 ),
-                image: DecorationImage(
-                  image: NetworkImage(widget.event.imageUrl),
-                  fit: BoxFit.cover,
-                ),
+                image: widget.event.imageUrls.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(widget.event.imageUrls.first),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
               child: Container(
                 decoration: BoxDecoration(
@@ -244,10 +246,12 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
               width: 88,
               height: 88,
               decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(widget.event.imageUrl),
-                  fit: BoxFit.cover,
-                ),
+                image: widget.event.imageUrls.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(widget.event.imageUrls.first),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
             ),
           ),

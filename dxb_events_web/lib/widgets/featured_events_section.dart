@@ -537,24 +537,37 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
             child: Container(
               height: 200,
               width: double.infinity,
-              child: Image.network(
-                event.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      gradient: AppColors.oceanGradient,
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.event,
-                        size: 48,
-                        color: Colors.white,
+              child: event.imageUrls.isNotEmpty
+                  ? Image.network(
+                      event.imageUrls.first,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: AppColors.oceanGradient,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.event,
+                              size: 48,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        gradient: AppColors.oceanGradient,
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.event,
+                          size: 48,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  );
-                },
-              ),
             ),
           ),
           
