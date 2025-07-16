@@ -48,10 +48,12 @@ class _AdsterraNativeAdState extends State<AdsterraNativeAd> {
           // Initialize the ad script
           js.context.callMethod('initializeAdsterra', ['flutter-${widget.identifier}']);
           
-          // Create a wrapper div to return
+          // Create a wrapper div to return with 1:1 aspect ratio
           final wrapper = html.DivElement()
-            ..style.width = '100%'
-            ..style.height = '250px';
+            ..style.width = '300px'
+            ..style.height = '300px'
+            ..style.maxWidth = '100%'
+            ..style.margin = '0 auto';
           
           // Move the container content to the wrapper
           wrapper.append(container);
@@ -89,11 +91,18 @@ class _AdsterraNativeAdState extends State<AdsterraNativeAd> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          width: double.infinity,
-          height: 250,
-          child: HtmlElementView(
-            viewType: viewId,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: 1.0, // 1:1 aspect ratio
+            child: Container(
+              constraints: const BoxConstraints(
+                maxWidth: 300,
+                maxHeight: 300,
+              ),
+              child: HtmlElementView(
+                viewType: viewId,
+              ),
+            ),
           ),
         ),
       ),

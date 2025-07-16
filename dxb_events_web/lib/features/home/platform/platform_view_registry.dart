@@ -11,8 +11,11 @@ void registerAdView(String viewId, String identifier) {
       // Create container div exactly like Vue example
       final container = html.DivElement()
         ..id = 'container-e1bd304e9b4f790ab61f30e117275a37-$identifier'
-        ..style.width = '100%'
-        ..style.height = '250px';
+        ..style.width = '300px'
+        ..style.height = '300px'
+        ..style.maxWidth = '100%'
+        ..style.margin = '0 auto'
+        ..style.aspectRatio = '1/1';
       
       // Store reload function reference
       var reloadFunction;
