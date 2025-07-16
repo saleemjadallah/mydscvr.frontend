@@ -222,54 +222,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Ad Debug Section - Test all approaches
           if (kIsWeb) ...[
             
-            // Debug widget to understand what's happening
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Debug Widget:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Test different implementations
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Simple Approach Fixed:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                    const Text('Simple Approach Fixed (Native Key):', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                    const Text('Global Approach:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                    const Text('Nuxt Style:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                    const Text('Exact Copy of Vue/Nuxt:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                    const Text('EXACT HTML Structure:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                    const Text('Iframe with EXACT HTML:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox.shrink(),
-                  ],
-                ),
-              ),
-            ),
           ] else
             SliverToBoxAdapter(
               child: SizedBox.shrink(),
