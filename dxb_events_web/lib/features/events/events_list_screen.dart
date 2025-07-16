@@ -24,7 +24,6 @@ import '../../widgets/common/breadcrumb_navigation.dart';
 import '../../widgets/common/glassmorphic_background.dart';
 import '../../widgets/common/footer.dart';
 import '../event_details/event_details_screen.dart';
-import '../../widgets/pagination_widget.dart';
 import '../../widgets/search/super_search_button.dart';
 
 class EventsListScreen extends ConsumerStatefulWidget {
@@ -63,9 +62,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   // Search state
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
-  int _currentPage = 1;
-  int _totalPages = 1;
-  static const int _eventsPerPage = 20;
+  // Remove pagination - load all events for carousel
+  static const int _maxEventsToLoad = 100; // Load up to 100 events
 
   List<Event> events = [];
   String? errorMessage;
@@ -138,16 +136,11 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
 
-  Future<void> _loadEvents({int? page}) async {
-    final pageToLoad = page ?? 1;
-    
+  Future<void> _loadEvents() async {
     setState(() {
       _isLoading = true;
       errorMessage = null;
-      if (page == null || page == 1) {
-        events.clear();
-        _currentPage = 1;
-      }
+      events.clear();
     });
 
     try {
@@ -163,7 +156,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         // Load ALL events to filter from (EXACT same as homepage does)
         final response = await _eventsService.getEvents(
           dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
-          perPage: 100, // Use EXACT same parameters as homepage
+          perPage: _maxEventsToLoad, // Load all events for carousel
           sortBy: '-created_at', // Sort by creation date descending (latest first)
         );
         
@@ -182,15 +175,9 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           }
           
           // Apply enhanced filtering
-          final allFilteredEvents = _applyEnhancedCategoryFiltering(allEvents, selectedCategory!);
-          print('✅ Found ${allFilteredEvents.length} events matching enhanced criteria for $selectedCategory');
-          
-          // Apply pagination to filtered results
-          final startIndex = (pageToLoad - 1) * _eventsPerPage;
-          filteredEvents = allFilteredEvents.skip(startIndex).take(_eventsPerPage).toList();
-          totalCount = allFilteredEvents.length;
-          
-          print('📄 Showing page $_currentPage: ${filteredEvents.length} events (${startIndex + 1}-${startIndex + filteredEvents.length} of $totalCount)');
+          filteredEvents = _applyEnhancedCategoryFiltering(allEvents, selectedCategory!);
+          totalCount = filteredEvents.length;
+          print('✅ Found ${filteredEvents.length} events matching enhanced criteria for $selectedCategory');
         } else {
           filteredEvents = [];
           totalCount = 0;
@@ -204,8 +191,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
           category: selectedCategory,
           location: selectedLocation,
           dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
-          page: pageToLoad,
-          perPage: _eventsPerPage,
+          page: 1,
+          perPage: _maxEventsToLoad, // Load all events for carousel
           sortBy: '-created_at', // Sort by creation date descending (latest first)
         );
         
@@ -224,10 +211,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         setState(() {
           events = filteredEvents;
           _totalEventsInDb = totalCount; // Store total count
-          _totalPages = (totalCount / _eventsPerPage).ceil();
-          _currentPage = pageToLoad;
           _isLoading = false;
-          print('🔍 DEBUG: Total events available: $_totalEventsInDb, pages: $_totalPages');
+          print('🔍 DEBUG: Total events available: $_totalEventsInDb');
         });
         
         _animationController.forward();
@@ -248,17 +233,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     }
   }
 
-  void _onPageChanged(int page) {
-    if (page != _currentPage && page >= 1 && page <= _totalPages) {
-      _loadEvents(page: page);
-      // Scroll to top when page changes
-      _scrollController.animateTo(
-        0,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
 
   @override
   void dispose() {
@@ -760,14 +734,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                     child: isLargeScreen ? _buildDesktopLayout() : _buildMobileLayout(),
                   ),
                   
-                  // Pagination for desktop view only
-                  if (isLargeScreen && !_isLoading && events.isNotEmpty)
-                    PaginationWidget(
-                      currentPage: _currentPage,
-                      totalPages: _totalPages,
-                      onPageChanged: _onPageChanged,
-                    ),
-                  
                   // Ad Placeholder 2 - Between Events Collection and Footer
                   _buildAdSenseContainer('2', Colors.green[50]),
                   
@@ -1106,62 +1072,127 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
   Widget _buildGridView(List<Event> filteredEvents) {
+    // Always use carousel format for all screen sizes
+    return _buildUniversalCarousel(filteredEvents);
+  }
+  
+  Widget _buildUniversalCarousel(List<Event> filteredEvents) {
+    if (filteredEvents.isEmpty) return const SizedBox.shrink();
+    
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 800;
     
-    // Use carousel for mobile, grid for larger screens
-    if (isMobile) {
-      return _buildMobileCarousel(filteredEvents);
+    // Determine optimal card dimensions based on screen size
+    double carouselHeight;
+    double cardWidth;
+    EdgeInsets cardPadding;
+    
+    if (screenWidth <= 480) {
+      // Mobile phones
+      carouselHeight = 480;
+      cardWidth = screenWidth * 0.85;
+      cardPadding = const EdgeInsets.symmetric(horizontal: 16);
+    } else if (screenWidth <= 768) {
+      // Tablets and small screens
+      carouselHeight = 520;
+      cardWidth = 380;
+      cardPadding = const EdgeInsets.symmetric(horizontal: 20);
+    } else if (screenWidth <= 1200) {
+      // Medium screens
+      carouselHeight = 580;
+      cardWidth = 420;
+      cardPadding = const EdgeInsets.symmetric(horizontal: 24);
+    } else {
+      // Large desktop screens
+      carouselHeight = 620;
+      cardWidth = 460;
+      cardPadding = const EdgeInsets.symmetric(horizontal: 32);
     }
     
-    // Responsive grid optimized for user preferences:
-    // 3-4 events only on big screens, 2 on smaller screens
-    int crossAxisCount;
-    if (screenWidth > 1400) {
-      crossAxisCount = 4; // Large desktop: 4 cards
-    } else if (screenWidth > 1200) {
-      crossAxisCount = 3; // Wide desktop: 3 cards (only for very wide displays)
-    } else {
-      crossAxisCount = 2; // Tablet and smaller desktop: 2 cards (better spacing)
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.85,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Carousel header
+        Padding(
+          padding: cardPadding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'All Events (${filteredEvents.length})',
+                style: GoogleFonts.comfortaa(
+                  fontSize: isMobile ? 20 : 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                'Swipe to browse →',
+                style: GoogleFonts.inter(
+                  fontSize: isMobile ? 12 : 14,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
         ),
-        itemCount: filteredEvents.length,
-        itemBuilder: (context, index) {
-          final event = filteredEvents[index];
-          return _buildEventCard(event)
-              .animate()
-              .fadeIn(
-                delay: Duration(milliseconds: index * 100),
-                duration: 600.ms,
-                curve: Curves.easeOutQuart,
-              )
-              .slideY(
-                begin: 0.2,
-                end: 0,
-                delay: Duration(milliseconds: index * 100),
-                duration: 600.ms,
-                curve: Curves.easeOutQuart,
-              )
-              .scale(
-                begin: Offset(0.8, 0.8),
-                end: Offset(1, 1),
-                delay: Duration(milliseconds: index * 100),
-                duration: 600.ms,
-                curve: Curves.easeOutQuart,
+        
+        const SizedBox(height: 16),
+        
+        // Horizontal carousel
+        SizedBox(
+          height: carouselHeight,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const ClampingScrollPhysics(),
+            padding: cardPadding,
+            itemCount: filteredEvents.length,
+            itemBuilder: (context, index) {
+              final event = filteredEvents[index];
+              return Container(
+                width: cardWidth,
+                margin: EdgeInsets.only(right: isMobile ? 16 : 24),
+                child: EnhancedEventCard(
+                  event: event,
+                  showQualityMetrics: !isMobile,
+                  showSocialMedia: screenWidth > 480,
+                  onTap: () => _navigateToEventDetail(event),
+                ).animate()
+                  .fadeIn(
+                    delay: Duration(milliseconds: index * 80),
+                    duration: 500.ms,
+                    curve: Curves.easeOutQuart,
+                  )
+                  .slideX(
+                    begin: 0.3,
+                    end: 0,
+                    delay: Duration(milliseconds: index * 80),
+                    duration: 500.ms,
+                    curve: Curves.easeOutQuart,
+                  ),
               );
-        },
-      ),
+            },
+          ),
+        ),
+        
+        // Note about viewing all events
+        if (filteredEvents.length > 10)
+          Padding(
+            padding: EdgeInsets.only(
+              left: cardPadding.left,
+              right: cardPadding.right,
+              top: 16,
+            ),
+            child: Text(
+              'Showing all ${filteredEvents.length} events. Swipe to see more.',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+      ],
     );
   }
   
