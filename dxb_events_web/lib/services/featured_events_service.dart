@@ -290,8 +290,6 @@ class FeaturedEventsService {
     Map<String, dynamic>? environmentalFactors,
   }) async {
     try {
-      print('🔄 FeaturedEventsService: Starting to fetch featured events from backend...');
-      print('🔄 FeaturedEventsService: Limit requested: $limit');
       
       // Use the backend featured events endpoint (with enhanced algorithm)
       final response = await _eventsService.getFeaturedEventsFromBackend(
@@ -299,18 +297,14 @@ class FeaturedEventsService {
         aiImagesOnly: true, // Fetch only events with AI images
       );
 
-      print('🔄 FeaturedEventsService: Backend API response isSuccess: ${response.isSuccess}');
       
       if (!response.isSuccess || response.data == null) {
-        print('🚨 FeaturedEventsService: Failed to fetch events - ${response.error}');
         return ApiResponse.error('Failed to fetch events for scoring: ${response.error}');
       }
 
       final events = response.data!;
-      print('🔄 FeaturedEventsService: Fetched ${events.length} events from API');
       
       if (events.isEmpty) {
-        print('🚨 FeaturedEventsService: No events returned from API');
         return ApiResponse.success(<Event>[]);
       }
 
@@ -322,8 +316,6 @@ class FeaturedEventsService {
       for (int i = 0; i < events.length; i++) {
         try {
           final event = events[i];
-          print('🔄 FeaturedEventsService: Scoring event ${i + 1}/${events.length}: "${event.title}"');
-          print('🔄 FeaturedEventsService: Event details - category: ${event.category}, venue: ${event.venue.name}, rating: ${event.rating}');
           
           final score = calculateFeaturedScore(
             event,
@@ -332,47 +324,31 @@ class FeaturedEventsService {
             currentFeaturedEvents: scoredEvents.map((se) => se.event).toList(),
           );
           
-          print('🔄 FeaturedEventsService: Event "${event.title}" scored: $score');
           scoredEvents.add(ScoredEvent(event: event, score: score));
           successfullyScored++;
         } catch (e, stackTrace) {
-          print('🚨 FeaturedEventsService: Error scoring event ${i + 1}: $e');
-          print('🚨 FeaturedEventsService: Event title: ${events[i].title}');
-          print('🚨 FeaturedEventsService: Stack trace: $stackTrace');
           failedToScore++;
         }
       }
 
-      print('🔄 FeaturedEventsService: Successfully scored: $successfullyScored events');
-      print('🔄 FeaturedEventsService: Failed to score: $failedToScore events');
 
       if (scoredEvents.isEmpty) {
-        print('🚨 FeaturedEventsService: No events were successfully scored');
         return ApiResponse.success(<Event>[]);
       }
 
       // Sort by score descending
       scoredEvents.sort((a, b) => b.score.compareTo(a.score));
-      print('🔄 FeaturedEventsService: Top 5 scored events:');
-      for (int i = 0; i < 5 && i < scoredEvents.length; i++) {
-        print('🔄   ${i + 1}. "${scoredEvents[i].event.title}" - Score: ${scoredEvents[i].score}');
-      }
 
       // Apply business rules for geographic and category balance
       final balancedEvents = _applyBalancingRules(scoredEvents, limit);
-      print('🔄 FeaturedEventsService: After balancing: ${balancedEvents.length} events selected');
 
       // Apply duplicate filtering based on title similarity
       final deduplicatedEvents = _removeDuplicatesByTitle(balancedEvents);
-      print('🔄 FeaturedEventsService: After deduplication: ${deduplicatedEvents.length} events selected');
 
       final finalEvents = deduplicatedEvents.map((se) => se.event).toList();
-      print('✅ FeaturedEventsService: Returning ${finalEvents.length} featured events');
       
       return ApiResponse.success(finalEvents);
     } catch (e, stackTrace) {
-      print('🚨 FeaturedEventsService: Critical error in getFeaturedEvents: $e');
-      print('🚨 FeaturedEventsService: Stack trace: $stackTrace');
       return ApiResponse.error('Error calculating featured events: $e');
     }
   }
@@ -475,7 +451,6 @@ class FeaturedEventsService {
       bool isDuplicate = false;
       for (final seenTitle in seenTitles) {
         if (_calculateTitleSimilarity(normalizedTitle, seenTitle) > 0.85) {
-          print('🔄 FeaturedEventsService: Duplicate detected - "${event.title}" similar to existing event');
           isDuplicate = true;
           break;
         }

@@ -160,11 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           }
           if (allEventsResponse.isSuccess) {
             _allEventsForCounting = allEventsResponse.data ?? [];
-            print('🔍 DEBUG: Loaded ${_allEventsForCounting.length} events for category counting');
-            // Debug: Show sample tags
-            if (_allEventsForCounting.isNotEmpty) {
-              print('🔍 DEBUG: Sample event tags: ${_allEventsForCounting.first.tags}');
-            }
+            // Events loaded for category counting
           }
           if (trendingResponse.isSuccess) {
             _trendingEvents = trendingResponse.data ?? [];
@@ -379,8 +375,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 // Debug print to help identify the issue
-                print('🔍 DEBUG: Logo failed to load: $error');
-                print('🔍 DEBUG: StackTrace: $stackTrace');
+                // Logo failed to load
                 // Fallback to a text-based logo
                 return Container(
                   height: 40,
@@ -1501,7 +1496,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }).length;
     
     // Debug: Check what events we're using for counting
-    print('🔍 DEBUG: Using ${eventsForCounting.length} events for category counting (_allEventsForCounting: ${_allEventsForCounting.length}, _featuredEvents: ${_featuredEvents.length})');
+    // Using events for category counting
     
     final beachCount = eventsForCounting.where((e) => 
       e.tags.any((tag) => tag.toLowerCase().contains('beach') || 
@@ -1532,11 +1527,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       })
     ).toList();
     
-    print('🔍 DEBUG: Category counts - Family: $familyCount, Indoor: $indoorCount, Beach: $beachCount, Cultural: $culturalCount');
-    if (familyEvents.isNotEmpty) {
-      print('🔍 DEBUG: Sample family event tags: ${familyEvents.first.tags}');
-      print('🔍 DEBUG: Sample family event title: ${familyEvents.first.title}');
-    }
+    // Category counts calculated
     
     final categories = [
       {'name': 'Family Fun', 'tag': 'family', 'count': '$familyCount events', 'gradient': AppColors.sunsetGradient},
@@ -1633,7 +1624,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildMyDscvrChoice() {
-    print('🎯 DEBUG: Building GameShow Winner Banner');
+    // Building GameShow Winner Banner
     
     // For now, use a featured event as placeholder until we implement daily choice API
     final placeholderEvent = _featuredEvents.isNotEmpty ? _featuredEvents.first : null;
@@ -2422,7 +2413,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildExploreAllEventsButton() {
-    print('🔍 DEBUG: Building Explore All Events Button!');
+    // Building Explore All Events Button
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Column(
@@ -2460,7 +2451,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    print('🎯 Explore All Events button clicked!');
+                    // Explore All Events button clicked
                     context.go('/events');
                   },
                   style: ElevatedButton.styleFrom(

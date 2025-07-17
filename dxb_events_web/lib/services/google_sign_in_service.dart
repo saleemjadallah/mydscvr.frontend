@@ -93,7 +93,6 @@ class GoogleSignInService {
                   scope: 'email profile',
                   callback: (tokenResponse) => {
                     // This won't work for our use case, we need ID token
-                    console.log('Token response:', tokenResponse);
                   }
                 });
                 // popup.requestAccessToken();
@@ -201,7 +200,6 @@ class GoogleSignInService {
         js.context.callMethod('eval', ['''
           try {
             if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-              console.log('Initializing Google Identity Services for popup...');
               
               // Initialize without redirect URI - pure client-side
               google.accounts.id.initialize({
@@ -213,25 +211,20 @@ class GoogleSignInService {
                 itp_support: true
               });
               
-              console.log('Google Identity Services initialized, showing prompt...');
               
               // Use prompt method which doesn't require redirect URI
               google.accounts.id.prompt((notification) => {
-                console.log('Prompt notification:', notification);
                 if (notification.isNotDisplayed()) {
-                  console.log('Prompt not displayed - user may have dismissed or blocked');
                   // Don't retry automatically
                 } else if (notification.isSkippedMoment()) {
-                  console.log('Prompt skipped - user chose not to sign in');
+                  // User chose not to sign in
                 }
               });
               
             } else {
-              console.error('Google Identity Services not available');
               throw new Error('Google Identity Services not loaded');
             }
           } catch (error) {
-            console.error('Google Sign-In error:', error);
             throw error;
           }
         ''']);

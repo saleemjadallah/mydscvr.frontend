@@ -20,13 +20,9 @@ class ApiClient {
 
   Future<ApiResponse<Map<String, dynamic>>> register(Map<String, dynamic> registerData) async {
     try {
-      print('Registering with data: $registerData');
-      print('Base URL: ${_dio.options.baseUrl}');
-      print('Full URL: ${_dio.options.baseUrl}/auth/register');
       final response = await _dio.post('/auth/register', data: registerData);
       return ApiResponse.success(response.data);
     } on DioException catch (e) {
-      print('Registration Dio Error: ${e.response?.data}');
       return ApiResponse.error(e.message ?? 'Registration failed');
     }
   }
@@ -54,7 +50,6 @@ class ApiClient {
       final response = await _dio.post('/auth/complete-onboarding', data: onboardingData);
       return ApiResponse.success(response.data);
     } on DioException catch (e) {
-      print('Complete onboarding error: ${e.response?.data}');
       return ApiResponse.error(e.message ?? 'Failed to complete onboarding');
     }
   }
@@ -119,11 +114,8 @@ class ApiClient {
   Future<ApiResponse<Map<String, dynamic>>> verifyEmail(Map<String, dynamic> verificationData) async {
     try {
       final response = await _dio.post('/auth/complete-registration', data: verificationData);
-      print('Verify email raw response: ${response.data}');
-      print('Response type: ${response.data.runtimeType}');
       return ApiResponse.success(response.data);
     } on DioException catch (e) {
-      print('Verify email error: ${e.response?.data}');
       return ApiResponse.error(e.message ?? 'Email verification failed');
     }
   }
@@ -316,11 +308,7 @@ class ApiClientProvider {
     dio.options.followRedirects = true;
     dio.options.maxRedirects = 5;
     
-    print('🌐 API Client initialized:');
-    print('   Primary URL: $baseUrl');
-    if (fallbackUrls.isNotEmpty) {
-      print('   Fallback URLs: ${fallbackUrls.join(', ')}');
-    }
+    // API Client initialized
     
     // Add interceptors with fallback support
     dio.interceptors.add(
@@ -328,21 +316,17 @@ class ApiClientProvider {
         onRequest: (options, handler) {
           // Add auth token if available
           // TODO: Add token from secure storage
-          print('🔗 API Request: ${options.method} ${options.uri}');
           handler.next(options);
         },
         onResponse: (response, handler) {
-          print('✅ API Success: ${response.statusCode} ${response.requestOptions.uri}');
           handler.next(response);
         },
         onError: (error, handler) async {
-          print('❌ API Error: ${error.message} (${error.requestOptions.uri})');
           
           // Try fallback URLs if primary fails
           if (fallbackUrls.isNotEmpty && error.type == DioExceptionType.connectionError) {
             for (final fallbackUrl in fallbackUrls) {
               try {
-                print('🔄 Trying fallback URL: $fallbackUrl');
                 
                 final fallbackOptions = error.requestOptions.copyWith(
                   baseUrl: fallbackUrl,

@@ -4,15 +4,17 @@ class DebugConfig {
   
   /// Log method calls for debugging
   static void logMethodCall(String methodName) {
+    // Debug logging disabled for production
     if (isDebugMode) {
-      print('🔍 DEBUG: $methodName called');
+      // Only log in development builds
     }
   }
   
   /// Log general debug messages
   static void log(String message) {
+    // Debug logging disabled for production
     if (isDebugMode) {
-      print('🔍 DEBUG: $message');
+      // Only log in development builds
     }
   }
 }

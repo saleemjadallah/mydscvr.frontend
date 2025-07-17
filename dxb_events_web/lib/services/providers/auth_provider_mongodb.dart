@@ -209,10 +209,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final googleResult = await _googleSignInService.signInWithGoogle();
       
       if (googleResult != null) {
-        print('🔵 Google Sign-In successful, processing result...');
-        print('🔵 Access token: ${googleResult['access_token']?.substring(0, 20) ?? 'null'}...');
-        print('🔵 Refresh token: ${googleResult['refresh_token']?.substring(0, 20) ?? 'null'}...');
-        print('🔵 User data: ${googleResult['user']?['email'] ?? 'no email'}');
         
         // Extract user data from Google response
         final user = UserProfile.fromJson(googleResult['user']);

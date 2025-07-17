@@ -396,9 +396,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       
       // Send onboarding data to backend if user is authenticated
       final authState = ref.read(authProvider);
-      print('🔍 Auth state during onboarding completion: ${authState.status}');
-      print('🔍 User exists: ${authState.user != null}');
-      print('🔍 Access token exists: ${authState.accessToken != null}');
       
       if (authState.status == AuthStatus.authenticated && authState.user != null) {
         try {

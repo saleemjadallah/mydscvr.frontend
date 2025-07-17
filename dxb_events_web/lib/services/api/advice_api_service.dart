@@ -109,7 +109,6 @@ class AdviceApiService {
       final prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('access_token');
       if (accessToken == null) {
-        print('❌ No access token found');
         return AdviceSubmissionResult.error('Please log in to submit advice');
       }
       
@@ -188,7 +187,6 @@ class AdviceApiService {
       final prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('access_token');
       if (accessToken == null) {
-        print('❌ No access token found for helpful vote');
         return MarkHelpfulResult.error('Please log in to vote on advice');
       }
       

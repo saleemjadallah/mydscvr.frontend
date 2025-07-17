@@ -110,7 +110,9 @@ class AuthInterceptor extends Interceptor {
         options.headers['Authorization'] = 'Bearer $accessToken';
       }
     } catch (e) {
-      print('Error reading access token: $e');
+      if (kDebugMode) {
+        print('Error reading access token: $e');
+      }
     }
 
     handler.next(options);
@@ -128,7 +130,9 @@ class AuthInterceptor extends Interceptor {
           return handler.resolve(retryResponse);
         }
       } catch (e) {
-        print('Token refresh failed: $e');
+        if (kDebugMode) {
+          print('Token refresh failed: $e');
+        }
         // Clear stored tokens
         await _clearTokens();
       }
@@ -163,7 +167,9 @@ class AuthInterceptor extends Interceptor {
         return true;
       }
     } catch (e) {
-      print('Refresh token error: $e');
+      if (kDebugMode) {
+        print('Refresh token error: $e');
+      }
     }
 
     return false;
@@ -313,27 +319,33 @@ class ErrorInterceptor extends Interceptor {
 class LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print('🚀 REQUEST[${options.method}] => PATH: ${options.path}');
-    print('🚀 Headers: ${options.headers}');
-    if (options.data != null) {
-      print('🚀 Body: ${options.data}');
+    if (kDebugMode) {
+      print('🚀 REQUEST[${options.method}] => PATH: ${options.path}');
+      print('🚀 Headers: ${options.headers}');
+      if (options.data != null) {
+        print('🚀 Body: ${options.data}');
+      }
     }
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
-    print('✅ Data: ${response.data}');
+    if (kDebugMode) {
+      print('✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+      print('✅ Data: ${response.data}');
+    }
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('❌ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
-    print('❌ Message: ${err.message}');
-    if (err.response?.data != null) {
-      print('❌ Error Data: ${err.response?.data}');
+    if (kDebugMode) {
+      print('❌ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
+      print('❌ Message: ${err.message}');
+      if (err.response?.data != null) {
+        print('❌ Error Data: ${err.response?.data}');
+      }
     }
     handler.next(err);
   }

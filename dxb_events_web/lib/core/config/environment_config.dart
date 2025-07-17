@@ -4,7 +4,7 @@ class EnvironmentConfig {
   // Google OAuth Configuration
   static const String googleClientId = String.fromEnvironment(
     'GOOGLE_CLIENT_ID',
-    defaultValue: '856722877537-ghlcv8v13tka4niinq0ke9s2kcu3njmj.apps.googleusercontent.com',
+    defaultValue: '',
   );
 
   // API Configuration
@@ -145,15 +145,14 @@ class EnvironmentConfig {
 
   /// Print current configuration (for debugging)
   static void printConfig() {
-    if (enableLogs) {
-      print('🔧 Environment Configuration:');
+    // Production builds should not expose configuration details
+    if (enableLogs && isDevelopment) {
+      print('Environment Configuration:');
       print('   Environment: $environment');
       print('   API Base URL: ${getApiBaseUrl()}');
       print('   Data Collection URL: ${getDataCollectionUrl()}');
-      print('   Google Client ID: ${googleClientId.substring(0, 20)}...');
       print('   Enable Logs: $enableLogs');
       print('   Enable Performance Overlay: $enablePerformanceOverlay');
-      print('   Custom Domain: $customDomain');
     }
   }
 }

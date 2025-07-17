@@ -278,45 +278,23 @@ class EventsService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        print('🔍 DEBUG EventsService: Raw API response received');
-        print('🔍 DEBUG EventsService: Response keys: ${data.keys.toList()}');
-        
         final eventsData = data['events'] as List<dynamic>;
         final total = data['pagination']?['total'] as int? ?? 0; // Extract total count from pagination
-        print('🔍 DEBUG EventsService: Events data length: ${eventsData.length}');
-        print('🔍 DEBUG EventsService: Total count from API: $total');
-        
-        if (eventsData.isNotEmpty) {
-          print('🔍 DEBUG EventsService: First event raw data: ${eventsData.first}');
-        }
         
         final events = <Event>[];
         for (int i = 0; i < eventsData.length; i++) {
           try {
             final eventJson = eventsData[i] as Map<String, dynamic>;
-            print('🔍 DEBUG EventsService: Attempting to parse event $i: ${eventJson['title']}');
             final event = SafeEventParser.parseEvent(eventJson);
             if (event != null) {
               events.add(event);
-              print('🔍 DEBUG EventsService: ✅ Successfully parsed event $i: ${event.title} - ${event.category}');
-              if (i == 0) {
-                print('🔍 DEBUG EventsService: First parsed event details: title=${event.title}, category=${event.category}, venue=${event.venue.name}, rating=${event.rating}');
-              }
-            } else {
-              print('🔍 DEBUG EventsService: ❌ Failed to parse event $i: ${eventJson['title']}');
             }
-          } catch (e, stackTrace) {
-            print('🔍 DEBUG EventsService: ❌ Error parsing event $i: $e');
-            print('🔍 DEBUG EventsService: Stack trace: $stackTrace');
-            print('🔍 DEBUG EventsService: Raw event data keys: ${(eventsData[i] as Map<String, dynamic>).keys.toList()}');
-            print('🔍 DEBUG EventsService: Event title: ${eventsData[i]['title']}');
-            // Don't include the full raw data to avoid cluttering logs, but show critical fields
-            final eventData = eventsData[i] as Map<String, dynamic>;
-            print('🔍 DEBUG EventsService: Critical fields - id: ${eventData['id']}, category: ${eventData['category']}, venue: ${eventData['venue']}, price: ${eventData['price']}');
+          } catch (e) {
+            // Log parsing errors for production debugging
+            print('Error parsing event: $e');
           }
         }
         
-        print('🔍 DEBUG EventsService: Successfully parsed ${events.length} events with total: $total');
         return ApiResponse.success(EventsWithTotal(events: events, total: total));
       } else {
         return ApiResponse.error('Failed to fetch events: ${response.statusMessage}');
@@ -549,7 +527,6 @@ class EventsService {
     bool aiImagesOnly = false,
   }) async {
     try {
-      print('🎯 Featured Events Backend: Calling /api/events/featured/list with limit=$limit and aiImagesOnly=$aiImagesOnly');
       
       // Call the backend featured events endpoint directly
       final response = await _dio.get(
@@ -570,13 +547,11 @@ class EventsService {
             .cast<Event>()
             .toList();
         
-        print('🎯 Featured Events Backend: Successfully fetched ${events.length} featured events from backend');
         return ApiResponse.success(events);
       } else {
         return ApiResponse.error('Backend returned status ${response.statusCode}');
       }
     } catch (e) {
-      print('🎯 Featured Events Backend Error: $e');
       return ApiResponse.error('Unexpected error fetching featured events: $e');
     }
   }

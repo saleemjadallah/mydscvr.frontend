@@ -66,7 +66,7 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
       // Load the Traffic Stars script and initialize ad
       _loadTrafficStarsScript();
     } catch (e) {
-      print('Error initializing Traffic Stars ad: $e');
+      // Error initializing ad
     }
   }
 
@@ -84,12 +84,10 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
         ..async = true;
 
       script.onLoad.listen((_) {
-        print('Traffic Stars script loaded successfully');
         _initializeTrafficStarsAd();
       });
 
       script.onError.listen((_) {
-        print('Failed to load Traffic Stars script');
         setState(() {
           _isAdLoaded = false;
         });
@@ -97,7 +95,6 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
 
       html.document.head!.append(script);
     } catch (e) {
-      print('Error loading Traffic Stars script: $e');
     }
   }
 
@@ -109,7 +106,6 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
           ..text = '''
             try {
               if (typeof NativeAd !== 'undefined') {
-                console.log('Initializing Traffic Stars banner ad...');
                 new NativeAd({
                   element_id: "ts_ad_native_dizsj",
                   spot: "761603040346483ea143d5f6b52b8959",
@@ -133,9 +129,7 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
                     }
                   }
                 });
-                console.log('Traffic Stars banner ad initialized successfully');
               } else {
-                console.log('NativeAd not available, retrying...');
                 setTimeout(function() {
                   if (typeof NativeAd !== 'undefined') {
                     new NativeAd({
@@ -165,7 +159,6 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
                 }, 1000);
               }
             } catch (error) {
-              console.error('Traffic Stars banner ad initialization error:', error);
             }
           ''';
         
@@ -176,7 +169,7 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
         });
       });
     } catch (e) {
-      print('Error initializing Traffic Stars ad: $e');
+      // Error initializing ad
     }
   }
 

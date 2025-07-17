@@ -138,26 +138,18 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildContent(BuildContext context, FeaturedEventsState state, FeaturedEventsNotifier notifier) {
-    print('🔍 DEBUG: _buildContent called');
-    print('🔍 DEBUG: isLoading: ${state.isLoading}, hasFeaturedEvents: ${state.hasFeaturedEvents}');
-    print('🔍 DEBUG: events count: ${state.events.length}, error: ${state.error}');
-    
     if (state.isLoading && !state.hasFeaturedEvents) {
-      print('🔍 DEBUG: Showing loading state');
       return _buildLoadingState();
     }
 
     if (state.error != null && !state.hasFeaturedEvents) {
-      print('🔍 DEBUG: Showing error state: ${state.error}');
       return _buildErrorState(state, notifier);
     }
 
     if (!state.hasFeaturedEvents) {
-      print('🔍 DEBUG: Showing empty state');
       return _buildEmptyState();
     }
 
-    print('🔍 DEBUG: Showing events grid');
     return _buildEventsGrid(context, state, notifier);
   }
 
@@ -263,11 +255,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
     final isTablet = screenWidth > 768 && screenWidth <= 1200;
     final isDesktop = screenWidth > 1200;
 
-    print('🔍 DEBUG: Building events display with ${events.length} events');
-    print('🔍 DEBUG: Screen width: $screenWidth, isMobile: $isMobile');
-    
     if (events.isEmpty) {
-      print('🔍 DEBUG: No events to display');
       return _buildEmptyState();
     }
 

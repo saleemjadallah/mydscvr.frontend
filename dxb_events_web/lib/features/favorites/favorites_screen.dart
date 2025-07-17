@@ -73,8 +73,6 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
     try {
       // Check authentication
       final authState = ref.read(authProvider);
-      print('🔍 Auth state: ${authState.isAuthenticated}');
-      print('🔍 User: ${authState.user?.email}');
       
       if (!authState.isAuthenticated || authState.user == null) {
         setState(() {

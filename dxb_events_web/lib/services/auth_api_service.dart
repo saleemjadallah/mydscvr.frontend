@@ -713,8 +713,7 @@ class AuthApiService {
   Future<AuthResult> forgotPassword({required String email}) async {
     try {
       final response = await _dio.post(
-        '$_authPath/forgot-password',
-        data: jsonEncode(email), // Send email as JSON string
+        '$_authPath/forgot-password?email=${Uri.encodeComponent(email)}',
         options: Options(
           headers: {
             'Content-Type': 'application/json',

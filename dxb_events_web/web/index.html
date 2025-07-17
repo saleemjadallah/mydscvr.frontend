@@ -257,10 +257,10 @@
     
     // Google Sign-In Script Loading Handlers
     function onGoogleScriptLoaded() {
-      console.log('✅ Google Identity Services script loaded successfully');
-      console.log('🔍 Google object available:', typeof google !== 'undefined');
-      console.log('🔍 Google.accounts available:', typeof google?.accounts !== 'undefined');
-      console.log('🔍 Google.accounts.id available:', typeof google?.accounts?.id !== 'undefined');
+      // console.log('✅ Google Identity Services script loaded successfully');
+      // console.log('🔍 Google object available:', typeof google !== 'undefined');
+      // console.log('🔍 Google.accounts available:', typeof google?.accounts !== 'undefined');
+      // console.log('🔍 Google.accounts.id available:', typeof google?.accounts?.id !== 'undefined');
       
       // Set a flag that Flutter can check
       window.googleScriptLoaded = true;
@@ -290,7 +290,7 @@
       if (img && fallback) {
         img.style.display = 'none';
         fallback.style.display = 'flex';
-        console.log('Logo failed to load, showing fallback. Tried path:', img.src);
+        // console.log('Logo failed to load, showing fallback. Tried path:', img.src);
       }
     }
     
@@ -299,9 +299,9 @@
       const img = document.getElementById('loading-logo-img');
       if (img) {
         img.onload = function() {
-          console.log('Logo loaded successfully from:', img.src);
+          // console.log('Logo loaded successfully from:', img.src);
         };
-        console.log('Attempting to load logo from:', img.src);
+        // console.log('Attempting to load logo from:', img.src);
       }
     });
     
@@ -328,10 +328,10 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(function(registration) {
-          console.log('Monetag Service Worker registered successfully:', registration);
+          // console.log('Monetag Service Worker registered successfully:', registration);
         })
         .catch(function(error) {
-          console.log('Monetag Service Worker registration failed:', error);
+          // console.log('Monetag Service Worker registration failed:', error);
         });
     }
     
