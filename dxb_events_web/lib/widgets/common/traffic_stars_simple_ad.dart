@@ -41,20 +41,22 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       
       if (flutterView == null) return;
       
-      // Create ad container
+      // Create ad container with standard banner dimensions
       final adContainer = html.DivElement()
         ..id = 'traffic-stars-container-${_adContainerId}'
         ..style.cssText = '''
           width: 100%;
-          max-width: 1200px;
+          max-width: 468px;
+          height: auto;
           margin: 20px auto;
-          padding: 20px;
+          padding: 10px;
           background-color: #ffffff;
-          border-radius: 12px;
+          border-radius: 8px;
           border: 1px solid #e1e5e9;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
           position: relative;
           z-index: 10;
+          overflow: hidden;
         ''';
       
       // Add title if provided
@@ -65,9 +67,16 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
         adContainer.append(titleDiv);
       }
       
-      // Create ad slot
+      // Create ad slot with size constraints
       final adSlot = html.DivElement()
-        ..id = _adContainerId;
+        ..id = _adContainerId
+        ..style.cssText = '''
+          width: 100%;
+          max-width: 468px;
+          height: 60px;
+          overflow: hidden;
+          display: block;
+        ''';
       
       adContainer.append(adSlot);
       
@@ -114,7 +123,26 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
                 rows: 1,
                 title: "",
                 titlePosition: "left",
-                adsByPosition: "bottom-right"
+                adsByPosition: "bottom-right",
+                styles: {
+                  "container": {
+                    "width": "468px",
+                    "height": "60px",
+                    "overflow": "hidden"
+                  },
+                  "image": {
+                    "padding-bottom": "42px"
+                  },
+                  "label": {
+                    "height": "42px"
+                  },
+                  "thumb": {
+                    "margin-bottom": 0
+                  },
+                  "headlineLink": {
+                    "font-size": "10px"
+                  }
+                }
               });
               console.log('Traffic Stars ad initialized: $_adContainerId');
             }
