@@ -714,7 +714,7 @@ class AuthApiService {
     try {
       final response = await _dio.post(
         '$_authPath/forgot-password',
-        data: email, // Send email as string directly
+        data: jsonEncode(email), // Send email as JSON string
         options: Options(
           headers: {
             'Content-Type': 'application/json',
