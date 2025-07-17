@@ -337,8 +337,47 @@
   </script> 
   <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
   
-  <!-- Traffic Stars Native Ad -->
-  <div id="ts_ad_native_agncm"></div>
+  <!-- Traffic Stars Native Ad Container -->
+  <div class="traffic-stars-container">
+    <div id="ts_ad_native_agncm"></div>
+  </div>
+  
+  <style>
+    .traffic-stars-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 10;
+    }
+    
+    #ts_ad_native_agncm {
+      min-height: 120px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Ensure ad content is visible */
+    #ts_ad_native_agncm * {
+      position: relative !important;
+      z-index: 15 !important;
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .traffic-stars-container {
+        margin: 10px;
+        padding: 15px;
+      }
+    }
+  </style>
+  
   <script src="//cdn.runative-syndicate.com/sdk/v1/n.js"></script>
   <script>
      NativeAd({
