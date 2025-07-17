@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
 // Import ad widget
-import '../../widgets/common/traffic_stars_ad.dart';
+import '../../widgets/common/traffic_stars_ad_marker.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -119,13 +119,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Traffic Stars Ad 1 - After Featured Events (Natural Space)
+          // Traffic Stars Ad 1 - After Featured Events (Marker Approach)
           const SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 300),
-              child: TrafficStarsAd(
-                title: 'Sponsored',
-                // No height constraint - let ad determine its own size
+              child: TrafficStarsAdMarker(
+                slotNumber: 1,
+                label: 'Sponsored',
               ),
             ),
           ),
@@ -145,9 +145,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           const SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 500),
-              child: TrafficStarsAd(
-                title: 'Discover more',
-                height: 80,
+              child: TrafficStarsAdMarker(
+                slotNumber: 2,
+                label: 'Sponsored',
               ),
             ),
           ),
@@ -180,9 +180,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           const SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 1100),
-              child: TrafficStarsAd(
-                title: 'You might like',
-                height: 80,
+              child: TrafficStarsAdMarker(
+                slotNumber: 3,
+                label: 'Sponsored',
               ),
             ),
           ),
@@ -201,9 +201,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           const SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 1400),
-              child: TrafficStarsAd(
-                title: 'More suggestions',
-                height: 80,
+              child: TrafficStarsAdMarker(
+                slotNumber: 4,
+                label: 'Sponsored',
               ),
             ),
           ),
