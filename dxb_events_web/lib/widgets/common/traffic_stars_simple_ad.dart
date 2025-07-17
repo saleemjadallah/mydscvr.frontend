@@ -62,8 +62,11 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
         if (adContainer != null) {
           adContainer.style.position = 'absolute';
           adContainer.style.top = '${absoluteTop}px';
-          adContainer.style.left = '50%';
-          adContainer.style.transform = 'translateX(-50%)';
+          adContainer.style.left = '0';
+          adContainer.style.right = '0';
+          adContainer.style.margin = '0 auto';
+          adContainer.style.width = '100%';
+          adContainer.style.maxWidth = '468px';
           adContainer.style.zIndex = '1000';
         }
       }
@@ -81,22 +84,19 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       
       if (flutterView == null) return;
       
-      // Create ad container with standard banner dimensions
+      // Create ad container with minimal styling
       final adContainer = html.DivElement()
         ..id = 'traffic-stars-container-${_adContainerId}'
         ..style.cssText = '''
           width: 100%;
           max-width: 468px;
-          height: auto;
-          margin: 20px auto;
+          margin: 0 auto;
           padding: 10px;
           background-color: #ffffff;
           border-radius: 8px;
           border: 1px solid #e1e5e9;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
           position: relative;
           z-index: 10;
-          overflow: hidden;
         ''';
       
       // Add title if provided
@@ -107,15 +107,13 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
         adContainer.append(titleDiv);
       }
       
-      // Create ad slot with size constraints
+      // Create ad slot
       final adSlot = html.DivElement()
         ..id = _adContainerId
         ..style.cssText = '''
           width: 100%;
-          max-width: 468px;
-          height: 60px;
-          overflow: hidden;
           display: block;
+          text-align: center;
         ''';
       
       adContainer.append(adSlot);
@@ -129,10 +127,10 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       // Append to body
       html.document.body!.append(adContainer);
       
-      // Load Traffic Stars script if not already loaded
-      if (html.document.querySelector('script[src*="runative-syndicate.com"]') == null) {
+      // Load Traffic Stars script if not already loaded (using correct CDN)
+      if (html.document.querySelector('script[src*="tsyndicate.com"]') == null) {
         final script = html.ScriptElement()
-          ..src = '//cdn.runative-syndicate.com/sdk/v1/n.js'
+          ..src = '//cdn.tsyndicate.com/sdk/v1/n.js'
           ..async = true;
         
         script.onLoad.listen((_) {
@@ -155,34 +153,13 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
         final initScript = html.ScriptElement()
           ..text = '''
             if (typeof NativeAd !== 'undefined') {
-              new NativeAd({
-                element_id: "$_adContainerId",
+              NativeAd({
                 spot: "${widget.spotId}",
+                element_id: "$_adContainerId",
                 type: "label-under",
                 cols: 1,
                 rows: 1,
-                title: "",
-                titlePosition: "left",
-                adsByPosition: "bottom-right",
-                styles: {
-                  "container": {
-                    "width": "468px",
-                    "height": "60px",
-                    "overflow": "hidden"
-                  },
-                  "image": {
-                    "padding-bottom": "42px"
-                  },
-                  "label": {
-                    "height": "42px"
-                  },
-                  "thumb": {
-                    "margin-bottom": 0
-                  },
-                  "headlineLink": {
-                    "font-size": "10px"
-                  }
-                }
+                title: ""
               });
               console.log('Traffic Stars ad initialized: $_adContainerId');
             }
