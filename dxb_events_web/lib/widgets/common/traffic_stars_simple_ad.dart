@@ -128,17 +128,17 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       // Append to body
       html.document.body!.append(adContainer);
       
-      // Load Traffic Stars banner script directly with data attributes
-      final script = html.ScriptElement()
-        ..src = '//cdn.runative-syndicate.com/sdk/v1/bi.js'
-        ..setAttribute('data-ts-spot', widget.spotId)
-        ..setAttribute('data-ts-width', '300')
-        ..setAttribute('data-ts-height', '250')
-        ..async = true
-        ..defer = true;
+      // Create iframe directly for Traffic Stars ads
+      final iframe = html.IFrameElement()
+        ..src = '//runative-syndicate.com/iframes2/${widget.spotId}.html?'
+        ..width = '300'
+        ..height = '250'
+        ..style.border = 'none'
+        ..style.overflow = 'hidden'
+        ..scrolling = 'no';
       
-      // Append script directly to the ad container
-      adSlot.append(script);
+      // Append iframe directly to the ad container
+      adSlot.append(iframe);
     } catch (e) {
       print('Error injecting Traffic Stars ad: $e');
     }
