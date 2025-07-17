@@ -714,11 +714,6 @@ class AuthApiService {
     try {
       final response = await _dio.post(
         '$_authPath/forgot-password?email=${Uri.encodeComponent(email)}',
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
       );
 
       if (response.statusCode == 200) {
