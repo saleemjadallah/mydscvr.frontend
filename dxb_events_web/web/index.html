@@ -243,6 +243,8 @@
     <div class="loading-spinner"></div>
   </div>
 
+
+
   <!-- Flutter App -->
   <script>
     // Configure Flutter web for clean URLs
@@ -321,101 +323,21 @@
         'currency': 'AED'
     });
     
-
+    // Register Monetag Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+          console.log('Monetag Service Worker registered successfully:', registration);
+        })
+        .catch(function(error) {
+          console.log('Monetag Service Worker registration failed:', error);
+        });
+    }
     
   </script>
   
   <script src="flutter_bootstrap.js" async></script>
   
-  <!-- Hidden Traffic Stars Ad Containers - Will be positioned by Flutter -->
-  <div id="traffic-stars-ad-1" class="traffic-stars-flutter-ad" style="display: none; position: absolute; width: 100%; z-index: 1000;">
-    <div id="ts_ad_native_slot1"></div>
-  </div>
-  
-  <div id="traffic-stars-ad-2" class="traffic-stars-flutter-ad" style="display: none; position: absolute; width: 100%; z-index: 1000;">
-    <div id="ts_ad_native_slot2"></div>
-  </div>
-  
-  <div id="traffic-stars-ad-3" class="traffic-stars-flutter-ad" style="display: none; position: absolute; width: 100%; z-index: 1000;">
-    <div id="ts_ad_native_slot3"></div>
-  </div>
-  
-  <div id="traffic-stars-ad-4" class="traffic-stars-flutter-ad" style="display: none; position: absolute; width: 100%; z-index: 1000;">
-    <div id="ts_ad_native_slot4"></div>
-  </div>
-  
-  <!-- Traffic Stars Script and Initialization -->
-  <script src="//cdn.runative-syndicate.com/sdk/v1/n.js"></script>
-  <script>
-    // Initialize all ad slots after script loads
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        // Initialize each ad slot
-        if (typeof NativeAd !== 'undefined') {
-          // Ad Slot 1
-          new NativeAd({
-            element_id: "ts_ad_native_slot1",
-            spot: "761603040346483ea143d5f6b52b8959",
-            type: "label-under",
-            cols: 1,
-            rows: 1,
-            title: "",
-            titlePosition: "left",
-            adsByPosition: "bottom-right"
-          });
-          
-          // Ad Slot 2
-          new NativeAd({
-            element_id: "ts_ad_native_slot2",
-            spot: "761603040346483ea143d5f6b52b8959",
-            type: "label-under",
-            cols: 1,
-            rows: 1,
-            title: "",
-            titlePosition: "left",
-            adsByPosition: "bottom-right"
-          });
-          
-          // Ad Slot 3
-          new NativeAd({
-            element_id: "ts_ad_native_slot3",
-            spot: "761603040346483ea143d5f6b52b8959",
-            type: "label-under",
-            cols: 1,
-            rows: 1,
-            title: "",
-            titlePosition: "left",
-            adsByPosition: "bottom-right"
-          });
-          
-          // Ad Slot 4
-          new NativeAd({
-            element_id: "ts_ad_native_slot4",
-            spot: "761603040346483ea143d5f6b52b8959",
-            type: "label-under",
-            cols: 1,
-            rows: 1,
-            title: "",
-            titlePosition: "left",
-            adsByPosition: "bottom-right"
-          });
-          
-          console.log('Traffic Stars ads initialized successfully');
-        }
-      }, 1000);
-    });
-    
-    // Flutter will call this to show/position ads
-    window.positionTrafficStarsAd = function(slotNumber, top, isVisible) {
-      const ad = document.getElementById('traffic-stars-ad-' + slotNumber);
-      if (ad) {
-        ad.style.display = isVisible ? 'block' : 'none';
-        ad.style.top = top + 'px';
-        ad.style.left = '0';
-        ad.style.right = '0';
-      }
-    };
-  </script>
   
   <!-- Infolinks Script -->
   <script type="text/javascript"> 

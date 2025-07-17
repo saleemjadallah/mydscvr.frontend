@@ -87,6 +87,12 @@ class _TrafficStarsAdMarkerState extends State<TrafficStarsAdMarker> {
     super.dispose();
   }
   
+  bool _shouldShowAdSpace() {
+    // Only show ad space if we're on web and ad might load
+    // You can add additional logic here to check if ads are enabled
+    return kIsWeb;
+  }
+  
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb) {
@@ -127,23 +133,14 @@ class _TrafficStarsAdMarkerState extends State<TrafficStarsAdMarker> {
               ),
             ),
           
-          // Placeholder space for the ad
-          Container(
-            height: 60, // Banner ad height
-            width: double.infinity,
-            color: Colors.transparent,
-            child: Center(
-              child: _isVisible
-                  ? const SizedBox.shrink() // Ad is shown in HTML layer
-                  : Text(
-                      'Ad space ${widget.slotNumber}',
-                      style: TextStyle(
-                        color: Colors.grey.withOpacity(0.3),
-                        fontSize: 10,
-                      ),
-                    ),
+          // Placeholder space for the ad - only show if ads are expected to load
+          if (_shouldShowAdSpace())
+            Container(
+              height: 60, // Banner ad height
+              width: double.infinity,
+              color: Colors.transparent,
+              child: const SizedBox.shrink(), // Empty space for ad
             ),
-          ),
         ],
       ),
     );
