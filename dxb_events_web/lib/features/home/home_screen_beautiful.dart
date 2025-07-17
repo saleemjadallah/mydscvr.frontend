@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
 // Import ad widget
+import '../../widgets/common/traffic_stars_simple_ad.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';

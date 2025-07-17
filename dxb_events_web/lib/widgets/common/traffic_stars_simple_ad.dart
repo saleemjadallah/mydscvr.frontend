@@ -135,7 +135,7 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
         ..height = '250'
         ..style.border = 'none'
         ..style.overflow = 'hidden'
-        ..scrolling = 'no';
+        ..setAttribute('scrolling', 'no');
       
       // Append iframe directly to the ad container
       adSlot.append(iframe);
