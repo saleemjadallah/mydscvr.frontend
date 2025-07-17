@@ -127,10 +127,10 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       // Append to body
       html.document.body!.append(adContainer);
       
-      // Load Traffic Stars script if not already loaded (using correct CDN)
-      if (html.document.querySelector('script[src*="tsyndicate.com"]') == null) {
+      // Load Traffic Stars script if not already loaded (using custom CDN)
+      if (html.document.querySelector('script[src*="runative"]') == null) {
         final script = html.ScriptElement()
-          ..src = '//cdn.tsyndicate.com/sdk/v1/n.js'
+          ..src = 'https://cdn.runative-syndicate.com/sdk/v1/n.js'
           ..async = true;
         
         script.onLoad.listen((_) {
