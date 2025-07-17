@@ -243,123 +243,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     super.dispose();
   }
 
-  /// Build AdSense ad container with header for events page
-  Widget _buildAdSenseContainer(String identifier, [Color? backgroundColor]) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 800;
-    
-    return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: isMobile ? 8 : 16, 
-        horizontal: isMobile ? 16 : 24
-      ),
-      child: Column(
-        children: [
-          // Header text
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              vertical: isMobile ? 6 : 8, 
-              horizontal: isMobile ? 12 : 16
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F0F0),
-              border: Border.all(color: const Color(0xFFDDDDDD)),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            ),
-            child: Text(
-              'This is an Ad. Please scroll to proceed with content',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: isMobile ? 10 : 12,
-                color: const Color(0xFF666666),
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-          
-          // AdSense container - Much shorter on mobile to save space for content
-          Container(
-            width: double.infinity,
-            height: isMobile ? 120 : 250, // Dramatically reduced mobile height
-            decoration: BoxDecoration(
-              color: backgroundColor ?? Colors.grey[50],
-              border: Border.all(color: const Color(0xFFDDDDDD)),
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.ad_units,
-                    size: isMobile ? 24 : 48,
-                    color: Colors.grey[600],
-                  ),
-                  SizedBox(height: isMobile ? 8 : 16),
-                  Text(
-                    'Google AdSense Ad',
-                    style: GoogleFonts.inter(
-                      fontSize: isMobile ? 12 : 18,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (!isMobile) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.blue[200]!),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Publisher: ca-pub-2361005033053502',
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: Colors.blue[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            'Slot: 2625901948',
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: Colors.blue[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  Text(
-                    'Events Page - Ad Space $identifier',
-                    style: GoogleFonts.inter(
-                      fontSize: isMobile ? 10 : 12,
-                      color: Colors.grey[600],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -721,9 +605,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             ),
           ),
           
-          // Ad Placeholder 1 - Between Header and Events Collection
-          _buildAdSenseContainer('1', Colors.blue[50]),
-          
           // Main content with responsive layout and footer
           Expanded(
             child: SingleChildScrollView(
@@ -733,9 +614,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                   Container(
                     child: isLargeScreen ? _buildDesktopLayout() : _buildMobileLayout(),
                   ),
-                  
-                  // Ad Placeholder 2 - Between Events Collection and Footer
-                  _buildAdSenseContainer('2', Colors.green[50]),
                   
                   // Footer as part of scrollable content
                   const Footer(),
