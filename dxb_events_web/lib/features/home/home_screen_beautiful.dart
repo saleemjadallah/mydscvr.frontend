@@ -119,13 +119,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Traffic Stars Ad 1 - After Featured Events
+          // Traffic Stars Ad 1 - After Featured Events (Banner Ad Test)
           const SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 300),
               child: TrafficStarsAd(
-                title: 'Recommended for you',
-                height: 80,
+                title: 'Sponsored',
+                height: 60,
               ),
             ),
           ),

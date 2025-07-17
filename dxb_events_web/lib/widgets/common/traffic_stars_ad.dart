@@ -52,7 +52,7 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
         ..style.overflow = 'hidden'
         ..style.position = 'relative'
         ..innerHtml = '''
-          <div id="ts_ad_native_agncm" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+          <div id="ts_ad_native_dizsj" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
             <div style="text-align: center; color: #64748b; font-family: 'Inter', sans-serif; font-size: 12px;">
               Loading ads...
             </div>
@@ -110,45 +110,87 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
           ..text = '''
             try {
               if (typeof NativeAd !== 'undefined') {
-                console.log('Initializing Traffic Stars ad...');
+                console.log('Initializing Traffic Stars banner ad...');
                 new NativeAd({
-                  spot: "929bef9969aa4c71b6c75a4a60a361f7",
+                  element_id: "ts_ad_native_dizsj",
+                  spot: "761603040346483ea143d5f6b52b8959",
                   type: "label-under",
-                  cols: 4,
+                  cols: 1,
                   rows: 1,
-                  title: "${widget.title ?? 'Suggested for you'}",
-                  titleColor: "#334155",
-                  urlColor: "#64748b",
-                  backgroundColor: "#ffffff",
-                  borderColor: "#e2e8f0",
+                  title: "",
+                  titlePosition: "left",
+                  adsByPosition: "bottom-right",
                   breakpoints: [
-                    {"maxWidth": 768, "cols": 2, "rows": 1}
-                  ]
+                    {
+                      "cols": 1,
+                      "width": 770
+                    }
+                  ],
+                  styles: {
+                    "image": {
+                      "padding-bottom": "42px"
+                    },
+                    "label": {
+                      "height": "42px"
+                    },
+                    "thumb": {
+                      "margin-bottom": 0
+                    },
+                    "container": {
+                      "width": "468px",
+                      "height": "60px",
+                      "overflow": "hidden"
+                    },
+                    "headlineLink": {
+                      "font-size": "10px"
+                    }
+                  }
                 });
-                console.log('Traffic Stars ad initialized successfully');
+                console.log('Traffic Stars banner ad initialized successfully');
               } else {
                 console.log('NativeAd not available, retrying...');
                 setTimeout(function() {
                   if (typeof NativeAd !== 'undefined') {
                     new NativeAd({
-                      spot: "929bef9969aa4c71b6c75a4a60a361f7",
+                      element_id: "ts_ad_native_dizsj",
+                      spot: "761603040346483ea143d5f6b52b8959",
                       type: "label-under",
-                      cols: 4,
+                      cols: 1,
                       rows: 1,
-                      title: "${widget.title ?? 'Suggested for you'}",
-                      titleColor: "#334155",
-                      urlColor: "#64748b",
-                      backgroundColor: "#ffffff",
-                      borderColor: "#e2e8f0",
+                      title: "",
+                      titlePosition: "left",
+                      adsByPosition: "bottom-right",
                       breakpoints: [
-                        {"maxWidth": 768, "cols": 2, "rows": 1}
-                      ]
+                        {
+                          "cols": 1,
+                          "width": 770
+                        }
+                      ],
+                      styles: {
+                        "image": {
+                          "padding-bottom": "42px"
+                        },
+                        "label": {
+                          "height": "42px"
+                        },
+                        "thumb": {
+                          "margin-bottom": 0
+                        },
+                        "container": {
+                          "width": "468px",
+                          "height": "60px",
+                          "overflow": "hidden"
+                        },
+                        "headlineLink": {
+                          "font-size": "10px"
+                        }
+                      }
                     });
                   }
                 }, 1000);
               }
             } catch (error) {
-              console.error('Traffic Stars ad initialization error:', error);
+              console.error('Traffic Stars banner ad initialization error:', error);
             }
           ''';
         
@@ -212,7 +254,7 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
           // Ad container
           Container(
             width: double.infinity,
-            height: widget.height ?? (isMobile ? 60 : 80),
+            height: widget.height ?? (isMobile ? 60 : 60), // Banner ad is 60px height
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
