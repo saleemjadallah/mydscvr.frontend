@@ -88,15 +88,15 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       final adContainer = html.DivElement()
         ..id = 'traffic-stars-container-${_adContainerId}'
         ..style.cssText = '''
-          width: 100%;
-          max-width: 468px;
+          width: 316px;
+          height: 266px;
           margin: 0 auto;
-          padding: 10px;
+          padding: 8px;
           background-color: #ffffff;
           border-radius: 8px;
           border: 1px solid #e1e5e9;
-          position: relative;
-          z-index: 10;
+          position: fixed;
+          z-index: 1000;
         ''';
       
       // Add title if provided
@@ -111,7 +111,8 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       final adSlot = html.DivElement()
         ..id = _adContainerId
         ..style.cssText = '''
-          width: 100%;
+          width: 300px;
+          height: 250px;
           display: block;
           text-align: center;
         ''';
@@ -127,50 +128,23 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
       // Append to body
       html.document.body!.append(adContainer);
       
-      // Load Traffic Stars script if not already loaded (using custom CDN)
-      if (html.document.querySelector('script[src*="runative"]') == null) {
-        final script = html.ScriptElement()
-          ..src = 'https://cdn.runative-syndicate.com/sdk/v1/n.js'
-          ..async = true;
-        
-        script.onLoad.listen((_) {
-          _initializeAd();
-        });
-        
-        html.document.head!.append(script);
-      } else {
-        // Script already loaded, initialize immediately
-        _initializeAd();
-      }
+      // Load Traffic Stars banner script directly with data attributes
+      final script = html.ScriptElement()
+        ..src = '//cdn.runative-syndicate.com/sdk/v1/bi.js'
+        ..setAttribute('data-ts-spot', widget.spotId)
+        ..setAttribute('data-ts-width', '300')
+        ..setAttribute('data-ts-height', '250')
+        ..async = true
+        ..defer = true;
+      
+      // Append script directly to the ad container
+      adSlot.append(script);
     } catch (e) {
       print('Error injecting Traffic Stars ad: $e');
     }
   }
   
-  void _initializeAd() {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      try {
-        final initScript = html.ScriptElement()
-          ..text = '''
-            if (typeof NativeAd !== 'undefined') {
-              NativeAd({
-                spot: "${widget.spotId}",
-                element_id: "$_adContainerId",
-                type: "label-under",
-                cols: 1,
-                rows: 1,
-                title: ""
-              });
-              console.log('Traffic Stars ad initialized: $_adContainerId');
-            }
-          ''';
-        
-        html.document.head!.append(initScript);
-      } catch (e) {
-        print('Error initializing Traffic Stars ad: $e');
-      }
-    });
-  }
+
   
   @override
   void dispose() {
@@ -225,8 +199,8 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
           
           // Placeholder space that will be replaced by the HTML ad
           Container(
-            height: 60, // Banner ad height
-            width: double.infinity,
+            height: 250, // Banner ad height (300x250)
+            width: 300, // Banner ad width
             decoration: BoxDecoration(
               color: Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
