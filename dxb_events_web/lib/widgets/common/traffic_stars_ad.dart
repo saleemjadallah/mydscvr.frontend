@@ -41,19 +41,18 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
       // Create unique view type for this ad instance
       _adViewType = 'traffic-stars-ad-${DateTime.now().millisecondsSinceEpoch}';
       
-      // Create the ad container HTML element
+      // Create a minimal, unconstrained ad container
       final adElement = html.DivElement()
         ..id = 'ts_ad_native_${DateTime.now().millisecondsSinceEpoch}'
         ..style.width = '100%'
-        ..style.height = '${widget.height ?? 80}px'
-        ..style.backgroundColor = '#f8fafc'
-        ..style.borderRadius = '12px'
-        ..style.border = '1px solid #e2e8f0'
-        ..style.overflow = 'hidden'
+        ..style.minHeight = '60px'
+        ..style.maxWidth = '100%'
+        ..style.display = 'block'
         ..style.position = 'relative'
+        ..style.overflow = 'visible'
         ..innerHtml = '''
-          <div id="ts_ad_native_dizsj" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-            <div style="text-align: center; color: #64748b; font-family: 'Inter', sans-serif; font-size: 12px;">
+          <div id="ts_ad_native_dizsj" style="width: 100%; min-height: 60px; display: block; position: relative;">
+            <div style="text-align: center; color: #64748b; font-family: 'Inter', sans-serif; font-size: 12px; padding: 20px;">
               Loading ads...
             </div>
           </div>
@@ -127,22 +126,10 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
                     }
                   ],
                   styles: {
-                    "image": {
-                      "padding-bottom": "42px"
-                    },
-                    "label": {
-                      "height": "42px"
-                    },
-                    "thumb": {
-                      "margin-bottom": 0
-                    },
                     "container": {
-                      "width": "468px",
-                      "height": "60px",
-                      "overflow": "hidden"
-                    },
-                    "headlineLink": {
-                      "font-size": "10px"
+                      "width": "100%",
+                      "max-width": "468px",
+                      "margin": "0 auto"
                     }
                   }
                 });
@@ -166,25 +153,13 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
                           "width": 770
                         }
                       ],
-                      styles: {
-                        "image": {
-                          "padding-bottom": "42px"
-                        },
-                        "label": {
-                          "height": "42px"
-                        },
-                        "thumb": {
-                          "margin-bottom": 0
-                        },
-                        "container": {
-                          "width": "468px",
-                          "height": "60px",
-                          "overflow": "hidden"
-                        },
-                        "headlineLink": {
-                          "font-size": "10px"
-                        }
-                      }
+                                             styles: {
+                         "container": {
+                           "width": "100%",
+                           "max-width": "468px",
+                           "margin": "0 auto"
+                         }
+                       }
                     });
                   }
                 }, 1000);
@@ -251,31 +226,16 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
               ),
             ),
           
-          // Ad container
+          // Natural ad space container - minimal constraints
           Container(
             width: double.infinity,
-            height: widget.height ?? (isMobile ? 60 : 60), // Banner ad is 60px height
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFE2E8F0),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+            constraints: BoxConstraints(
+              minHeight: widget.height ?? 60,
+              maxHeight: widget.height != null ? widget.height! : 200, // Allow up to 200px if not specified
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(11),
-              child: _isAdLoaded
-                  ? HtmlElementView(viewType: _adViewType!)
-                  : _buildLoadingPlaceholder(),
-            ),
+            child: _isAdLoaded
+                ? HtmlElementView(viewType: _adViewType!)
+                : _buildLoadingPlaceholder(),
           ),
         ],
       ),
@@ -285,8 +245,7 @@ class _TrafficStarsAdState extends State<TrafficStarsAd> {
   Widget _buildLoadingPlaceholder() {
     return Container(
       width: double.infinity,
-      height: double.infinity,
-      color: const Color(0xFFF8FAFC),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
