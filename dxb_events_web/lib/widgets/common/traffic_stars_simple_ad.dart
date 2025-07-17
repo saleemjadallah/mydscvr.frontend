@@ -19,6 +19,7 @@ class TrafficStarsSimpleAd extends StatefulWidget {
 
 class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
   late String _adContainerId;
+  final GlobalKey _placeholderKey = GlobalKey();
   
   @override
   void initState() {
@@ -28,7 +29,46 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
     if (kIsWeb) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _injectAd();
+        _positionAd();
+        _setupScrollListener();
       });
+    }
+  }
+  
+  void _setupScrollListener() {
+    // Update ad position on scroll
+    html.window.addEventListener('scroll', (_) {
+      _positionAd();
+    });
+    
+    // Also update on resize
+    html.window.addEventListener('resize', (_) {
+      _positionAd();
+    });
+  }
+  
+  void _positionAd() {
+    // Position the ad to match the placeholder
+    if (!mounted) return;
+    
+    try {
+      final RenderBox? renderBox = _placeholderKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null && renderBox.hasSize) {
+        final position = renderBox.localToGlobal(Offset.zero);
+        final scrollY = html.window.scrollY ?? 0;
+        final absoluteTop = position.dy + scrollY;
+        
+        final adContainer = html.document.getElementById('traffic-stars-container-${_adContainerId}');
+        if (adContainer != null) {
+          adContainer.style.position = 'absolute';
+          adContainer.style.top = '${absoluteTop}px';
+          adContainer.style.left = '50%';
+          adContainer.style.transform = 'translateX(-50%)';
+          adContainer.style.zIndex = '1000';
+        }
+      }
+    } catch (e) {
+      print('Error positioning ad: $e');
     }
   }
   
@@ -167,7 +207,69 @@ class _TrafficStarsSimpleAdState extends State<TrafficStarsSimpleAd> {
   
   @override
   Widget build(BuildContext context) {
-    // Return empty container - ad is rendered outside Flutter
-    return const SizedBox.shrink();
+    if (!kIsWeb) {
+      return const SizedBox.shrink();
+    }
+    
+    // Create a placeholder that reserves space in Flutter's layout
+    return Container(
+      key: _placeholderKey,
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Optional label
+          if (widget.title != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Text(
+                    widget.title!,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748b),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'Ads by TrafficStars',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF94a3b8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
+          // Placeholder space that will be replaced by the HTML ad
+          Container(
+            height: 60, // Banner ad height
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.grey.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: const Center(
+              child: Text(
+                'Ad loading...',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 } 
