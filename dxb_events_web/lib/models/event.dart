@@ -497,14 +497,22 @@ class Event {
 
   bool get isThisWeekend {
     final now = DateTime.now();
-    final daysUntilWeekend = 6 - now.weekday; // Saturday = 6
-    final weekendStart = now.add(Duration(days: daysUntilWeekend));
-    final weekendEnd = weekendStart.add(const Duration(days: 1)); // Sunday
     
-    // Include both Saturday and Sunday events
+    // Match backend logic: find Saturday of current week
+    // Backend: Monday=0, Dart: Monday=1, so convert
+    final daysSinceMonday = now.weekday - 1; // Convert to backend numbering
+    int saturdayOffset = (5 - daysSinceMonday) % 7; // Saturday=5 in backend
+    
+    // Special case: if it's Sunday (weekday=7 in Dart, 6 in backend)
+    if (saturdayOffset == 0 && now.weekday > 6) {
+      saturdayOffset = 7 - daysSinceMonday + 5;
+    }
+    
+    final saturday = now.add(Duration(days: saturdayOffset));
+    final saturdayDate = DateTime(saturday.year, saturday.month, saturday.day);
+    final sundayDate = DateTime(saturday.year, saturday.month, saturday.day + 1);
+    
     final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
-    final saturdayDate = DateTime(weekendStart.year, weekendStart.month, weekendStart.day);
-    final sundayDate = DateTime(weekendEnd.year, weekendEnd.month, weekendEnd.day);
     
     return eventDate.isAtSameMomentAs(saturdayDate) || eventDate.isAtSameMomentAs(sundayDate);
   }
