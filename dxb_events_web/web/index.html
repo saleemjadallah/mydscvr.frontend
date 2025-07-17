@@ -243,7 +243,10 @@
     <div class="loading-spinner"></div>
   </div>
 
-
+  <!-- Traffic Stars Native Ad Container - Between Loading and Main App -->
+  <div class="traffic-stars-container">
+    <div id="ts_ad_native_agncm"></div>
+  </div>
 
   <!-- Flutter App -->
   <script>
@@ -337,43 +340,61 @@
   </script> 
   <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
   
-  <!-- Traffic Stars Native Ad Container -->
-  <div class="traffic-stars-container">
-    <div id="ts_ad_native_agncm"></div>
-  </div>
+
   
   <style>
     .traffic-stars-container {
       width: 100%;
       max-width: 1200px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      border: 1px solid #e9ecef;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 10;
+      margin: 30px auto;
+      padding: 15px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e1e5e9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      position: static;
+      clear: both;
+      display: block;
+      z-index: 1;
     }
     
     #ts_ad_native_agncm {
-      min-height: 120px;
+      min-height: 80px;
       width: 100%;
-      position: relative;
-      overflow: hidden;
+      position: static;
+      overflow: visible;
+      display: block;
     }
     
-    /* Ensure ad content is visible */
-    #ts_ad_native_agncm * {
+    /* Fix for ad images and content */
+    #ts_ad_native_agncm .ts-native-ad-item {
       position: relative !important;
-      z-index: 15 !important;
+      display: inline-block !important;
+      vertical-align: top !important;
+    }
+    
+    #ts_ad_native_agncm img {
+      max-width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      border-radius: 6px !important;
+    }
+    
+    #ts_ad_native_agncm .ts-native-ad-title {
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+      margin-top: 8px !important;
     }
     
     /* Mobile responsive */
     @media (max-width: 768px) {
       .traffic-stars-container {
-        margin: 10px;
-        padding: 15px;
+        margin: 20px 10px;
+        padding: 12px;
+      }
+      
+      #ts_ad_native_agncm {
+        min-height: 60px;
       }
     }
   </style>
