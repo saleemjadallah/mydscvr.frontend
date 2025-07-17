@@ -7,9 +7,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
-// Import ad widget
-import '../../widgets/common/traffic_stars_simple_ad.dart';
-
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
 import '../../widgets/home/interactive_category_explorer.dart';
@@ -119,17 +116,6 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Traffic Stars Ad 1 - After Featured Events (Iframe Integration)
-          const SliverToBoxAdapter(
-            child: FadeInSlideUp(
-              delay: Duration(milliseconds: 300),
-              child: TrafficStarsSimpleAd(
-                spotId: '086c8e3bdcfb4ef3ae67807988f08c7e',
-                title: 'Sponsored',
-              ),
-            ),
-          ),
-          
           // Hidden Gem - Using actual component
           const SliverToBoxAdapter(
             child: Padding(
@@ -164,17 +150,6 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 1000),
               child: SmartTrendingSection(),
-            ),
-          ),
-          
-          // Traffic Stars Ad 2 - After Trending Section (Iframe Integration)
-          const SliverToBoxAdapter(
-            child: FadeInSlideUp(
-              delay: Duration(milliseconds: 1100),
-              child: TrafficStarsSimpleAd(
-                spotId: '086c8e3bdcfb4ef3ae67807988f08c7e',
-                title: 'Sponsored',
-              ),
             ),
           ),
           
