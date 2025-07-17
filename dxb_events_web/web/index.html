@@ -343,9 +343,26 @@
   </script> 
   <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
   
-  <!-- Monetag Ad Scripts -->
+  <!-- Monetag Ad Scripts - Testing individually to avoid conflicts -->
+  <!-- Page push ads (working) -->
   <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9582453,document.createElement('script'))</script>
-  <script src="https://fenoofaussut.net/act/files/tag.min.js?z=9582577" data-cfasync="false" async></script>
-  <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9582474,document.createElement('script'))</script>  
+  
+  <!-- Vignette banner - testing with delay -->
+  <script>
+    setTimeout(function() {
+      (function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9582474,document.createElement('script'))
+    }, 2000);
+  </script>
+  
+  <!-- Push notifications - testing with longer delay -->
+  <script>
+    setTimeout(function() {
+      var script = document.createElement('script');
+      script.src = 'https://fenoofaussut.net/act/files/tag.min.js?z=9582577';
+      script.setAttribute('data-cfasync', 'false');
+      script.async = true;
+      document.body.appendChild(script);
+    }, 4000);
+  </script>  
 </body>
 </html>
