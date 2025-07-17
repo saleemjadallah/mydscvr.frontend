@@ -327,121 +327,12 @@
   
   <script src="flutter_bootstrap.js" async></script>
   
-  <!-- Traffic Stars Native Ad Container - Positioned for Flutter Integration -->
-  <div class="traffic-stars-container" id="traffic-stars-main">
-    <div id="ts_ad_native_agncm"></div>
-  </div>
-  
-  
   <!-- Infolinks Script -->
   <script type="text/javascript"> 
     var infolinks_pid = 3438312; 
     var infolinks_wsid = 0; 
   </script> 
   <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
-  
-
-  
-  <style>
-    .traffic-stars-container {
-      width: calc(100% - 40px);
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #e1e5e9;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      position: relative;
-      display: block;
-      z-index: 10;
-    }
-    
-    #ts_ad_native_agncm {
-      min-height: 80px;
-      width: 100%;
-      position: static;
-      overflow: visible;
-      display: block;
-    }
-    
-    /* Fix for ad images and content */
-    #ts_ad_native_agncm .ts-native-ad-item {
-      position: relative !important;
-      display: inline-block !important;
-      vertical-align: top !important;
-    }
-    
-    #ts_ad_native_agncm img {
-      max-width: 100% !important;
-      height: auto !important;
-      display: block !important;
-      border-radius: 6px !important;
-    }
-    
-    #ts_ad_native_agncm .ts-native-ad-title {
-      font-size: 14px !important;
-      line-height: 1.4 !important;
-      margin-top: 8px !important;
-    }
-    
-    /* Mobile responsive */
-    @media (max-width: 768px) {
-      .traffic-stars-container {
-        margin: 20px 10px;
-        padding: 12px;
-      }
-      
-      #ts_ad_native_agncm {
-        min-height: 60px;
-      }
-    }
-  </style>
-  
-  <script src="//cdn.runative-syndicate.com/sdk/v1/n.js"></script>
-  <script>
-     // Wait for Flutter to load, then inject the ad
-     function initTrafficStarsAd() {
-       NativeAd({
-           element_id: "ts_ad_native_agncm",
-           spot: "929bef9969aa4c71b6c75a4a60a361f7",
-           type: "label-under",
-           cols: 4,
-           rows: 1,
-           title: "Suggested for you",
-           titlePosition: "left",
-           adsByPosition: "right",
-    	breakpoints: [
-    	          {
-    	                    "cols": 2,
-    	                    "width": 770
-    	          }
-    	],
-       });
-     }
-     
-     // Try to inject ad after Flutter loads
-     setTimeout(function() {
-       // Look for Flutter root element
-       const flutterView = document.querySelector('flt-glass-pane') || document.querySelector('flutter-view') || document.body;
-       
-       if (flutterView && document.getElementById('traffic-stars-main')) {
-         // Move the ad container to be visible in Flutter
-         const adContainer = document.getElementById('traffic-stars-main');
-         document.body.appendChild(adContainer);
-         
-         // Initialize the ad
-         initTrafficStarsAd();
-         
-         console.log('Traffic Stars ad injected after Flutter load');
-       }
-     }, 3000);
-     
-     // Also try to initialize immediately
-     document.addEventListener('DOMContentLoaded', function() {
-       setTimeout(initTrafficStarsAd, 1000);
-     });
-  </script>
   
   
 </body>
