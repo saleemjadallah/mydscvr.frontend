@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
 // Import ad widget
-import '../../widgets/common/traffic_stars_ad_marker.dart';
+import '../../widgets/common/traffic_stars_simple_ad.dart';
 
 // Import actual built components
 import '../../widgets/home/home_search_widget_simple.dart';
@@ -119,13 +119,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Traffic Stars Ad 1 - After Featured Events (Marker Approach)
+          // Traffic Stars Ad 1 - After Featured Events (Simple Direct Injection)
           const SliverToBoxAdapter(
             child: FadeInSlideUp(
               delay: Duration(milliseconds: 300),
-              child: TrafficStarsAdMarker(
-                slotNumber: 1,
-                label: 'Sponsored',
+              child: TrafficStarsSimpleAd(
+                spotId: '761603040346483ea143d5f6b52b8959',
+                title: 'Sponsored',
               ),
             ),
           ),
@@ -141,16 +141,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Traffic Stars Ad 2 - After Hidden Gem
-          const SliverToBoxAdapter(
-            child: FadeInSlideUp(
-              delay: Duration(milliseconds: 500),
-              child: TrafficStarsAdMarker(
-                slotNumber: 2,
-                label: 'Sponsored',
-              ),
-            ),
-          ),
+
           
           // Categories Section - Using actual component
           const SliverToBoxAdapter(
@@ -176,16 +167,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
           
-          // Traffic Stars Ad 3 - After Trending Section
-          const SliverToBoxAdapter(
-            child: FadeInSlideUp(
-              delay: Duration(milliseconds: 1100),
-              child: TrafficStarsAdMarker(
-                slotNumber: 3,
-                label: 'Sponsored',
-              ),
-            ),
-          ),
+
           
           // MyDscvr's Choice Section - Final solution
           SliverToBoxAdapter(
@@ -197,16 +179,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             child: _buildExploreAllEventsButton(),
           ),
           
-          // Traffic Stars Ad 4 - Before Footer
-          const SliverToBoxAdapter(
-            child: FadeInSlideUp(
-              delay: Duration(milliseconds: 1400),
-              child: TrafficStarsAdMarker(
-                slotNumber: 4,
-                label: 'Sponsored',
-              ),
-            ),
-          ),
+
           
           // Footer
           SliverToBoxAdapter(
