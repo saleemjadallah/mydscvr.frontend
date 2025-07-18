@@ -296,11 +296,13 @@ class Event {
     DateTime? endDate;
     try {
       // Handle both string and timestamp formats
+      // Parse as local time for Dubai timezone
       final startDateValue = json['start_date'];
       if (startDateValue is String) {
-        startDate = DateTime.parse(startDateValue);
+        // Parse as local time, not UTC
+        startDate = DateTime.parse(startDateValue).toLocal();
       } else if (startDateValue is int) {
-        startDate = DateTime.fromMillisecondsSinceEpoch(startDateValue * 1000);
+        startDate = DateTime.fromMillisecondsSinceEpoch(startDateValue * 1000).toLocal();
       } else {
         throw Exception('Invalid start_date format');
       }
@@ -308,9 +310,10 @@ class Event {
       final endDateValue = json['end_date'];
       if (endDateValue != null) {
         if (endDateValue is String) {
-          endDate = DateTime.parse(endDateValue);
+          // Parse as local time, not UTC
+          endDate = DateTime.parse(endDateValue).toLocal();
         } else if (endDateValue is int) {
-          endDate = DateTime.fromMillisecondsSinceEpoch(endDateValue * 1000);
+          endDate = DateTime.fromMillisecondsSinceEpoch(endDateValue * 1000).toLocal();
         }
       }
     } catch (e) {
@@ -498,19 +501,24 @@ class Event {
   bool get isThisWeekend {
     final now = DateTime.now();
     
-    // Match backend logic: find Saturday of current week
-    // Backend: Monday=0, Dart: Monday=1, so convert
-    final daysSinceMonday = now.weekday - 1; // Convert to backend numbering
-    int saturdayOffset = (5 - daysSinceMonday) % 7; // Saturday=5 in backend
-    
-    // Special case: if it's Sunday (weekday=7 in Dart, 6 in backend)
-    if (saturdayOffset == 0 && now.weekday > 6) {
-      saturdayOffset = 7 - daysSinceMonday + 5;
+    // Find this weekend's Saturday and Sunday
+    // If today is Monday-Friday, get the upcoming weekend
+    // If today is Saturday or Sunday, that's this weekend
+    int daysUntilSaturday;
+    if (now.weekday == 6) {
+      // Today is Saturday
+      daysUntilSaturday = 0;
+    } else if (now.weekday == 7) {
+      // Today is Sunday, Saturday was yesterday
+      daysUntilSaturday = -1;
+    } else {
+      // Monday = 1, Friday = 5, so Saturday = 6
+      daysUntilSaturday = 6 - now.weekday;
     }
     
-    final saturday = now.add(Duration(days: saturdayOffset));
+    final saturday = now.add(Duration(days: daysUntilSaturday));
     final saturdayDate = DateTime(saturday.year, saturday.month, saturday.day);
-    final sundayDate = DateTime(saturday.year, saturday.month, saturday.day + 1);
+    final sundayDate = saturdayDate.add(Duration(days: 1));
     
     final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
     
