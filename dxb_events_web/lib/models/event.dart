@@ -491,11 +491,29 @@ class Event {
   }
 
   /// Helper methods
+  
+  /// Get the effective end date (use startDate if endDate is null)
+  DateTime get effectiveEndDate {
+    if (endDate != null) {
+      return DateTime(endDate!.year, endDate!.month, endDate!.day, 23, 59, 59);
+    }
+    return DateTime(startDate.year, startDate.month, startDate.day, 23, 59, 59);
+  }
+  
+  /// Check if a date falls within the event's date range
+  bool _dateInEventRange(DateTime date) {
+    final eventStart = DateTime(startDate.year, startDate.month, startDate.day);
+    final eventEnd = effectiveEndDate;
+    final checkDate = DateTime(date.year, date.month, date.day);
+    
+    return (checkDate.isAtSameMomentAs(eventStart) || checkDate.isAfter(eventStart)) &&
+           (checkDate.isAtSameMomentAs(eventEnd) || checkDate.isBefore(eventEnd));
+  }
+  
   bool get isToday {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final eventDay = DateTime(startDate.year, startDate.month, startDate.day);
-    return today == eventDay;
+    return _dateInEventRange(today);
   }
 
   bool get isThisWeekend {
@@ -520,16 +538,14 @@ class Event {
     final saturdayDate = DateTime(saturday.year, saturday.month, saturday.day);
     final sundayDate = saturdayDate.add(Duration(days: 1));
     
-    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
-    
-    return eventDate.isAtSameMomentAs(saturdayDate) || eventDate.isAtSameMomentAs(sundayDate);
+    // Check if either Saturday or Sunday falls within the event date range
+    return _dateInEventRange(saturdayDate) || _dateInEventRange(sundayDate);
   }
 
   bool get isTomorrow {
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    final eventDay = DateTime(startDate.year, startDate.month, startDate.day);
-    return tomorrow == eventDay;
+    return _dateInEventRange(tomorrow);
   }
 
   bool get isThisWeek {
@@ -537,12 +553,14 @@ class Event {
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1)); // Monday
     final endOfWeek = startOfWeek.add(const Duration(days: 6)); // Sunday
     
-    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
     final weekStart = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-    final weekEnd = DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day);
+    final weekEnd = DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
     
-    return (eventDate.isAtSameMomentAs(weekStart) || eventDate.isAfter(weekStart)) &&
-           (eventDate.isAtSameMomentAs(weekEnd) || eventDate.isBefore(weekEnd));
+    // Check if event overlaps with this week
+    final eventStart = DateTime(startDate.year, startDate.month, startDate.day);
+    final eventEnd = effectiveEndDate;
+    
+    return eventEnd.isAfter(weekStart) && eventStart.isBefore(weekEnd);
   }
 
   bool get isNextWeek {
@@ -550,18 +568,31 @@ class Event {
     final startOfNextWeek = now.add(Duration(days: 7 - now.weekday + 1)); // Next Monday
     final endOfNextWeek = startOfNextWeek.add(const Duration(days: 6)); // Next Sunday
     
-    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
     final weekStart = DateTime(startOfNextWeek.year, startOfNextWeek.month, startOfNextWeek.day);
-    final weekEnd = DateTime(endOfNextWeek.year, endOfNextWeek.month, endOfNextWeek.day);
+    final weekEnd = DateTime(endOfNextWeek.year, endOfNextWeek.month, endOfNextWeek.day, 23, 59, 59);
     
-    return (eventDate.isAtSameMomentAs(weekStart) || eventDate.isAfter(weekStart)) &&
-           (eventDate.isAtSameMomentAs(weekEnd) || eventDate.isBefore(weekEnd));
+    // Check if event overlaps with next week
+    final eventStart = DateTime(startDate.year, startDate.month, startDate.day);
+    final eventEnd = effectiveEndDate;
+    
+    return eventEnd.isAfter(weekStart) && eventStart.isBefore(weekEnd);
   }
 
   bool get isThisMonth {
     final now = DateTime.now();
-    final eventDate = DateTime(startDate.year, startDate.month, startDate.day);
-    return eventDate.year == now.year && eventDate.month == now.month;
+    
+    // Check if any part of the event falls within this month
+    final eventStart = DateTime(startDate.year, startDate.month, startDate.day);
+    final eventEnd = effectiveEndDate;
+    
+    // Event overlaps with this month if:
+    // 1. It starts in this month, OR
+    // 2. It ends in this month, OR  
+    // 3. It spans across this month
+    return (eventStart.year == now.year && eventStart.month == now.month) ||
+           (eventEnd.year == now.year && eventEnd.month == now.month) ||
+           (eventStart.isBefore(DateTime(now.year, now.month, 1)) && 
+            eventEnd.isAfter(DateTime(now.year, now.month + 1, 0)));
   }
 
   bool get isUpcoming {
