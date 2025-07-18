@@ -154,8 +154,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         print('📊 Using enhanced filtering for category: $selectedCategory');
         
         // Load ALL events to filter from (EXACT same as homepage does)
+        // Don't send date filter to backend - we'll filter on frontend
         final response = await _eventsService.getEvents(
-          dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
           perPage: _maxEventsToLoad, // Load all events for carousel
           sortBy: '-created_at', // Sort by creation date descending (latest first)
         );
@@ -187,10 +187,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         print('📊 Using standard API filtering for category: $selectedCategory');
         
         // Use standard API filtering for other categories
+        // Don't send date filter to backend - we'll filter on frontend
         final response = await _eventsService.getEventsWithTotal(
           category: selectedCategory,
           location: selectedLocation,
-          dateFilter: _mapDateFilterToBackend(_currentFilters.dateRange),
           page: 1,
           perPage: _maxEventsToLoad, // Load all events for carousel
           sortBy: '-created_at', // Sort by creation date descending (latest first)
@@ -660,15 +660,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             child: EventsFilterSidebarGlassmorphic(
               filters: _currentFilters,
               onFiltersChanged: (filters) {
-                final oldDateRange = _currentFilters.dateRange;
                 setState(() {
                   _currentFilters = filters;
                 });
-                // Reload events if date filter changed
-                if (oldDateRange != filters.dateRange) {
-                  print('🔄 Date filter changed from "$oldDateRange" to "${filters.dateRange}", reloading events');
-                  _loadEvents();
-                }
+                // No need to reload events - we filter on frontend
               },
               isExpanded: _isFilterExpanded,
               onToggle: () {
@@ -721,15 +716,10 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             child: EventsFilterSidebarGlassmorphic(
               filters: _currentFilters,
               onFiltersChanged: (filters) {
-                final oldDateRange = _currentFilters.dateRange;
                 setState(() {
                   _currentFilters = filters;
                 });
-                // Reload events if date filter changed
-                if (oldDateRange != filters.dateRange) {
-                  print('🔄 Date filter changed from "$oldDateRange" to "${filters.dateRange}", reloading events');
-                  _loadEvents();
-                }
+                // No need to reload events - we filter on frontend
               },
               isExpanded: _isFilterExpanded,
               onToggle: () {
@@ -1311,6 +1301,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       selectedCategory = null;
       selectedLocation = null;
     });
+    // Reload all events without filters to restore the full list
+    _loadEvents();
   }
 
   void _navigateToEventDetail(Event event) {
