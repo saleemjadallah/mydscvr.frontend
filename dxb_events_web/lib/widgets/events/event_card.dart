@@ -9,11 +9,15 @@ import '../../utils/duration_formatter.dart';
 import '../../utils/image_utils.dart';
 import 'event_actions.dart';
 
+enum EventCardLayout { vertical, horizontal }
+
 class EventCard extends StatelessWidget {
   final Event event;
   final VoidCallback? onTap;
   final VoidCallback? onFavorite;
   final bool isFavorite;
+  final bool isCompact;
+  final EventCardLayout layout;
 
   const EventCard({
     super.key,
@@ -21,10 +25,19 @@ class EventCard extends StatelessWidget {
     this.onTap,
     this.onFavorite,
     this.isFavorite = false,
+    this.isCompact = false,
+    this.layout = EventCardLayout.vertical,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (layout == EventCardLayout.horizontal) {
+      return _buildHorizontalLayout(context);
+    }
+    return _buildVerticalLayout(context);
+  }
+
+  Widget _buildVerticalLayout(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -34,7 +47,7 @@ class EventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Event image - reduced height
+            // Event image - increased height for mobile
             _buildEventImage(),
             
             // Event details - more compact layout
@@ -192,9 +205,111 @@ class EventCard extends StatelessWidget {
     );
   }
 
+  Widget _buildHorizontalLayout(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 150, // Increased height for mobile horizontal cards
+        child: GlassCard(
+          padding: EdgeInsets.zero,
+          blur: 8,
+          opacity: 0.05,
+          child: Row(
+            children: [
+              // Event image - larger size for mobile
+              _buildEventImageHorizontal(),
+              
+              // Event details
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Event title
+                      Text(
+                        event.title,
+                        style: GoogleFonts.comfortaa(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      
+                      const SizedBox(height: 6),
+                      
+                      // Event date
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.calendar,
+                            size: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              _formatEventDate(),
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 4),
+                      
+                      // Location
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.mapPin,
+                            size: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              event.venue.area,
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const Spacer(),
+                      
+                      // Price
+                      Text(
+                        event.displayPrice,
+                        style: GoogleFonts.comfortaa(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: event.isFree ? AppColors.dubaiTeal : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEventImage() {
     return Container(
-      height: 160, // Restored original height
+      height: isCompact ? 180 : 200, // Increased height for better visibility on mobile
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         color: Colors.grey[200],
@@ -299,10 +414,32 @@ class EventCard extends StatelessWidget {
     );
   }
 
+  Widget _buildEventImageHorizontal() {
+    return Container(
+      width: 150, // Increased width for better visibility
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+        color: Colors.grey[200],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+        child: event.imageUrls.isNotEmpty
+            ? ImageUtils.buildNetworkImage(
+                imageUrl: event.imageUrls.first,
+                width: 150,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                errorWidget: _buildImagePlaceholderHorizontal(),
+              )
+            : _buildImagePlaceholderHorizontal(),
+      ),
+    );
+  }
+
   Widget _buildImagePlaceholder() {
     return Container(
       width: double.infinity,
-      height: 160,
+      height: isCompact ? 180 : 200,
       decoration: BoxDecoration(
         gradient: AppColors.sunsetGradient,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -318,6 +455,32 @@ class EventCard extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) => const Icon(
               LucideIcons.calendar,
               size: 32,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholderHorizontal() {
+    return Container(
+      width: 150,
+      decoration: BoxDecoration(
+        gradient: AppColors.sunsetGradient,
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+      ),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Image.asset(
+            'assets/images/mydscvr-logo.png',
+            width: 60,
+            height: 60,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Icon(
+              LucideIcons.calendar,
+              size: 24,
               color: Colors.white,
             ),
           ),
