@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html if (dart.library.io) 'dart:io';
 
 /// Utility class for handling image URLs and loading
 class ImageUtils {
@@ -6,6 +8,12 @@ class ImageUtils {
   static String getSafeImageUrl(String? originalUrl) {
     if (originalUrl == null || originalUrl.isEmpty) {
       return '';
+    }
+    
+    // For S3 URLs, ensure we're using HTTPS
+    if (originalUrl.contains('s3') && originalUrl.contains('amazonaws.com')) {
+      // Already an S3 URL, ensure HTTPS
+      return originalUrl.replaceAll('http://', 'https://');
     }
     
     // If it's a mydscvr.xyz URL, use the mydscvr.ai domain instead
@@ -31,13 +39,33 @@ class ImageUtils {
       return errorWidget ?? _buildDefaultErrorWidget(width, height);
     }
     
+    // Add headers for better mobile compatibility
+    final headers = <String, String>{};
+    if (kIsWeb) {
+      headers['Accept'] = 'image/webp,image/apng,image/*,*/*;q=0.8';
+    }
+    
     return Image.network(
       safeUrl,
       width: width,
       height: height,
       fit: fit,
+      headers: headers,
       errorBuilder: (context, error, stackTrace) {
-        debugPrint('Image loading error: $error for URL: $safeUrl');
+        // Enhanced error logging for debugging
+        if (kIsWeb) {
+          final userAgent = _getUserAgent();
+          final isMobile = _isMobileBrowser();
+          debugPrint('===== Image Loading Error =====');
+          debugPrint('Platform: ${isMobile ? "Mobile" : "Desktop"} Browser');
+          debugPrint('User Agent: $userAgent');
+          debugPrint('Error: $error');
+          debugPrint('Original URL: $imageUrl');
+          debugPrint('Safe URL: $safeUrl');
+          debugPrint('==============================');
+        } else {
+          debugPrint('Image loading error: $error for URL: $safeUrl');
+        }
         return errorWidget ?? _buildDefaultErrorWidget(width, height);
       },
       loadingBuilder: (context, child, loadingProgress) {
@@ -82,5 +110,27 @@ class ImageUtils {
         ),
       ),
     );
+  }
+  
+  /// Check if running on mobile browser
+  static bool _isMobileBrowser() {
+    if (!kIsWeb) return false;
+    
+    final userAgent = _getUserAgent().toLowerCase();
+    return userAgent.contains('mobile') || 
+           userAgent.contains('android') || 
+           userAgent.contains('iphone') ||
+           userAgent.contains('ipad');
+  }
+  
+  /// Get user agent string
+  static String _getUserAgent() {
+    if (!kIsWeb) return '';
+    
+    try {
+      return html.window.navigator.userAgent;
+    } catch (e) {
+      return '';
+    }
   }
 }
