@@ -21,6 +21,8 @@ class SearchState {
   final String? nextPageToken;
   final List<SearchResult> searchResults;
   final SearchMetadata searchMetadata;
+  final int currentPage;
+  final int perPage;
 
   const SearchState({
     this.query = '',
@@ -36,6 +38,8 @@ class SearchState {
     this.nextPageToken,
     this.searchResults = const [],
     this.searchMetadata = const SearchMetadata(),
+    this.currentPage = 1,
+    this.perPage = 50,  // Increased from 20 to 50 for carousel
   });
 
   SearchState copyWith({
@@ -48,6 +52,8 @@ class SearchState {
     bool? isLoadingMore,
     String? error,
     int? totalCount,
+    int? currentPage,
+    int? perPage,
     bool? hasMore,
     String? nextPageToken,
     List<SearchResult>? searchResults,
@@ -67,6 +73,8 @@ class SearchState {
       nextPageToken: nextPageToken ?? this.nextPageToken,
       searchResults: searchResults ?? this.searchResults,
       searchMetadata: searchMetadata ?? this.searchMetadata,
+      currentPage: currentPage ?? this.currentPage,
+      perPage: perPage ?? this.perPage,
     );
   }
 
@@ -152,30 +160,41 @@ class SearchNotifier extends StateNotifier<SearchState> {
     if (query.trim().isEmpty) return;
 
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(
+        isLoading: true, 
+        error: null,
+        query: query,
+        currentPage: 1,  // Reset to first page on new search
+        results: [],     // Clear previous results
+      );
       
       final response = await _apiClient.searchEvents(
         query: query,
         filters: state.filters != null 
             ? jsonEncode(state.filters.toJson())
             : null,
+        page: 1,
+        perPage: state.perPage,
       );
       
       if (response.success && response.data != null) {
         final searchData = response.data!;
         
-        final results = (searchData['results'] as List<dynamic>?)
-            ?.map((json) => SearchResult.fromJson(json as Map<String, dynamic>))
+        // Handle both old and new API response formats
+        final events = (searchData['events'] as List<dynamic>?)
+            ?.map((json) => Event.fromJson(json as Map<String, dynamic>))
             .toList() ?? [];
         
-        final metadata = SearchMetadata.fromJson(
-          searchData['metadata'] as Map<String, dynamic>? ?? {},
-        );
+        final pagination = searchData['pagination'] as Map<String, dynamic>? ?? {};
+        final total = pagination['total'] ?? events.length;
+        final hasMore = (pagination['page'] ?? 1) < (pagination['total_pages'] ?? 1);
         
         state = state.copyWith(
-          searchResults: results,
-          searchMetadata: metadata,
+          results: events,
+          totalCount: total,
+          hasMore: hasMore,
           isLoading: false,
+          currentPage: 1,
         );
       } else {
         throw Exception(response.message ?? 'Search failed');
@@ -190,42 +209,46 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
   /// Load more search results (pagination)
   Future<void> loadMoreResults() async {
-    if (state.isLoading || !state.hasMore || state.nextPageToken == null) {
+    if (state.isLoadingMore || !state.hasMore || state.query.isEmpty) {
       return;
     }
     
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(isLoadingMore: true, error: null);
       
+      final nextPage = state.currentPage + 1;
       final response = await _apiClient.searchEvents(
         query: state.query,
         filters: state.filters != null 
             ? jsonEncode(state.filters.toJson())
             : null,
+        page: nextPage,
+        perPage: state.perPage,
       );
       
       if (response.success && response.data != null) {
         final searchData = response.data!;
         
-        final newResults = (searchData['results'] as List<dynamic>?)
-            ?.map((json) => SearchResult.fromJson(json as Map<String, dynamic>))
+        // Handle both old and new API response formats
+        final newEvents = (searchData['events'] as List<dynamic>?)
+            ?.map((json) => Event.fromJson(json as Map<String, dynamic>))
             .toList() ?? [];
         
-        final metadata = SearchMetadata.fromJson(
-          searchData['metadata'] as Map<String, dynamic>? ?? {},
-        );
+        final pagination = searchData['pagination'] as Map<String, dynamic>? ?? {};
+        final hasMore = (pagination['page'] ?? nextPage) < (pagination['total_pages'] ?? 1);
         
         state = state.copyWith(
-          searchResults: [...state.searchResults, ...newResults],
-          searchMetadata: metadata,
-          isLoading: false,
+          results: [...state.results, ...newEvents],
+          hasMore: hasMore,
+          isLoadingMore: false,
+          currentPage: nextPage,
         );
       } else {
         throw Exception(response.message ?? 'Search failed');
       }
     } catch (e) {
       state = state.copyWith(
-        isLoading: false,
+        isLoadingMore: false,
         error: 'Failed to load more results',
       );
     }

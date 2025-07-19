@@ -175,11 +175,15 @@ class ApiClient {
   Future<ApiResponse<Map<String, dynamic>>> searchEvents({
     required String query,
     String? filters,
+    int? page,
+    int? perPage,
   }) async {
     try {
       final response = await _dio.get('/search', queryParameters: {
         'q': query,
         if (filters != null) 'filters': filters,
+        if (page != null) 'page': page,
+        if (perPage != null) 'per_page': perPage,
       });
       return ApiResponse.success(response.data);
     } on DioException catch (e) {

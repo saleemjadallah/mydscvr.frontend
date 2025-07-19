@@ -17,7 +17,7 @@ import '../../providers/search_provider.dart';
 // Widget imports
 import '../../widgets/search/search_bar_widget.dart';
 import '../../widgets/search/search_filters.dart';
-import '../../widgets/search/search_results.dart';
+import '../../widgets/search/search_results_carousel.dart';
 import '../../widgets/search/category_browser.dart';
 import '../../widgets/search/search_suggestions.dart';
 
@@ -325,9 +325,9 @@ class _AdvancedSearchScreenState extends ConsumerState<AdvancedSearchScreen>
   List<Widget> _buildSearchResults() {
     return [
       SliverToBoxAdapter(
-        child: SearchResultsWidget(
+        child: SearchResultsCarousel(
           onLoadMore: () {
-            ref.read(searchProvider.notifier).loadMore();
+            ref.read(searchProvider.notifier).loadMoreResults();
           },
         ).animate().fadeIn(duration: 300.ms),
       ),
