@@ -541,6 +541,8 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
               child: event.imageUrls.isNotEmpty
                   ? ImageUtils.buildNetworkImage(
                       imageUrl: event.imageUrls.first,
+                      width: double.infinity,
+                      height: 200,
                       fit: BoxFit.cover,
                       errorWidget: Container(
                         decoration: BoxDecoration(
