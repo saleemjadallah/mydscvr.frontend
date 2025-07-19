@@ -212,6 +212,11 @@ class FeaturedEventsProvider extends ChangeNotifier {
   void _scheduleNextRefresh() {
     _refreshTimer?.cancel();
     
+    // TEMPORARILY DISABLED FOR MOBILE IMAGE TESTING
+    // TODO: Re-enable after mobile image loading is fixed
+    print('🚫 FeaturedEventsProvider: Auto-refresh DISABLED for mobile image testing');
+    return;
+    
     // Circuit breaker: Don't schedule if too many failures
     if (_consecutiveFailures >= _maxConsecutiveFailures) {
       print('🚫 FeaturedEventsProvider: Circuit breaker open, stopping refresh cycle');
