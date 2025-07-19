@@ -58,11 +58,15 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
   final FocusNode _searchFocusNode = FocusNode();
   late AnimationController _pulseController;
   late AnimationController _searchBarController;
+  PageController? _pageController;
   
   SuperSearchResult? _searchResult;
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   bool _showResults = false;
   String? _error;
+  int _currentPage = 1;
+  List<Event> _allEvents = [];
 
   @override
   void initState() {
@@ -103,6 +107,7 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
     _searchFocusNode.dispose();
     _pulseController.dispose();
     _searchBarController.dispose();
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -116,13 +121,15 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
       _isLoading = true;
       _showResults = true;
       _error = null;
+      _currentPage = 1;
+      _allEvents = [];
     });
 
     final response = await _superSearchService.search(
       query: query.trim(),
       filters: const SuperSearchFilters(),
       page: 1,
-      perPage: 20,
+      perPage: 50,  // Increased for carousel
     );
 
     if (mounted) {
@@ -130,13 +137,44 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
         _isLoading = false;
         if (response.isSuccess) {
           _searchResult = response.data;
+          _allEvents = response.data?.events ?? [];
           _error = null;
           print('🎯 SuperSearchScreen: Search successful! Events count: ${_searchResult?.events.length ?? 0}');
           print('🎯 SuperSearchScreen: Total results: ${_searchResult?.total ?? 0}');
         } else {
           _error = response.error;
           _searchResult = null;
+          _allEvents = [];
           print('🚨 SuperSearchScreen: Search failed with error: ${response.error}');
+        }
+      });
+    }
+  }
+  
+  Future<void> _loadMoreResults() async {
+    if (_isLoadingMore || _searchResult == null || _currentPage >= (_searchResult?.totalPages ?? 1)) {
+      return;
+    }
+    
+    setState(() {
+      _isLoadingMore = true;
+    });
+    
+    final nextPage = _currentPage + 1;
+    final response = await _superSearchService.search(
+      query: ref.read(searchQueryProvider),
+      filters: const SuperSearchFilters(),
+      page: nextPage,
+      perPage: 50,
+    );
+    
+    if (mounted) {
+      setState(() {
+        _isLoadingMore = false;
+        if (response.isSuccess && response.data != null) {
+          _allEvents.addAll(response.data!.events);
+          _searchResult = response.data;
+          _currentPage = nextPage;
         }
       });
     }
@@ -1610,30 +1648,19 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
         
         const SizedBox(height: 16),
         
-        // Results list
-        ...result.events.asMap().entries.map((entry) {
-          final index = entry.key;
-          final event = entry.value;
-          
-          return AnimationConfiguration.staggeredList(
-            position: index,
-            duration: const Duration(milliseconds: 375),
-            child: SlideAnimation(
-              verticalOffset: 50,
-              child: FadeInAnimation(
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: EnhancedEventCard(
-                    event: event,
-                    onTap: () {
-                      context.go('/event/${event.id}');
-                    },
-                  ),
-                ),
-              ),
+        // Results carousel
+        _buildResultsGrid(_allEvents),
+        
+        // Loading more indicator
+        if (_isLoadingMore) ...[
+          const SizedBox(height: 16),
+          Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(MyDscvrColors.dubaiTeal),
             ),
-          );
-        }).toList(),
+          ),
+          const SizedBox(height: 16),
+        ],
       ],
     );
   }
@@ -1659,31 +1686,113 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
   }
   
   Widget _buildResultsGrid(List<Event> events) {
-    return AnimationLimiter(
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+    return _buildResultsCarousel(events);
+  }
+  
+  Widget _buildResultsCarousel(List<Event> events) {
+    if (events.isEmpty) return const SizedBox.shrink();
+    
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Determine carousel height and viewport fraction based on screen size
+    double carouselHeight;
+    double viewportFraction;
+    EdgeInsets cardMargin;
+    
+    if (screenWidth <= 480) {
+      // Mobile phones - show 1 card
+      carouselHeight = 500;
+      viewportFraction = 0.9;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 8);
+    } else if (screenWidth <= 768) {
+      // Tablets - show 1.5 cards
+      carouselHeight = 550;
+      viewportFraction = 0.7;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 12);
+    } else if (screenWidth <= 1200) {
+      // Medium screens - show 2 cards
+      carouselHeight = 600;
+      viewportFraction = 0.5;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
+    } else {
+      // Large screens - show 2.5-3 cards
+      carouselHeight = 650;
+      viewportFraction = 0.35;
+      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
+    }
+    
+    // Create page controller if not exists
+    _pageController ??= PageController(
+      viewportFraction: viewportFraction,
+    );
+    
+    // Add listener for auto-loading
+    _pageController!.addListener(() {
+      final currentPage = _pageController!.page ?? 0;
+      final totalEvents = events.length;
+      
+      // Load more when reaching 80% of current results
+      if (currentPage >= totalEvents * 0.8 && !_isLoadingMore) {
+        _loadMoreResults();
+      }
+    });
+    
+    return Column(
+      children: [
+        Container(
+          height: carouselHeight,
+          child: PageView.builder(
+            controller: _pageController,
+            padEnds: false,
+            itemCount: events.length,
+            onPageChanged: (index) {
+              setState(() {}); // Update indicators
+            },
+            itemBuilder: (context, index) {
+              final event = events[index];
+              return AnimationConfiguration.staggeredList(
+                position: index,
+                duration: const Duration(milliseconds: 500),
+                child: SlideAnimation(
+                  horizontalOffset: 50.0,
+                  child: FadeInAnimation(
+                    child: Padding(
+                      padding: cardMargin,
+                      child: GestureDetector(
+                        onTap: () => context.go('/event/${event.id}'),
+                        child: EnhancedEventCard(event: event),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-        itemCount: events.length,
-        itemBuilder: (context, index) {
-          final event = events[index];
-          return AnimationConfiguration.staggeredGrid(
-            position: index,
-            duration: const Duration(milliseconds: 500),
-            columnCount: 2,
-            child: ScaleAnimation(
-              child: FadeInAnimation(
-                child: EnhancedEventCard(event: event),
-              ),
+        const SizedBox(height: 20),
+        // Page indicators
+        if (events.length > 1)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              events.length > 20 ? 20 : events.length,
+              (index) {
+                final currentPage = (_pageController?.page ?? 0).round();
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: index == currentPage 
+                        ? MyDscvrColors.dubaiTeal 
+                        : MyDscvrColors.dubaiTeal.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
+          ),
+      ],
     );
   }
   
