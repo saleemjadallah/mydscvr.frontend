@@ -30,6 +30,7 @@ import '../../models/event.dart';
 import '../../models/api_response.dart';
 import '../../widgets/common/footer.dart';
 import '../../widgets/notifications/notification_bell.dart';
+import '../../utils/image_utils.dart';
 
 /// Beautiful homepage with working animations
 class BeautifulHomeScreen extends ConsumerStatefulWidget {
@@ -1801,10 +1802,12 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
                     child: placeholderEvent.imageUrls.isNotEmpty
-                      ? Image.network(
-                          placeholderEvent.imageUrls.first,
+                      ? ImageUtils.buildNetworkImage(
+                          imageUrl: placeholderEvent.imageUrls.first,
+                          width: double.infinity,
+                          height: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorWidget: Container(
                             color: Colors.white.withOpacity(0.2),
                             child: const Icon(Icons.event, color: Colors.white, size: 30),
                           ),
@@ -1962,10 +1965,12 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(21),
             child: placeholderEvent.imageUrls.isNotEmpty
-              ? Image.network(
-                  placeholderEvent.imageUrls.first,
+              ? ImageUtils.buildNetworkImage(
+                  imageUrl: placeholderEvent.imageUrls.first,
+                  width: double.infinity,
+                  height: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorWidget: Container(
                     color: Colors.white.withOpacity(0.2),
                     child: Icon(Icons.event, color: Colors.white, size: isTablet ? 50 : 60),
                   ),
