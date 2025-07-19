@@ -8,7 +8,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/event.dart';
 import '../../providers/search_provider.dart';
-import '../../widgets/events/event_card.dart';
+import '../../widgets/events/event_card_enhanced.dart';
 
 class SearchResultsWidget extends ConsumerStatefulWidget {
   final VoidCallback? onLoadMore;
@@ -581,9 +581,8 @@ class _SearchResultsWidgetState extends ConsumerState<SearchResultsWidget> {
         ),
         itemCount: events.length,
         itemBuilder: (context, index) {
-          return EventCard(
+          return EventCardEnhanced(
             event: events[index],
-            isCompact: false,
           ).animate().slideY(
             delay: Duration(milliseconds: index * 100),
             duration: 400.ms,
@@ -605,9 +604,8 @@ class _SearchResultsWidgetState extends ConsumerState<SearchResultsWidget> {
         ),
         itemCount: events.length,
         itemBuilder: (context, index) {
-          return EventCard(
+          return EventCardEnhanced(
             event: events[index],
-            isCompact: false,
           ).animate().slideY(
             delay: Duration(milliseconds: index * 100),
             duration: 400.ms,
@@ -629,9 +627,8 @@ class _SearchResultsWidgetState extends ConsumerState<SearchResultsWidget> {
         ),
         itemCount: events.length,
         itemBuilder: (context, index) {
-          return EventCard(
+          return EventCardEnhanced(
             event: events[index],
-            isCompact: true,
           ).animate().slideY(
             delay: Duration(milliseconds: index * 100),
             duration: 400.ms,
@@ -649,10 +646,8 @@ class _SearchResultsWidgetState extends ConsumerState<SearchResultsWidget> {
         itemBuilder: (context, index) {
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
-            child: EventCard(
+            child: EventCardEnhanced(
               event: events[index],
-              isCompact: true,
-              layout: EventCardLayout.horizontal,
             ),
           ).animate().slideX(
             delay: Duration(milliseconds: index * 100),
