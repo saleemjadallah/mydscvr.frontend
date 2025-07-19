@@ -196,7 +196,7 @@ class Event {
     final venueData = json['venue'] as Map<String, dynamic>?;
     final venue = venueData != null 
         ? Venue(
-            id: json['id'] ?? '',
+            id: venueData['id'] ?? venueData['_id'] ?? json['id'] ?? json['_id'] ?? '',
             name: venueData['name'] ?? 'TBA',
             address: venueData['address'] ?? '',
             area: venueData['area'] ?? json['area'] ?? 'Dubai',
@@ -209,7 +209,7 @@ class Event {
             publicTransportAccess: true,
           )
         : Venue(
-            id: json['id'] ?? '',
+            id: json['id'] ?? json['_id'] ?? '',
             name: 'Location TBA',
             address: json['area'] ?? 'Dubai',
             area: json['area'] ?? 'Dubai',
@@ -423,7 +423,7 @@ class Event {
     final rating = (json['rating'] ?? (familyScore ?? 75) / 20).toDouble().clamp(1.0, 5.0);
 
     return Event(
-      id: json['id'] ?? '',
+      id: json['id'] ?? json['_id'] ?? '',
       title: json['title'] ?? 'Untitled Event',
       description: json['description'] ?? '',
       shortDescription: json['short_description'],

@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/event.dart';
 import '../../utils/duration_formatter.dart';
+import '../../utils/image_utils.dart';
 import '../../features/event_details/event_details_screen.dart';
 
 /// Enhanced Event Card that showcases all new backend extraction features
@@ -102,12 +103,12 @@ class EnhancedEventCard extends StatelessWidget {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: (event.imageUrls != null && event.imageUrls.isNotEmpty)
-                ? Image.network(
-                    event.imageUrls.first,
+                ? ImageUtils.buildNetworkImage(
+                    imageUrl: event.imageUrls.first,
                     width: double.infinity,
                     height: imageHeight,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
+                    errorWidget: _buildImagePlaceholder(),
                   )
                 : _buildImagePlaceholder(),
           ),
