@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 
 import '../../core/constants/app_colors.dart';
 import '../../models/event.dart';
@@ -24,6 +26,17 @@ class EventActionButtons extends ConsumerWidget {
     this.iconSize,
   }) : super(key: key);
 
+  // Check if running on mobile browser
+  bool get _isMobileBrowser {
+    if (!kIsWeb) return false;
+    
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('mobile') || 
+           userAgent.contains('android') || 
+           userAgent.contains('iphone') ||
+           userAgent.contains('ipad');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
@@ -35,15 +48,16 @@ class EventActionButtons extends ConsumerWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Share button (always visible)
-          _ShareButton(
-            event: event,
-            iconColor: iconColor,
-            iconSize: iconSize ?? 20,
-            showLabel: false,
-          ),
+          // Share button (temporarily disabled on mobile browsers to test image loading)
+          if (!_isMobileBrowser)
+            _ShareButton(
+              event: event,
+              iconColor: iconColor,
+              iconSize: iconSize ?? 20,
+              showLabel: false,
+            ),
           if (isAuthenticated) ...[
-            const SizedBox(width: 8),
+            if (!_isMobileBrowser) const SizedBox(width: 8),
             _HeartButton(
               eventId: event.id,
               isHearted: isHearted,
@@ -67,15 +81,16 @@ class EventActionButtons extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Share button (always visible)
-        _ShareButton(
-          event: event,
-          iconColor: iconColor,
-          iconSize: iconSize ?? 24,
-          showLabel: true,
-        ),
+        // Share button (temporarily disabled on mobile browsers to test image loading)
+        if (!_isMobileBrowser)
+          _ShareButton(
+            event: event,
+            iconColor: iconColor,
+            iconSize: iconSize ?? 24,
+            showLabel: true,
+          ),
         if (isAuthenticated) ...[
-          const SizedBox(height: 8),
+          if (!_isMobileBrowser) const SizedBox(height: 8),
           _HeartButton(
             eventId: event.id,
             isHearted: isHearted,
@@ -455,6 +470,17 @@ class EventFloatingActions extends ConsumerWidget {
     required this.event,
   }) : super(key: key);
 
+  // Check if running on mobile browser
+  bool get _isMobileBrowser {
+    if (!kIsWeb) return false;
+    
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('mobile') || 
+           userAgent.contains('android') || 
+           userAgent.contains('iphone') ||
+           userAgent.contains('ipad');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
@@ -465,28 +491,29 @@ class EventFloatingActions extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Share button (always visible)
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        // Share button (temporarily disabled on mobile browsers to test image loading)
+        if (!_isMobileBrowser)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: _ShareButton(
+              event: event,
+              iconSize: 20,
+              showLabel: false,
+            ),
           ),
-          child: _ShareButton(
-            event: event,
-            iconSize: 20,
-            showLabel: false,
-          ),
-        ),
         
         if (isAuthenticated) ...[
-          const SizedBox(height: 8),
+          if (!_isMobileBrowser) const SizedBox(height: 8),
           
           // Heart button
           Container(
