@@ -1477,7 +1477,8 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
   }
   
   Widget _buildSearchResults() {
-    if (_isLoading) {
+    try {
+      if (_isLoading) {
       return Container(
         height: 200,
         child: Center(
@@ -1667,6 +1668,13 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
         ],
       ],
     );
+    } catch (e, stackTrace) {
+      print('🚨 SuperSearchScreen Error in _buildSearchResults: $e');
+      print('🚨 Stack trace: $stackTrace');
+      return Center(
+        child: Text('Error loading search results: $e'),
+      );
+    }
   }
   
   Widget _buildResultsHeader() {
@@ -1694,7 +1702,9 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
   }
   
   Widget _buildResultsCarousel(List<Event> events) {
-    if (events.isEmpty) return const SizedBox.shrink();
+    // Create a defensive copy of the events list
+    final safeEvents = List<Event>.from(events);
+    if (safeEvents.isEmpty) return const SizedBox.shrink();
     
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -1752,12 +1762,13 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
           child: PageView.builder(
             controller: _pageController,
             padEnds: false,
-            itemCount: events.length,
+            itemCount: safeEvents.length,
             onPageChanged: (index) {
               setState(() {}); // Update indicators
             },
             itemBuilder: (context, index) {
-              final event = events[index];
+              if (index >= safeEvents.length) return const SizedBox.shrink();
+              final event = safeEvents[index];
               return AnimationConfiguration.staggeredList(
                 position: index,
                 duration: const Duration(milliseconds: 500),
@@ -1779,13 +1790,13 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
         ),
         const SizedBox(height: 20),
         // Page indicators
-        if (events.length > 1)
+        if (safeEvents.length > 1)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
-              events.length > 20 ? 20 : events.length,
+              safeEvents.length > 20 ? 20 : safeEvents.length,
               (index) {
-                final currentPage = (_pageController?.page ?? 0).round();
+                final currentPage = (_pageController?.hasClients == true ? (_pageController!.page ?? 0).round() : 0);
                 return Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   width: 8,

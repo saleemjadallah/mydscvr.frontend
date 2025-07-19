@@ -101,7 +101,7 @@ class EnhancedEventCard extends StatelessWidget {
           // Event Image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: event.imageUrls.isNotEmpty
+            child: (event.imageUrls != null && event.imageUrls.isNotEmpty)
                 ? Image.network(
                     event.imageUrls.first,
                     width: double.infinity,
