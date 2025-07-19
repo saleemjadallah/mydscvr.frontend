@@ -13,8 +13,8 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   
-  <!-- Content Security Policy for Flutter Web with Google Sign-In and Lucky Orange -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http: https://apis.google.com https://accounts.google.com https://tools.luckyorange.com https://storage.googleapis.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: http: https://developers.google.com; font-src 'self' https:; connect-src 'self' https: http: https://accounts.google.com https://api.mydscvr.ai https://*.luckyorange.com https://pubsub.googleapis.com wss://*.visitors.live wss://realtime.luckyorange.com; frame-src 'self' data: https: http: https://accounts.google.com; object-src 'none'; base-uri 'self'">
+  <!-- Content Security Policy for Flutter Web with Google Sign-In - Temporarily relaxed for debugging -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https: http: wss: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; worker-src 'self' blob:; connect-src 'self' https: http: wss: data:; frame-src 'self' https: http: data:; object-src 'none'">
 
   <!-- SEO Meta Tags -->
   <meta name="description" content="Discover amazing family-friendly events in Dubai! mydscvr.ai helps busy Dubai families find perfect activities for children of all ages. From beach fun to art workshops, explore the best family events in the UAE.">
@@ -108,8 +108,7 @@
   />  </noscript>
   <!-- End Meta Pixel Code -->
   
-  <!-- Lucky Orange Heatmap and Site Tracking -->
-  <script async defer src="https://tools.luckyorange.com/core/lo.js?site-id=fe966133"></script>
+
   
   <!-- Google AdSense Removed - Interfering with native ads -->
 
@@ -340,16 +339,31 @@
     
   </script>
   
-  <script src="flutter_bootstrap.js" async></script>
+    <script src="flutter_bootstrap.js" async></script>
   
+  <!-- Lucky Orange - Load after Flutter for better compatibility -->
+  <script>
+    // Wait for Flutter to fully load before initializing Lucky Orange
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://tools.luckyorange.com/core/lo.js?site-id=fe966133';
+        document.head.appendChild(script);
+        console.log('🍊 Lucky Orange loaded after Flutter initialization');
+      }, 2000); // Wait 2 seconds after page load
+    });
+  </script>
   
-  <!-- Infolinks Script -->
+  <!-- Infolinks Script - Temporarily disabled for debugging -->
+  <!-- 
   <script type="text/javascript"> 
     var infolinks_pid = 3438312; 
     var infolinks_wsid = 0; 
   </script> 
   <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
+  -->
   
-  
+
 </body>
 </html>

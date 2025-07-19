@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
+// Analytics service
+import 'services/analytics_service.dart';
+
 // Feature imports
 import 'features/home/home_screen_beautiful.dart';
 import 'features/events/events_list_screen.dart';
@@ -248,6 +251,26 @@ class DXBEventsApp extends ConsumerStatefulWidget {
 }
 
 class _DXBEventsAppState extends ConsumerState<DXBEventsApp> {
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize analytics after Flutter app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAnalytics();
+    });
+  }
+
+  /// Initialize analytics services after Flutter is ready
+  Future<void> _initializeAnalytics() async {
+    try {
+      await AnalyticsService.initialize();
+      print('🚀 Analytics services initialized successfully');
+    } catch (e) {
+      print('❌ Error initializing analytics: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
