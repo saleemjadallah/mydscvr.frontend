@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/event.dart';
 import '../../services/providers/auth_provider_mongodb.dart';
+import '../../utils/share_utils.dart';
 
 /// Heart/Save action buttons for events
 class EventActionButtons extends ConsumerWidget {
@@ -27,32 +28,38 @@ class EventActionButtons extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final isAuthenticated = authState.isAuthenticated;
-    final isHearted = ref.watch(isEventHeartedProvider(event.id));
-    final isSaved = ref.watch(isEventSavedProvider(event.id));
-    
-    if (!isAuthenticated) {
-      return const SizedBox.shrink(); // Don't show actions for unauthenticated users
-    }
+    final isHearted = isAuthenticated ? ref.watch(isEventHeartedProvider(event.id)) : false;
+    final isSaved = isAuthenticated ? ref.watch(isEventSavedProvider(event.id)) : false;
 
     if (isCompact) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _HeartButton(
-            eventId: event.id,
-            isHearted: isHearted,
+          // Share button (always visible)
+          _ShareButton(
+            event: event,
             iconColor: iconColor,
             iconSize: iconSize ?? 20,
             showLabel: false,
           ),
-          const SizedBox(width: 8),
-          _SaveButton(
-            eventId: event.id,
-            isSaved: isSaved,
-            iconColor: iconColor,
-            iconSize: iconSize ?? 20,
-            showLabel: false,
-          ),
+          if (isAuthenticated) ...[
+            const SizedBox(width: 8),
+            _HeartButton(
+              eventId: event.id,
+              isHearted: isHearted,
+              iconColor: iconColor,
+              iconSize: iconSize ?? 20,
+              showLabel: false,
+            ),
+            const SizedBox(width: 8),
+            _SaveButton(
+              eventId: event.id,
+              isSaved: isSaved,
+              iconColor: iconColor,
+              iconSize: iconSize ?? 20,
+              showLabel: false,
+            ),
+          ],
         ],
       );
     }
@@ -60,22 +67,89 @@ class EventActionButtons extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _HeartButton(
-          eventId: event.id,
-          isHearted: isHearted,
+        // Share button (always visible)
+        _ShareButton(
+          event: event,
           iconColor: iconColor,
           iconSize: iconSize ?? 24,
           showLabel: true,
         ),
-        const SizedBox(height: 8),
-        _SaveButton(
-          eventId: event.id,
-          isSaved: isSaved,
-          iconColor: iconColor,
-          iconSize: iconSize ?? 24,
-          showLabel: true,
-        ),
+        if (isAuthenticated) ...[
+          const SizedBox(height: 8),
+          _HeartButton(
+            eventId: event.id,
+            isHearted: isHearted,
+            iconColor: iconColor,
+            iconSize: iconSize ?? 24,
+            showLabel: true,
+          ),
+          const SizedBox(height: 8),
+          _SaveButton(
+            eventId: event.id,
+            isSaved: isSaved,
+            iconColor: iconColor,
+            iconSize: iconSize ?? 24,
+            showLabel: true,
+          ),
+        ],
       ],
+    );
+  }
+}
+
+/// Share button widget
+class _ShareButton extends StatelessWidget {
+  final Event event;
+  final Color? iconColor;
+  final double iconSize;
+  final bool showLabel;
+
+  const _ShareButton({
+    required this.event,
+    this.iconColor,
+    required this.iconSize,
+    this.showLabel = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => ShareUtils.shareEvent(context, event),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.all(showLabel ? 8 : 4),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: showLabel
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.share2,
+                    color: iconColor ?? AppColors.textSecondary,
+                    size: iconSize,
+                  ),
+                  if (showLabel) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'Share',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: iconColor ?? AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              )
+            : Icon(
+                LucideIcons.share2,
+                color: iconColor ?? AppColors.textSecondary,
+                size: iconSize,
+              ),
+      ),
     );
   }
 }
@@ -385,18 +459,13 @@ class EventFloatingActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final isAuthenticated = authState.isAuthenticated;
-    
-    if (!isAuthenticated) {
-      return const SizedBox.shrink();
-    }
-
-    final isHearted = ref.watch(isEventHeartedProvider(event.id));
-    final isSaved = ref.watch(isEventSavedProvider(event.id));
+    final isHearted = isAuthenticated ? ref.watch(isEventHeartedProvider(event.id)) : false;
+    final isSaved = isAuthenticated ? ref.watch(isEventSavedProvider(event.id)) : false;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Heart button
+        // Share button (always visible)
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -409,36 +478,60 @@ class EventFloatingActions extends ConsumerWidget {
               ),
             ],
           ),
-          child: _HeartButton(
-            eventId: event.id,
-            isHearted: isHearted,
+          child: _ShareButton(
+            event: event,
             iconSize: 20,
             showLabel: false,
           ),
         ),
         
-        const SizedBox(height: 8),
-        
-        // Save button
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        if (isAuthenticated) ...[
+          const SizedBox(height: 8),
+          
+          // Heart button
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: _HeartButton(
+              eventId: event.id,
+              isHearted: isHearted,
+              iconSize: 20,
+              showLabel: false,
+            ),
           ),
-          child: _SaveButton(
-            eventId: event.id,
-            isSaved: isSaved,
-            iconSize: 20,
-            showLabel: false,
+          
+          const SizedBox(height: 8),
+          
+          // Save button
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: _SaveButton(
+              eventId: event.id,
+              isSaved: isSaved,
+              iconSize: 20,
+              showLabel: false,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
