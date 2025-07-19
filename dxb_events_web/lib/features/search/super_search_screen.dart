@@ -124,6 +124,10 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
       _currentPage = 1;
       _allEvents = [];
     });
+    
+    // Reset page controller for new search
+    _pageController?.dispose();
+    _pageController = null;
 
     final response = await _superSearchService.search(
       query: query.trim(),
@@ -1551,7 +1555,7 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
       );
     }
     
-    if (_searchResult == null || _searchResult!.events.isEmpty) {
+    if (_searchResult == null || _allEvents.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -1722,20 +1726,24 @@ class _SuperSearchScreenState extends ConsumerState<SuperSearchScreen>
     }
     
     // Create page controller if not exists
-    _pageController ??= PageController(
-      viewportFraction: viewportFraction,
-    );
-    
-    // Add listener for auto-loading
-    _pageController!.addListener(() {
-      final currentPage = _pageController!.page ?? 0;
-      final totalEvents = events.length;
+    if (_pageController == null) {
+      _pageController = PageController(
+        viewportFraction: viewportFraction,
+      );
       
-      // Load more when reaching 80% of current results
-      if (currentPage >= totalEvents * 0.8 && !_isLoadingMore) {
-        _loadMoreResults();
-      }
-    });
+      // Add listener for auto-loading only once
+      _pageController!.addListener(() {
+        if (_pageController!.hasClients) {
+          final currentPage = _pageController!.page ?? 0;
+          final totalEvents = _allEvents.length;
+          
+          // Load more when reaching 80% of current results
+          if (totalEvents > 0 && currentPage >= totalEvents * 0.8 && !_isLoadingMore) {
+            _loadMoreResults();
+          }
+        }
+      });
+    }
     
     return Column(
       children: [
