@@ -361,24 +361,27 @@ class Event {
     final List<String> imageUrls = [];
     final defaultImageUrl = 'assets/images/mydscvr-logo.png';
     
-    // Highest priority: permanent AI generated image
+    // Highest priority: permanent AI generated image (excluding DALL-E URLs)
     // imagesData already declared above for hasAiImage
     if (imagesData != null && imagesData['ai_generated'] != null && (imagesData['ai_generated'] as String).isNotEmpty) {
-      imageUrls.add(imagesData['ai_generated'] as String);
+      final aiGeneratedUrl = imagesData['ai_generated'] as String;
+      if (!aiGeneratedUrl.contains('oaidalleapiprodscus.blob.core.windows.net')) {
+        imageUrls.add(aiGeneratedUrl);
+      }
     }
     
-    // Second priority: ai_image_url field
+    // Second priority: ai_image_url field (excluding DALL-E URLs)
     if (json['ai_image_url'] != null && json['ai_image_url'].toString().isNotEmpty) {
       final aiImageUrl = json['ai_image_url'].toString();
-      if (!imageUrls.contains(aiImageUrl)) {
+      if (!aiImageUrl.contains('oaidalleapiprodscus.blob.core.windows.net') && !imageUrls.contains(aiImageUrl)) {
         imageUrls.add(aiImageUrl);
       }
     }
     
-    // Third priority: regular image_url field
+    // Third priority: regular image_url field (excluding DALL-E URLs)
     if (json['image_url'] != null && json['image_url'].toString().isNotEmpty) {
       final regularImageUrl = json['image_url'].toString();
-      if (!imageUrls.contains(regularImageUrl)) {
+      if (!regularImageUrl.contains('oaidalleapiprodscus.blob.core.windows.net') && !imageUrls.contains(regularImageUrl)) {
         imageUrls.add(regularImageUrl);
       }
     }
