@@ -301,6 +301,7 @@ class EventCardEnhanced extends StatelessWidget {
             child: event.imageUrls.isNotEmpty
                 ? ImageUtils.buildNetworkImage(
                     imageUrl: event.imageUrls.first,
+                    eventId: event.id, // Pass event ID for cache-busting
                     width: double.infinity,
                     height: 140,
                     fit: BoxFit.cover,

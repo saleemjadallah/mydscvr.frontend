@@ -4,36 +4,45 @@ import 'dart:html' as html if (dart.library.io) 'dart:io';
 
 /// Utility class for handling image URLs and loading
 class ImageUtils {
-  /// Get a safe image URL that avoids HTTP/2 errors
-  static String getSafeImageUrl(String? originalUrl) {
+  /// Get a safe image URL that avoids HTTP/2 errors and cache issues
+  static String getSafeImageUrl(String? originalUrl, {String? eventId}) {
     if (originalUrl == null || originalUrl.isEmpty) {
       return '';
     }
     
+    var url = originalUrl;
+
     // For S3 URLs, ensure we're using HTTPS
-    if (originalUrl.contains('s3') && originalUrl.contains('amazonaws.com')) {
-      // Already an S3 URL, ensure HTTPS
-      return originalUrl.replaceAll('http://', 'https://');
+    if (url.contains('s3') && url.contains('amazonaws.com')) {
+      url = url.replaceAll('http://', 'https://');
     }
     
     // If it's a mydscvr.xyz URL, use the mydscvr.ai domain instead
-    // This helps avoid HTTP/2 protocol errors
-    if (originalUrl.contains('mydscvr.xyz')) {
-      return originalUrl.replaceAll('mydscvr.xyz', 'mydscvr.ai');
+    if (url.contains('mydscvr.xyz')) {
+      url = url.replaceAll('mydscvr.xyz', 'mydscvr.ai');
+    }
+
+    // Add cache-busting query parameter for mobile web
+    if (kIsWeb && _isMobileBrowser() && eventId != null) {
+      final uri = Uri.parse(url);
+      final queryParameters = Map<String, String>.from(uri.queryParameters);
+      queryParameters['v'] = eventId;
+      url = uri.replace(queryParameters: queryParameters).toString();
     }
     
-    return originalUrl;
+    return url;
   }
   
   /// Build an image widget with proper error handling
   static Widget buildNetworkImage({
     required String imageUrl,
+    String? eventId, // Add eventId for cache-busting
     double? width,
     double? height,
     BoxFit fit = BoxFit.cover,
     Widget? errorWidget,
   }) {
-    final safeUrl = getSafeImageUrl(imageUrl);
+    final safeUrl = getSafeImageUrl(imageUrl, eventId: eventId);
     
     if (safeUrl.isEmpty) {
       return errorWidget ?? _buildDefaultErrorWidget(width, height);
