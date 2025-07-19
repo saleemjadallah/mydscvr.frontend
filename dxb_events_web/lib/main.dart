@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+// Web-specific imports
+import 'dart:html' as html;
 
 // Analytics service
 import 'services/analytics_service.dart';
@@ -264,10 +266,28 @@ class _DXBEventsAppState extends ConsumerState<DXBEventsApp> {
   /// Initialize analytics services after Flutter is ready
   Future<void> _initializeAnalytics() async {
     try {
+      // Signal that Flutter is ready by dispatching a custom event
+      _signalFlutterReady();
+      
       await AnalyticsService.initialize();
       print('🚀 Analytics services initialized successfully');
     } catch (e) {
       print('❌ Error initializing analytics: $e');
+    }
+  }
+  
+  /// Signal to JavaScript that Flutter is ready
+  void _signalFlutterReady() {
+    try {
+      // Dispatch custom event to notify JavaScript
+      html.window.dispatchEvent(html.CustomEvent('flutter-initialized'));
+      
+      // Also add the class directly to body
+      html.document.body?.classes.add('flutter-ready');
+      
+      print('🎯 Flutter ready signal sent');
+    } catch (e) {
+      print('Could not signal Flutter ready: $e');
     }
   }
 

@@ -256,7 +256,7 @@
   <!-- Loading Screen -->
   <div class="loading-container" id="loading">
     <div class="loading-logo">
-      <img src="assets/assets/images/mydscvr-logo.png" alt="mydscvr.ai logo" id="loading-logo-img" 
+      <img src="assets/images/mydscvr-logo.png" alt="mydscvr.ai logo" id="loading-logo-img" 
            onerror="handleLogoError()" />
       <div class="loading-logo-fallback" id="loading-logo-fallback" style="display: none;">
         M
@@ -273,6 +273,50 @@
   
   
     <script src="flutter_bootstrap.js" async></script>
+    
+  <!-- Flutter initialization handler -->
+  <script>
+    // Clear any cached service worker to ensure fresh load
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Unregistered service worker:', registration);
+        }
+      });
+    }
+    
+    // Monitor Flutter initialization
+    window.addEventListener('flutter-initialized', function() {
+      console.log('Flutter initialized event received');
+      document.body.classList.add('flutter-ready');
+    });
+    
+    // Fallback: Hide loading screen after timeout
+    setTimeout(function() {
+      if (!document.body.classList.contains('flutter-ready')) {
+        console.warn('Flutter initialization timeout - forcing loading screen removal');
+        document.body.classList.add('flutter-ready');
+      }
+    }, 5000); // 5 seconds timeout (reduced)
+    
+    // Alternative detection method
+    var checkFlutterReady = setInterval(function() {
+      if (window._flutter && window._flutter.loader && document.querySelector('flt-glass-pane')) {
+        console.log('Flutter detected via DOM check');
+        document.body.classList.add('flutter-ready');
+        clearInterval(checkFlutterReady);
+      }
+    }, 100);
+    
+    // Even more aggressive fallback
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        console.log('Window loaded - removing loading screen');
+        document.body.classList.add('flutter-ready');
+      }, 2000);
+    });
+  </script>
   
   <!-- Lucky Orange - Load after Flutter for better compatibility -->
   <script>
