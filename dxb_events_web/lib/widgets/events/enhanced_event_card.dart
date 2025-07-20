@@ -119,7 +119,16 @@ class EnhancedEventCard extends StatelessWidget {
                 ? Builder(
                     builder: (context) {
                       final imageUrl = event.imageUrls.first;
-                      // Debug logging removed
+                      final isAssetImage = imageUrl.contains('assets/images/');
+                      
+                      // If it's an asset image (placeholder), show it directly
+                      if (isAssetImage) {
+                        print('📱 MOBILE: Using asset placeholder for ${event.title}');
+                        return _buildImagePlaceholder();
+                      }
+                      
+                      print('📱 MOBILE: Loading network image for ${event.title}: $imageUrl');
+                      
                       return SizedBox(
                         width: double.infinity,
                         height: imageHeight,
@@ -134,7 +143,12 @@ class EnhancedEventCard extends StatelessWidget {
                       );
                     },
                   )
-                : _buildImagePlaceholder(),
+                : Builder(
+                    builder: (context) {
+                      print('📱 MOBILE: No images for ${event.title} - showing placeholder');
+                      return _buildImagePlaceholder();
+                    },
+                  ),
           ),
           
           // Quality Badge (top-right)
@@ -183,11 +197,14 @@ class EnhancedEventCard extends StatelessWidget {
             width: 120,
             height: 120,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Icon(
-              LucideIcons.calendar,
-              size: 48,
-              color: Colors.white.withOpacity(0.7),
-            ),
+            errorBuilder: (context, error, stackTrace) {
+              print('⚠️ MOBILE: Failed to load logo asset: $error');
+              return Icon(
+                LucideIcons.image,
+                size: 48,
+                color: Colors.white.withOpacity(0.7),
+              );
+            },
           ),
         ),
       ),
