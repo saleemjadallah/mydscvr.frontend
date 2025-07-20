@@ -1258,12 +1258,11 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
     // Share functionality temporarily disabled to fix mobile image loading issue
     // TODO: Re-implement share functionality with proper web compatibility
     ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sharing not supported on this platform'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+      const SnackBar(
+        content: Text('Sharing not supported on this platform'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _toggleFavorite(String eventId) async {
