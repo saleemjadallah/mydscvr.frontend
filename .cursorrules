@@ -1,0 +1,83 @@
+# Flutter DXB Events Web Project Rules
+
+## Project Structure
+This is a Flutter web application for Dubai events discovery.
+
+### Key Directories:
+- `dxb_events_web/lib/` - Main Flutter application code
+- `dxb_events_web/lib/features/` - Feature-based modules
+- `dxb_events_web/lib/services/` - API and service layers
+- `dxb_events_web/lib/models/` - Data models
+- `dxb_events_web/lib/widgets/` - Reusable UI components
+- `dxb_events_web/web/` - Web-specific files
+- `dxb_events_web/assets/` - Images and static assets
+
+## Development Guidelines
+
+### Dart/Flutter Standards:
+- Use 2 spaces for indentation
+- Line length limit: 120 characters
+- Follow Dart naming conventions (camelCase for variables, PascalCase for classes)
+- Use const constructors when possible
+- Prefer final over var when the variable won't be reassigned
+
+### State Management:
+- Primary: Riverpod (flutter_riverpod)
+- Secondary: Provider pattern
+- Use StateNotifier for complex state logic
+
+### Code Organization:
+- Feature-first folder structure
+- Separate concerns: UI, business logic, data layer
+- Use barrel exports (index.dart files) for clean imports
+- Keep widgets focused and single-responsibility
+
+### Dependencies:
+- Core: flutter_riverpod, go_router, dio, google_fonts
+- UI: cached_network_image, flutter_svg, iconsax, lucide_icons
+- Animations: flutter_animate, animate_do, lottie, flutter_staggered_animations
+- Utils: shared_preferences, timeago, url_launcher
+
+### Web-Specific Considerations:
+- This is a web-only Flutter project
+- Use web-safe dependencies only
+- Consider responsive design for desktop and mobile web
+- Optimize for web performance (lazy loading, image optimization)
+
+### File Patterns to Index:
+- All .dart files in lib/
+- pubspec.yaml for dependencies
+- analysis_options.yaml for linting rules
+- Assets in assets/ directory
+
+### Files to Ignore:
+- build/ directory
+- .dart_tool/ directory
+- .pub-cache/ directory
+- .DS_Store files
+- canvaskit/ directory (Flutter web artifacts)
+
+## API Integration:
+- Backend API endpoint configuration in lib/config/
+- Use Dio for HTTP requests
+- Implement proper error handling and loading states
+- Cache responses when appropriate
+
+## UI/UX Guidelines:
+- Use Material Design 3 principles
+- Implement dark/light theme support
+- Focus on smooth animations and transitions
+- Ensure accessibility compliance
+- Responsive design for various screen sizes
+
+## Testing:
+- Write unit tests for business logic
+- Widget tests for UI components
+- Integration tests for critical user flows
+- Use flutter_test framework
+
+## Performance:
+- Use const widgets where possible
+- Implement proper image caching
+- Lazy load content when appropriate
+- Monitor bundle size for web deployment 

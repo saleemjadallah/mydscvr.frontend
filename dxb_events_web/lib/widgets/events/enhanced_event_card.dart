@@ -44,7 +44,44 @@ class EnhancedEventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TEMPORARILY REMOVED IMAGE SECTION FOR DEBUGGING
+            // Simple image section for testing
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                color: Colors.grey[200],
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: event.id == '685bd9564009b338adca07f7'
+                    ? Image.network(
+                        'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685bd9564009b338adca07f7_Untitled_Event_e4bacac9.jpg',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('❌ ERROR loading test image: $error');
+                          return Container(
+                            color: Colors.red,
+                            child: const Center(
+                              child: Text(
+                                'ERROR',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: Colors.orange,
+                        child: const Center(
+                          child: Text(
+                            'NOT TEST EVENT',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
             
             // Event Content
             Expanded(

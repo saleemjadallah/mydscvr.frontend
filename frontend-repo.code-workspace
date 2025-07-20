@@ -1,0 +1,53 @@
+{
+  "folders": [
+    {
+      "name": "Frontend Root",
+      "path": "."
+    },
+    {
+      "name": "DXB Events Web",
+      "path": "./dxb_events_web"
+    }
+  ],
+  "settings": {
+    "dart.flutterSdkPath": null,
+    "dart.sdkPath": null,
+    "files.associations": {
+      "*.dart": "dart"
+    },
+    "dart.analysisExcludedFolders": [
+      "build/",
+      ".dart_tool/",
+      ".pub-cache/",
+      "node_modules/",
+      "canvaskit/"
+    ],
+    "search.exclude": {
+      "**/build/**": true,
+      "**/.dart_tool/**": true,
+      "**/.pub-cache/**": true,
+      "**/node_modules/**": true,
+      "**/.git/**": true,
+      "**/canvaskit/**": true,
+      "**/.DS_Store": true
+    },
+    "files.exclude": {
+      "**/.dart_tool": true,
+      "**/build": true,
+      "**/.DS_Store": true
+    },
+    "dart.lineLength": 120,
+    "dart.enableSdkFormatter": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.dart-code",
+      "dart-code.flutter"
+    ]
+  }
+} 
