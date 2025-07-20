@@ -54,32 +54,7 @@ class EnhancedEventCard extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: event.id == '685bd9564009b338adca07f7'
-                    ? Image.network(
-                        'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685bd9564009b338adca07f7_Untitled_Event_e4bacac9.jpg',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          print('❌ ERROR loading test image: $error');
-                          return Container(
-                            color: Colors.red,
-                            child: const Center(
-                              child: Text(
-                                'ERROR',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Container(
-                        color: Colors.orange,
-                        child: const Center(
-                          child: Text(
-                            'NOT TEST EVENT',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
+                child: _buildTestImage(event),
               ),
             ),
             
@@ -240,6 +215,66 @@ class EnhancedEventCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+  
+  Widget _buildTestImage(Event event) {
+    // Test specific events with hardcoded S3 URLs
+    Map<String, String> testEvents = {
+      '685bd9564009b338adca07f7': 'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685bd9564009b338adca07f7_Untitled_Event_e4bacac9.jpg',
+      '685bd9924009b338adca07fb': 'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685bd9924009b338adca07fb_Jet-Lag_at_Cavo_in_Dubai_1e2aa173.jpg',
+    };
+    
+    if (testEvents.containsKey(event.id)) {
+      final imageUrl = testEvents[event.id]!;
+      print('🧪 Testing S3 image for event: ${event.title} (${event.id})');
+      print('🧪 URL: $imageUrl');
+      
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print('❌ ERROR loading S3 image for ${event.title}: $error');
+          return Container(
+            color: Colors.red,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, color: Colors.white, size: 40),
+                  const SizedBox(height: 8),
+                  Text(
+                    'ERROR: ${event.title}',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+    
+    // For non-test events, show placeholder
+    return Container(
+      color: Colors.grey[300],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.image, color: Colors.grey[600], size: 40),
+            const SizedBox(height: 8),
+            Text(
+              event.title,
+              style: TextStyle(color: Colors.grey[700], fontSize: 12),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
   
