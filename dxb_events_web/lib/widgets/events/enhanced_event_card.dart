@@ -115,40 +115,7 @@ class EnhancedEventCard extends StatelessWidget {
           // Event Image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: (event.imageUrls != null && event.imageUrls.isNotEmpty)
-                ? Builder(
-                    builder: (context) {
-                      final imageUrl = event.imageUrls.first;
-                      final isAssetImage = imageUrl.contains('assets/images/');
-                      
-                      // If it's an asset image (placeholder), show it directly
-                      if (isAssetImage) {
-                        print('📱 MOBILE: Using asset placeholder for ${event.title}');
-                        return _buildImagePlaceholder();
-                      }
-                      
-                      print('📱 MOBILE: Loading network image for ${event.title}: $imageUrl');
-                      
-                      return SizedBox(
-                        width: double.infinity,
-                        height: imageHeight,
-                        child: ImageUtils.buildNetworkImage(
-                          imageUrl: imageUrl,
-                          eventId: event.id,  // Add eventId for mobile cache-busting
-                          width: double.infinity,
-                          height: imageHeight,
-                          fit: BoxFit.cover,
-                          errorWidget: _buildImagePlaceholder(),
-                        ),
-                      );
-                    },
-                  )
-                : Builder(
-                    builder: (context) {
-                      print('📱 MOBILE: No images for ${event.title} - showing placeholder');
-                      return _buildImagePlaceholder();
-                    },
-                  ),
+            child: _buildEventImage(context, imageHeight),
           ),
           
           // Quality Badge (top-right)
@@ -181,6 +148,65 @@ class EnhancedEventCard extends StatelessWidget {
     );
   }
 
+  Widget _buildEventImage(BuildContext context, double imageHeight) {
+    // Check if we have any images
+    if (event.imageUrls == null || event.imageUrls.isEmpty) {
+      print('📱 No images for ${event.title} - showing placeholder');
+      return _buildImagePlaceholder();
+    }
+    
+    final imageUrl = event.imageUrls.first;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 480;
+    
+    // Check if it's an asset image
+    if (imageUrl.startsWith('assets/')) {
+      print('📱 Asset image detected for ${event.title}: $imageUrl');
+      return _buildImagePlaceholder();
+    }
+    
+    // It's a network image
+    print('📱 Network image for ${event.title}: $imageUrl');
+    print('📱 Is Mobile: $isMobile, Screen Width: $screenWidth');
+    
+    // Use Image.network directly to bypass ImageUtils issues
+    return Image.network(
+      imageUrl,
+      width: double.infinity,
+      height: imageHeight,
+      fit: BoxFit.cover,
+      headers: {
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        if (isMobile) ...{
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      },
+      errorBuilder: (context, error, stackTrace) {
+        print('❌ Failed to load network image: $error');
+        print('❌ URL was: $imageUrl');
+        return _buildImagePlaceholder();
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          width: double.infinity,
+          height: imageHeight,
+          color: Colors.grey[200],
+          child: Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                  : null,
+              strokeWidth: 2,
+              color: AppColors.dubaiTeal,
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
   Widget _buildImagePlaceholder() {
     return Container(
       width: double.infinity,
@@ -198,7 +224,7 @@ class EnhancedEventCard extends StatelessWidget {
             height: 120,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              print('⚠️ MOBILE: Failed to load logo asset: $error');
+              print('⚠️ Failed to load logo asset: $error');
               return Icon(
                 LucideIcons.image,
                 size: 48,
