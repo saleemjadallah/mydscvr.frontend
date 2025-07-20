@@ -44,8 +44,7 @@ class EnhancedEventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Event Image with Quality Badge
-            _buildImageSection(context),
+            // TEMPORARILY REMOVED IMAGE SECTION FOR DEBUGGING
             
             // Event Content
             Expanded(
