@@ -1804,6 +1804,7 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
                     child: placeholderEvent.imageUrls.isNotEmpty
                       ? ImageUtils.buildNetworkImage(
                           imageUrl: placeholderEvent.imageUrls.first,
+                          eventId: placeholderEvent.id, // Add event ID for cache-busting on mobile
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
@@ -1967,6 +1968,7 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
             child: placeholderEvent.imageUrls.isNotEmpty
               ? ImageUtils.buildNetworkImage(
                   imageUrl: placeholderEvent.imageUrls.first,
+                  eventId: placeholderEvent.id, // Add event ID for cache-busting on mobile
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,

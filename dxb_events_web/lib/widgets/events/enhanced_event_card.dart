@@ -148,49 +148,20 @@ class EnhancedEventCard extends StatelessWidget {
     }
     
     final imageUrl = event.imageUrls.first;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 480;
     
     // Check if it's an asset image
     if (imageUrl.startsWith('assets/')) {
       return _buildImagePlaceholder();
     }
     
-    // It's a network image - use enhanced headers for mobile compatibility
-    return Image.network(
-      imageUrl,
+    // Use ImageUtils for proper mobile compatibility
+    return ImageUtils.buildNetworkImage(
+      imageUrl: imageUrl,
+      eventId: event.id, // Pass event ID for cache-busting on mobile
       width: double.infinity,
       height: imageHeight,
       fit: BoxFit.cover,
-      headers: const {
-        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-        'Cache-Control': 'max-age=3600',
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
-          width: double.infinity,
-          height: imageHeight,
-          color: Colors.grey[200],
-          child: Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                  : null,
-              strokeWidth: 2,
-              color: AppColors.dubaiTeal,
-            ),
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        if (isMobile) {
-          print('❌ Mobile image load failed for ${event.title}');
-          print('❌ URL: $imageUrl');
-          print('❌ Error: $error');
-        }
-        return _buildImagePlaceholder();
-      },
+      errorWidget: _buildImagePlaceholder(),
     );
   }
   
