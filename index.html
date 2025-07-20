@@ -8,12 +8,13 @@
   <base href="/">
 
   <!-- Basic Meta Tags -->
+   
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   
-  <!-- Content Security Policy for Flutter Web with Google Sign-In -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http: https://apis.google.com https://accounts.google.com https://www.highperformanceformat.com https://www.topcreativeformat.com https://www.integratedadvertising.top https://trotscheme.com https://*.trotscheme.com https://pl27139224.profitableratecpm.com https://pl15015147.pvclouds.com https://*.profitableratecpm.com https://*.pvclouds.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: http: https://developers.google.com; font-src 'self' https:; connect-src 'self' https: http: https://accounts.google.com https://api.mydscvr.ai https://trotscheme.com https://*.trotscheme.com; frame-src 'self' data: https: http: https://accounts.google.com https://www.highperformanceformat.com https://www.topcreativeformat.com https://www.integratedadvertising.top https://trotscheme.com https://*.trotscheme.com https://pl27139224.profitableratecpm.com https://pl15015147.pvclouds.com https://*.profitableratecpm.com https://*.pvclouds.com; object-src 'none'; base-uri 'self'">
+  <!-- Content Security Policy optimized for Flutter web + Lucky Orange + Facebook Pixel + Google Analytics -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://tools.luckyorange.com https://storage.googleapis.com https://www.gstatic.com https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https: https://accounts.google.com https://api.mydscvr.ai https://*.luckyorange.com https://pubsub.googleapis.com wss://*.visitors.live wss://realtime.luckyorange.com https://www.facebook.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com; frame-src 'self' https: https://accounts.google.com; object-src 'none'; base-uri 'self'";
 
   <!-- SEO Meta Tags -->
   <meta name="description" content="Discover amazing family-friendly events in Dubai! mydscvr.ai helps busy Dubai families find perfect activities for children of all ages. From beach fun to art workshops, explore the best family events in the UAE.">
@@ -104,8 +105,10 @@
   </script>
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1086840866748895&ev=PageView&noscript=1"
-  /></noscript>
+  />  </noscript>
   <!-- End Meta Pixel Code -->
+  
+
   
   <!-- Google AdSense Removed - Interfering with native ads -->
 
@@ -113,6 +116,29 @@
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleScriptLoaded()" onerror="onGoogleScriptError()"></script>
+  
+  <!-- Helper JavaScript Functions -->
+  <script>
+    // Google Identity Services callback functions
+    function onGoogleScriptLoaded() {
+      console.log('✅ Google Identity Services loaded successfully');
+      window.googleScriptLoaded = true;
+    }
+    
+    function onGoogleScriptError() {
+      console.error('❌ Failed to load Google Identity Services');
+      window.googleScriptLoaded = false;
+    }
+    
+    // Logo error handler
+    function handleLogoError() {
+      console.log('Logo failed to load, showing fallback');
+      document.getElementById('loading-logo-img').style.display = 'none';
+      document.getElementById('loading-logo-fallback').style.display = 'flex';
+    }
+  </script>
+
+
 
   <!-- Loading Styles -->
   <style>
@@ -165,9 +191,9 @@
 
     .loading-logo img {
       width: 100px;
-      height: auto;
-      max-height: 100px;
+      height: 100px;
       object-fit: contain;
+      display: block;
     }
 
     .loading-logo-fallback {
@@ -226,16 +252,6 @@
   </style>
 </head>
 <body>
-  <!-- Ad Header -->
-  <div style="background-color: #f0f0f0; text-align: center; padding: 8px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
-    This is an Ad. Please scroll to proceed with content
-  </div>
-  
-  <!-- Native Banner Ad Container with Anti-Adblock -->
-  <div id="native-banner-container" style="display: block; text-align: center; padding: 10px; background-color: #f9f9f9;">
-    <script async="async" data-cfasync="false" src="//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js"></script>
-    <div id="container-e1bd304e9b4f790ab61f30e117275a37"></div>
-  </div>
   
   <!-- Loading Screen -->
   <div class="loading-container" id="loading">
@@ -251,318 +267,80 @@
     <div class="loading-spinner"></div>
   </div>
 
+
+
   <!-- Flutter App -->
+  
+  
+    <script src="flutter_bootstrap.js" async></script>
+    
+  <!-- Flutter initialization handler -->
   <script>
-    // Configure Flutter web for clean URLs
-    window.flutterConfiguration = {
-      canvasKitBaseUrl: "/canvaskit/",
-      // Use path-based routing instead of hash routing
-      usePathUrlStrategy: true
-    };
-    
-    // Google Sign-In Script Loading Handlers
-    function onGoogleScriptLoaded() {
-      console.log('✅ Google Identity Services script loaded successfully');
-      console.log('🔍 Google object available:', typeof google !== 'undefined');
-      console.log('🔍 Google.accounts available:', typeof google?.accounts !== 'undefined');
-      console.log('🔍 Google.accounts.id available:', typeof google?.accounts?.id !== 'undefined');
-      
-      // Set a flag that Flutter can check
-      window.googleScriptLoaded = true;
-      
-      // Dispatch custom event for Flutter to listen to
-      window.dispatchEvent(new CustomEvent('google-script-loaded'));
-    }
-    
-    function onGoogleScriptError() {
-      console.error('❌ Failed to load Google Identity Services script');
-      console.error('🔧 This might be due to:');
-      console.error('   - Ad blockers blocking Google scripts');
-      console.error('   - Network connectivity issues');
-      console.error('   - Google services being unavailable');
-      
-      // Set error flag
-      window.googleScriptError = true;
-      
-      // Dispatch error event
-      window.dispatchEvent(new CustomEvent('google-script-error'));
-    }
-    
-    // Handle logo loading error
-    function handleLogoError() {
-      const img = document.getElementById('loading-logo-img');
-      const fallback = document.getElementById('loading-logo-fallback');
-      if (img && fallback) {
-        img.style.display = 'none';
-        fallback.style.display = 'flex';
-        console.log('Logo failed to load, showing fallback. Tried path:', img.src);
-      }
-    }
-    
-    // Debug: Check if logo loads successfully
-    document.addEventListener('DOMContentLoaded', function() {
-      const img = document.getElementById('loading-logo-img');
-      if (img) {
-        img.onload = function() {
-          console.log('Logo loaded successfully from:', img.src);
-        };
-        console.log('Attempting to load logo from:', img.src);
-      }
-    });
-    
-    window.addEventListener('flutter-first-frame', function () {
-      const loading = document.getElementById('loading');
-      if (loading) {
-        loading.style.opacity = '0';
-        loading.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => {
-          loading.style.display = 'none';
-          document.body.classList.add('flutter-ready');
-        }, 500);
-      }
-    });
-    
-    // Event snippet for Home page conversion page
-    gtag('event', 'conversion', {
-        'send_to': 'AW-17261831821/YmOuCPSTxfAaEI3NiqdA',
-        'value': 1.0,
-        'currency': 'AED'
-    });
-    
-    // Native Banner Ad Management
-    let nativeBannerLoaded = false;
-    let adScriptLoaded = false;
-    const adKey = 'e1bd304e9b4f790ab61f30e117275a37';
-    const adScriptUrl = '//trotscheme.com/e1bd304e9b4f790ab61f30e117275a37/invoke.js';
-    
-    // Function to recreate the ad container and reload the ad
-    function reloadNativeBanner() {
-      const bannerContainer = document.getElementById('native-banner-container');
-      if (!bannerContainer || !nativeBannerLoaded) {
-        console.log('Banner container not ready or not loaded');
-        return;
-      }
-      
-      // Method 1: Try all possible reload methods
-      const container = document.getElementById(`container-${adKey}`);
-      
-      // Check multiple ways to access reload
-      const reloadMethods = [
-        () => container.reload && container.reload(),
-        () => container.reload && container.reload.call(container),
-        () => window[`reload_${adKey}`] && window[`reload_${adKey}`](),
-        () => {
-          // Check if reload is in the prototype
-          const proto = Object.getPrototypeOf(container);
-          if (proto && proto.reload) {
-            proto.reload.call(container);
-          }
-        },
-        () => {
-          // Check all properties for reload-like functions
-          for (let prop in container) {
-            if (prop.toLowerCase().includes('reload') && typeof container[prop] === 'function') {
-              console.log(`Found reload method: ${prop}`);
-              container[prop]();
-              return true;
-            }
-          }
+    // Clear any cached service worker to ensure fresh load
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Unregistered service worker:', registration);
         }
-      ];
-      
-      for (let method of reloadMethods) {
-        try {
-          if (method()) {
-            console.log('Native banner reloaded successfully');
-            return;
-          }
-        } catch (error) {
-          console.log('Reload method failed:', error);
-        }
-      }
-      
-      // Method 2: Re-inject the ad by recreating the container
-      console.log('Reloading native banner by re-injecting');
-      
-      // Clear the current ad content
-      bannerContainer.innerHTML = '';
-      
-      // Recreate the ad container
-      const newContainer = document.createElement('div');
-      newContainer.id = `container-${adKey}`;
-      bannerContainer.appendChild(newContainer);
-      
-      // Re-inject the ad script
-      if (adScriptLoaded) {
-        // If script was already loaded, trigger a re-render
-        // Some ad networks expose a global function to reinitialize ads
-        if (window.atOptions) {
-          // Try to reinitialize with existing options
-          const tempScript = document.createElement('script');
-          tempScript.textContent = `
-            if (typeof window['__${adKey}_reinit'] === 'function') {
-              window['__${adKey}_reinit']();
-            } else {
-              // Force re-evaluation of the ad
-              var script = document.createElement('script');
-              script.src = '${adScriptUrl}?t=' + Date.now();
-              script.async = true;
-              script.setAttribute('data-cfasync', 'false');
-              document.getElementById('native-banner-container').appendChild(script);
-            }
-          `;
-          document.body.appendChild(tempScript);
-          document.body.removeChild(tempScript);
-        } else {
-          // Reload the script with a cache buster
-          const script = document.createElement('script');
-          script.src = adScriptUrl + '?t=' + Date.now();
-          script.async = true;
-          script.setAttribute('data-cfasync', 'false');
-          bannerContainer.appendChild(script);
-        }
-      } else {
-        // First time loading
-        const script = document.createElement('script');
-        script.src = adScriptUrl;
-        script.async = true;
-        script.setAttribute('data-cfasync', 'false');
-        script.onload = () => {
-          adScriptLoaded = true;
-          console.log('Ad script loaded successfully');
-        };
-        bannerContainer.appendChild(script);
-      }
-      
-      console.log('Native banner reload initiated');
-    }
-    
-    // Show native banner after Flutter loads
-    window.addEventListener('flutter-first-frame', function() {
-      const bannerContainer = document.getElementById('native-banner-container');
-      if (bannerContainer) {
-        bannerContainer.style.display = 'block';
-        nativeBannerLoaded = true;
-        
-        // Mark the initial script as loaded if it exists
-        const existingScript = bannerContainer.querySelector('script');
-        if (existingScript) {
-          adScriptLoaded = true;
-        }
-      }
-    });
-    
-    // Enhanced navigation detection for SPAs
-    let lastUrl = window.location.href;
-    let lastPathname = window.location.pathname;
-    let lastHash = window.location.hash;
-    
-    // Function to check if navigation occurred
-    function checkNavigation() {
-      const currentUrl = window.location.href;
-      const currentPathname = window.location.pathname;
-      const currentHash = window.location.hash;
-      
-      if (currentUrl !== lastUrl || currentPathname !== lastPathname || currentHash !== lastHash) {
-        lastUrl = currentUrl;
-        lastPathname = currentPathname;
-        lastHash = currentHash;
-        
-        console.log('Navigation detected, reloading native banner');
-        
-        // Delay reload to ensure DOM is ready
-        setTimeout(() => {
-          if (nativeBannerLoaded) {
-            reloadNativeBanner();
-          }
-        }, 200);
-      }
-    }
-    
-    // Multiple navigation detection strategies
-    
-    // 1. MutationObserver for DOM changes
-    const urlObserver = new MutationObserver(() => {
-      checkNavigation();
-    });
-    
-    // 2. Interval-based checking as fallback
-    let navigationCheckInterval = null;
-    
-    // Start observing once Flutter is ready
-    window.addEventListener('flutter-first-frame', function() {
-      // Start MutationObserver
-      urlObserver.observe(document.body, { 
-        childList: true, 
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['href']
       });
-      
-      // Start interval checking as backup
-      navigationCheckInterval = setInterval(checkNavigation, 1000);
+    }
+    
+    // Monitor Flutter initialization
+    window.addEventListener('flutter-initialized', function() {
+      console.log('Flutter initialized event received');
+      document.body.classList.add('flutter-ready');
     });
     
-    // 3. Listen for History API events
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-    
-    history.pushState = function() {
-      originalPushState.apply(history, arguments);
-      setTimeout(checkNavigation, 100);
-    };
-    
-    history.replaceState = function() {
-      originalReplaceState.apply(history, arguments);
-      setTimeout(checkNavigation, 100);
-    };
-    
-    // 4. Popstate for browser back/forward
-    window.addEventListener('popstate', () => {
-      console.log('Browser navigation detected');
-      setTimeout(checkNavigation, 100);
-    });
-    
-    // 5. Hashchange event
-    window.addEventListener('hashchange', () => {
-      console.log('Hash change detected');
-      setTimeout(checkNavigation, 100);
-    });
-    
-    // Handle visibility changes
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && nativeBannerLoaded) {
-        console.log('Page became visible, reloading native banner');
-        setTimeout(reloadNativeBanner, 500);
+    // Fallback: Hide loading screen after timeout
+    setTimeout(function() {
+      if (!document.body.classList.contains('flutter-ready')) {
+        console.warn('Flutter initialization timeout - forcing loading screen removal');
+        document.body.classList.add('flutter-ready');
       }
-    });
+    }, 5000); // 5 seconds timeout (reduced)
     
-    // Handle focus events
-    window.addEventListener('focus', () => {
-      if (nativeBannerLoaded) {
-        console.log('Window focused, reloading native banner');
-        setTimeout(reloadNativeBanner, 500);
+    // Alternative detection method
+    var checkFlutterReady = setInterval(function() {
+      if (window._flutter && window._flutter.loader && document.querySelector('flt-glass-pane')) {
+        console.log('Flutter detected via DOM check');
+        document.body.classList.add('flutter-ready');
+        clearInterval(checkFlutterReady);
       }
-    });
+    }, 100);
     
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-      if (urlObserver) {
-        urlObserver.disconnect();
-      }
-      if (navigationCheckInterval) {
-        clearInterval(navigationCheckInterval);
-      }
+    // Even more aggressive fallback
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        console.log('Window loaded - removing loading screen');
+        document.body.classList.add('flutter-ready');
+      }, 2000);
     });
   </script>
   
-  <script src="flutter_bootstrap.js" async></script>
+  <!-- Lucky Orange - Load after Flutter for better compatibility -->
+  <script>
+    // Wait for Flutter to fully load before initializing Lucky Orange
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://tools.luckyorange.com/core/lo.js?site-id=fe966133';
+        document.head.appendChild(script);
+        console.log('🍊 Lucky Orange loaded after Flutter initialization');
+      }, 2000); // Wait 2 seconds after page load
+    });
+  </script>
   
-  <!-- Infolinks Script -->
+  <!-- Infolinks Script - Temporarily disabled for debugging -->
+  <!-- 
   <script type="text/javascript"> 
     var infolinks_pid = 3438312; 
     var infolinks_wsid = 0; 
   </script> 
   <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
+  -->
+  
+
 </body>
 </html>
