@@ -55,7 +55,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         end: Alignment.bottomRight,
         colors: [Color(0xFFFF6B35), Color(0xFFFF4757)],
       ),
-      'bgImage': 'https://images.unsplash.com/photo-1544967882-4d0e306c8d68?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      // 'bgImage': 'https://images.unsplash.com/photo-1544967882-4d0e306c8d68?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'subCategories': ['Museums', 'Art Galleries', 'Heritage Sites'],
     },
     {
@@ -70,7 +70,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         end: Alignment.bottomRight,
         colors: [Color(0xFF27AE60), Color(0xFF2ECC71)],
       ),
-      'bgImage': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      // 'bgImage': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'subCategories': ['Parks', 'Beaches', 'Sports'],
     },
     {
@@ -85,7 +85,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         end: Alignment.bottomRight,
         colors: [Color(0xFFF39C12), Color(0xFFE67E22)],
       ),
-      'bgImage': 'https://images.unsplash.com/photo-1527856263669-12c3a0af2aa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      // 'bgImage': 'https://images.unsplash.com/photo-1527856263669-12c3a0af2aa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'subCategories': ['Playgrounds', 'Activities', 'Education'],
     },
     {
@@ -100,7 +100,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         end: Alignment.bottomRight,
         colors: [Color(0xFFE74C3C), Color(0xFFC0392B)],
       ),
-      'bgImage': 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      // 'bgImage': 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'subCategories': ['Restaurants', 'Brunch', 'Dining Experiences'],
     },
     {
@@ -115,7 +115,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         end: Alignment.bottomRight,
         colors: [Color(0xFF8E44AD), Color(0xFF9B59B6)],
       ),
-      'bgImage': 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      // 'bgImage': 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'subCategories': ['Concerts', 'Live Shows', 'Performances'],
     },
     {
@@ -130,7 +130,7 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
         end: Alignment.bottomRight,
         colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
       ),
-      'bgImage': 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      // 'bgImage': 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'subCategories': ['Malls', 'Workshops', 'Shopping'],
     },
   ];
@@ -460,23 +460,29 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
             borderRadius: BorderRadius.circular(24),
             child: Stack(
               children: [
-                // Background Image
+                // Background Image or Gradient
                 Positioned.fill(
-                  child: CachedNetworkImage(
-                    imageUrl: category['bgImage'] as String,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: AppColors.surfaceVariant,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
+                  child: category.containsKey('bgImage') && category['bgImage'] != null 
+                    ? CachedNetworkImage(
+                        imageUrl: category['bgImage'] as String,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: AppColors.surfaceVariant,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          decoration: BoxDecoration(
+                            gradient: category['gradient'] as LinearGradient,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                          gradient: category['gradient'] as LinearGradient,
+                        ),
                       ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      decoration: BoxDecoration(
-                        gradient: category['gradient'] as LinearGradient,
-                      ),
-                    ),
-                  ),
                 ),
                 
                 // Gradient Overlay
