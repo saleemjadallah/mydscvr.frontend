@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test S3 CORS</title>
+</head>
+<body>
+    <h1>S3 CORS Test</h1>
+    <p>Testing image: <code>686327dd4946b0a808c2f01d_UAE_National_Day_at_Dubai_Garden_Centre_f065338b.jpg</code></p>
+    
+    <h2>Direct Image Load:</h2>
+    <img id="test-img" 
+         src="https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/686327dd4946b0a808c2f01d_UAE_National_Day_at_Dubai_Garden_Centre_f065338b.jpg" 
+         style="max-width: 400px; border: 1px solid #ccc;"
+         onload="console.log('✅ Image loaded successfully')"
+         onerror="console.error('❌ Image failed to load', event)">
+    
+    <h2>Fetch Test:</h2>
+    <pre id="fetch-result"></pre>
+    
+    <script>
+        // Test with fetch
+        async function testFetch() {
+            const url = 'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/686327dd4946b0a808c2f01d_UAE_National_Day_at_Dubai_Garden_Centre_f065338b.jpg';
+            const resultDiv = document.getElementById('fetch-result');
+            
+            try {
+                console.log('🔍 Testing fetch...');
+                const response = await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'cors'
+                });
+                
+                resultDiv.textContent = `✅ Fetch successful!
+Status: ${response.status}
+Headers:
+${Array.from(response.headers.entries()).map(([k,v]) => `  ${k}: ${v}`).join('\n')}`;
+                
+                console.log('✅ Fetch response:', response);
+            } catch (error) {
+                resultDiv.textContent = `❌ Fetch failed!
+Error: ${error.message}`;
+                console.error('❌ Fetch error:', error);
+            }
+        }
+        
+        // Run tests
+        window.onload = function() {
+            testFetch();
+            
+            // Also test with XMLHttpRequest
+            const xhr = new XMLHttpRequest();
+            xhr.open('HEAD', 'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/686327dd4946b0a808c2f01d_UAE_National_Day_at_Dubai_Garden_Centre_f065338b.jpg');
+            xhr.onload = () => console.log('✅ XHR success:', xhr.status);
+            xhr.onerror = () => console.error('❌ XHR error');
+            xhr.send();
+        };
+    </script>
+</body>
+</html>
