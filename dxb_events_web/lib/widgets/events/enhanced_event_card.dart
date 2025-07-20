@@ -46,37 +46,35 @@ class EnhancedEventCard extends StatelessWidget {
             _buildImageSection(context),
             
             // Event Content
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(isMobile ? 12 : 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title and Category
-                    _buildTitleSection(context),
-                    
-                    SizedBox(height: isMobile ? 4 : 8),
-                    
-                    // Enhanced Description
-                    _buildDescriptionSection(context),
-                    
-                    SizedBox(height: isMobile ? 6 : 12),
-                    
-                    // Event Details Row - simplified on mobile
-                    _buildEventDetailsRow(),
-                    
-                    // Venue section - only show on larger screens
-                    if (!isMobile) ...[
-                      const SizedBox(height: 12),
-                      _buildVenueSection(),
-                    ],
-                    
-                    const Spacer(),
-                    
-                    // Bottom section with price and actions
-                    _buildBottomSection(context),
+            Padding(
+              padding: EdgeInsets.all(isMobile ? 12 : 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title and Category
+                  _buildTitleSection(context),
+                  
+                  SizedBox(height: isMobile ? 4 : 8),
+                  
+                  // Enhanced Description
+                  _buildDescriptionSection(context),
+                  
+                  SizedBox(height: isMobile ? 6 : 12),
+                  
+                  // Event Details Row - simplified on mobile
+                  _buildEventDetailsRow(),
+                  
+                  // Venue section - only show on larger screens
+                  if (!isMobile) ...[
+                    const SizedBox(height: 12),
+                    _buildVenueSection(),
                   ],
-                ),
+                  
+                  SizedBox(height: isMobile ? 8 : 12),
+                  
+                  // Bottom section with price and actions
+                  _buildBottomSection(context),
+                ],
               ),
             ),
           ],
