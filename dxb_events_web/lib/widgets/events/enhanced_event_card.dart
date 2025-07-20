@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 // import 'package:url_launcher/url_launcher.dart'; // TODO: Replace with web-safe link handling
 
 import '../../core/constants/app_colors.dart';
@@ -230,23 +231,54 @@ class EnhancedEventCard extends StatelessWidget {
       print('🧪 Testing S3 image for event: ${event.title} (${event.id})');
       print('🧪 URL: $imageUrl');
       
+      // Add headers and caching strategy for mobile
       return Image.network(
         imageUrl,
         fit: BoxFit.cover,
+        headers: const {
+          'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+          'Cache-Control': 'max-age=3600',
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            color: Colors.grey[300],
+            child: Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                    : null,
+                color: AppColors.dubaiTeal,
+              ),
+            ),
+          );
+        },
         errorBuilder: (context, error, stackTrace) {
           print('❌ ERROR loading S3 image for ${event.title}: $error');
+          print('❌ Error details: $error');
+          print('❌ Stack trace: $stackTrace');
+          
+          // Show detailed error for debugging
           return Container(
-            color: Colors.red,
+            color: Colors.red.shade700,
+            padding: const EdgeInsets.all(8),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error, color: Colors.white, size: 40),
-                  const SizedBox(height: 8),
+                  const Icon(Icons.error_outline, color: Colors.white, size: 32),
+                  const SizedBox(height: 4),
                   Text(
-                    'ERROR: ${event.title}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    event.title,
+                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Image failed to load',
+                    style: TextStyle(color: Colors.white70, fontSize: 9),
                   ),
                 ],
               ),
