@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:share_plus/share_plus.dart';
+// import 'package:share_plus/share_plus.dart'; // Removed - causing web compatibility issues
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1255,18 +1255,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
   }
 
   void _shareEvent(Event event) {
-    try {
-      Share.share(
-        'Check out this amazing event: ${event.title}\n\n'
-        '📅 ${_formatDateTime(event.startDate)}\n'
-        '📍 ${event.venue?.name ?? 'Dubai'}, ${event.venue?.area ?? 'UAE'}\n\n'
-        'Discover more family activities on MyDscvr!',
-        subject: event.title,
-      );
-    } catch (e) {
-      // Fallback for web or unsupported platforms
-      print('Share failed: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
+    // Share functionality temporarily disabled to fix mobile image loading issue
+    // TODO: Re-implement share functionality with proper web compatibility
+    ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Sharing not supported on this platform'),
           duration: Duration(seconds: 2),
