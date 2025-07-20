@@ -30,6 +30,11 @@ class ImageUtils {
       url = uri.replace(queryParameters: queryParameters).toString();
     }
     
+    // Debug S3 URLs on mobile
+    if (kIsWeb && _isMobileBrowser() && url.contains('s3') && url.contains('amazonaws.com')) {
+      debugPrint('📱 MOBILE S3 IMAGE: $url');
+    }
+    
     return url;
   }
   
@@ -52,6 +57,11 @@ class ImageUtils {
     final headers = <String, String>{};
     if (kIsWeb) {
       headers['Accept'] = 'image/webp,image/apng,image/*,*/*;q=0.8';
+      // Add no-cache headers for mobile to avoid stale images
+      if (_isMobileBrowser()) {
+        headers['Cache-Control'] = 'no-cache';
+        headers['Pragma'] = 'no-cache';
+      }
     }
     
     return Image.network(

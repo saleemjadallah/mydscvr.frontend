@@ -35,8 +35,8 @@ class EnhancedEventCard extends StatelessWidget {
       margin: EdgeInsets.all(isMobile ? 4 : 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        // TEST: Add red border on mobile to verify changes
-        side: isMobile ? BorderSide(color: Colors.red, width: 3) : BorderSide.none,
+        // Remove test border
+        // side: isMobile ? BorderSide(color: Colors.red, width: 3) : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap ?? () => _navigateToDetails(context),
@@ -108,11 +108,10 @@ class EnhancedEventCard extends StatelessWidget {
                 ? Builder(
                     builder: (context) {
                       final imageUrl = event.imageUrls.first;
-                      print('🔍 MOBILE TEST - Loading image: $imageUrl');
-                      print('🔍 MOBILE TEST - Is Mobile: $isMobile');
-                      print('🔍 MOBILE TEST - Screen Width: $screenWidth');
+                      // Debug logging removed
                       return ImageUtils.buildNetworkImage(
                         imageUrl: imageUrl,
+                        eventId: event.id,  // Add eventId for mobile cache-busting
                         width: double.infinity,
                         height: imageHeight,
                         fit: BoxFit.cover,
@@ -147,27 +146,7 @@ class EnhancedEventCard extends StatelessWidget {
               child: _buildFeaturedBadge(),
             ),
           
-          // TEST: Add MOBILE label on mobile devices
-          if (isMobile)
-            Positioned(
-              top: 50,
-              left: 10,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'MOBILE VIEW TEST',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+          // Test label removed
         ],
       ),
     );
