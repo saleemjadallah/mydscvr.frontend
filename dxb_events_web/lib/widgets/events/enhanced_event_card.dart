@@ -46,35 +46,37 @@ class EnhancedEventCard extends StatelessWidget {
             _buildImageSection(context),
             
             // Event Content
-            Padding(
-              padding: EdgeInsets.all(isMobile ? 12 : 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title and Category
-                  _buildTitleSection(context),
-                  
-                  SizedBox(height: isMobile ? 4 : 8),
-                  
-                  // Enhanced Description
-                  _buildDescriptionSection(context),
-                  
-                  SizedBox(height: isMobile ? 6 : 12),
-                  
-                  // Event Details Row - simplified on mobile
-                  _buildEventDetailsRow(),
-                  
-                  // Venue section - only show on larger screens
-                  if (!isMobile) ...[
-                    const SizedBox(height: 12),
-                    _buildVenueSection(),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(isMobile ? 12 : 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title and Category
+                    _buildTitleSection(context),
+                    
+                    SizedBox(height: isMobile ? 4 : 8),
+                    
+                    // Enhanced Description
+                    _buildDescriptionSection(context),
+                    
+                    SizedBox(height: isMobile ? 6 : 12),
+                    
+                    // Event Details Row - simplified on mobile
+                    _buildEventDetailsRow(),
+                    
+                    // Venue section - only show on larger screens
+                    if (!isMobile) ...[
+                      const SizedBox(height: 12),
+                      _buildVenueSection(),
+                    ],
+                    
+                    const Spacer(),
+                    
+                    // Bottom section with price and actions
+                    _buildBottomSection(context),
                   ],
-                  
-                  SizedBox(height: isMobile ? 8 : 12),
-                  
-                  // Bottom section with price and actions
-                  _buildBottomSection(context),
-                ],
+                ),
               ),
             ),
           ],
@@ -599,102 +601,68 @@ class EnhancedEventCard extends StatelessWidget {
   }
 
   Widget _buildBottomSection(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width <= 768;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Left Column: Price and Family Score
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              event.displayPrice,
-              style: GoogleFonts.comfortaa(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: event.isFree ? AppColors.dubaiTeal : AppColors.textPrimary,
+        // Left: Free badge or price
+        if (event.isFree)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green, width: 1),
+            ),
+            child: Text(
+              'FREE',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Colors.green,
               ),
             ),
-            if (event.familyScore != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.heart,
-                      size: 14,
-                      color: event.familyScoreColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Family ${event.familyScore}%',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: event.familyScoreColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+          )
+        else
+          Text(
+            event.displayPrice,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.dubaiGold,
+            ),
+          ),
         
-        // Right Column: Social links and Action Buttons
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (showSocialMedia && !isTablet && event.socialMedia?.hasAnyLinks == true)
-              _buildSocialMediaSection(),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                // Quality info button
-                if (showQualityMetrics && event.qualityMetrics != null)
-                  IconButton(
-                    onPressed: () => _showQualityInfo(context),
-                    icon: Icon(
-                      LucideIcons.info,
-                      size: 20,
-                      color: AppColors.textSecondary,
-                    ),
-                    tooltip: 'Quality Info',
-                  ),
-                
-                // Book/Details button
-                ElevatedButton(
-                  onPressed: () => _navigateToDetails(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.dubaiTeal,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'View More',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        LucideIcons.arrowRight,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        // Right: View More Button
+        ElevatedButton(
+          onPressed: () => _navigateToDetails(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.dubaiTeal,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-          ],
-        )
+            elevation: 0,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'View More',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                LucideIcons.arrowRight,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
