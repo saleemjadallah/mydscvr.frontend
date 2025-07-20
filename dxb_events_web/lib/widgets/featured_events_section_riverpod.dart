@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ class FeaturedEventsSection extends ConsumerStatefulWidget {
 class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   late PageController _pageController;
   int _currentPage = 0;
+  Timer? _autoRefreshTimer;
   
   @override
   void initState() {
@@ -44,11 +46,23 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
         ref.read(featuredEventsProvider.notifier).loadFeaturedEvents();
       }
     });
+    
+    // Set up auto-refresh timer - refresh every 5 minutes
+    _autoRefreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      if (mounted) {
+        final currentState = ref.read(featuredEventsProvider);
+        if (!currentState.isLoading) {
+          ref.read(featuredEventsProvider.notifier).refresh();
+          print('🔄 Auto-refreshing featured events...');
+        }
+      }
+    });
   }
   
   @override
   void dispose() {
     _pageController.dispose();
+    _autoRefreshTimer?.cancel();
     super.dispose();
   }
 
@@ -123,17 +137,27 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildRefreshButton(FeaturedEventsState state, FeaturedEventsNotifier notifier) {
-    return IconButton(
-      onPressed: state.isLoading ? null : () => notifier.refresh(),
-      icon: AnimatedRotation(
-        turns: state.isLoading ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 1000),
-        child: Icon(
-          Icons.refresh_rounded,
-          color: state.isLoading ? AppColors.textTertiary : AppColors.dubaiTeal,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if (state.isLoading)
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
+            ),
+          ),
+        IconButton(
+          onPressed: state.isLoading ? null : () => notifier.refresh(),
+          icon: Icon(
+            Icons.refresh_rounded,
+            color: state.isLoading ? Colors.transparent : AppColors.dubaiTeal,
+          ),
+          tooltip: state.isLoading ? 'Refreshing...' : 'Refresh featured events (auto-refreshes every 5 minutes)',
         ),
-      ),
-      tooltip: 'Refresh featured events',
+      ],
     );
   }
 
