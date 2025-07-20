@@ -45,19 +45,8 @@ class EnhancedEventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Simple image section for testing
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                color: Colors.grey[200],
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: _buildTestImage(event),
-              ),
-            ),
+            // Event Image with Quality Badge
+            _buildImageSection(context),
             
             // Event Content
             Expanded(
@@ -99,17 +88,11 @@ class EnhancedEventCard extends StatelessWidget {
     );
   }
 
+  
   Widget _buildImageSection(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 480;
-    final imageHeight = isMobile ? 200.0 : 180.0;  // Increased mobile height from 140 to 200
-    
-    // Debug logging
-    if (isMobile && event.imageUrls.isNotEmpty) {
-      print('📱 MOBILE IMAGE: ${event.title}');
-      print('📱 Image URL: ${event.imageUrls.first}');
-      print('📱 Dimensions: ${screenWidth}w x ${imageHeight}h');
-    }
+    final imageHeight = isMobile ? 200.0 : 180.0;
     
     return Container(
       height: imageHeight,
@@ -153,17 +136,14 @@ class EnhancedEventCard extends StatelessWidget {
               left: 12,
               child: _buildFeaturedBadge(),
             ),
-          
-          // Test label removed
         ],
       ),
     );
   }
-
+  
   Widget _buildEventImage(BuildContext context, double imageHeight) {
     // Check if we have any images
     if (event.imageUrls == null || event.imageUrls.isEmpty) {
-      print('📱 No images for ${event.title} - showing placeholder');
       return _buildImagePlaceholder();
     }
     
@@ -173,31 +153,18 @@ class EnhancedEventCard extends StatelessWidget {
     
     // Check if it's an asset image
     if (imageUrl.startsWith('assets/')) {
-      print('📱 Asset image detected for ${event.title}: $imageUrl');
       return _buildImagePlaceholder();
     }
     
-    // It's a network image
-    print('📱 Network image for ${event.title}: $imageUrl');
-    print('📱 Is Mobile: $isMobile, Screen Width: $screenWidth');
-    
-    // Use Image.network directly to bypass ImageUtils issues
+    // It's a network image - use enhanced headers for mobile compatibility
     return Image.network(
       imageUrl,
       width: double.infinity,
       height: imageHeight,
       fit: BoxFit.cover,
-      headers: {
+      headers: const {
         'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-        if (isMobile) ...{
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        },
-      },
-      errorBuilder: (context, error, stackTrace) {
-        print('❌ Failed to load network image: $error');
-        print('❌ URL was: $imageUrl');
-        return _buildImagePlaceholder();
+        'Cache-Control': 'max-age=3600',
       },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -216,97 +183,14 @@ class EnhancedEventCard extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-  
-  Widget _buildTestImage(Event event) {
-    // Test specific events with hardcoded S3 URLs
-    Map<String, String> testEvents = {
-      '685bd9564009b338adca07f7': 'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685bd9564009b338adca07f7_Untitled_Event_e4bacac9.jpg',
-      '685bd9924009b338adca07fb': 'https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685bd9924009b338adca07fb_Jet-Lag_at_Cavo_in_Dubai_1e2aa173.jpg',
-    };
-    
-    if (testEvents.containsKey(event.id)) {
-      final imageUrl = testEvents[event.id]!;
-      print('🧪 Testing S3 image for event: ${event.title} (${event.id})');
-      print('🧪 URL: $imageUrl');
-      
-      // Add headers and caching strategy for mobile
-      return Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        headers: const {
-          'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-          'Cache-Control': 'max-age=3600',
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: Colors.grey[300],
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                    : null,
-                color: AppColors.dubaiTeal,
-              ),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          print('❌ ERROR loading S3 image for ${event.title}: $error');
-          print('❌ Error details: $error');
-          print('❌ Stack trace: $stackTrace');
-          
-          // Show detailed error for debugging
-          return Container(
-            color: Colors.red.shade700,
-            padding: const EdgeInsets.all(8),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.white, size: 32),
-                  const SizedBox(height: 4),
-                  Text(
-                    event.title,
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Image failed to load',
-                    style: TextStyle(color: Colors.white70, fontSize: 9),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
-    
-    // For non-test events, show placeholder
-    return Container(
-      color: Colors.grey[300],
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.image, color: Colors.grey[600], size: 40),
-            const SizedBox(height: 8),
-            Text(
-              event.title,
-              style: TextStyle(color: Colors.grey[700], fontSize: 12),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
+      errorBuilder: (context, error, stackTrace) {
+        if (isMobile) {
+          print('❌ Mobile image load failed for ${event.title}');
+          print('❌ URL: $imageUrl');
+          print('❌ Error: $error');
+        }
+        return _buildImagePlaceholder();
+      },
     );
   }
   
