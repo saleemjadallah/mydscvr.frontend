@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/duration_formatter.dart';
+import '../../utils/image_utils.dart';
 
 // Core imports
 import '../../core/constants/app_colors.dart';
@@ -298,21 +299,22 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen>
             // Event Image
             Hero(
               tag: 'event-image-${event.id}',
-              child: Image.network(
-                event.imageUrl,
+              child: ImageUtils.buildNetworkImage(
+                imageUrl: event.imageUrls.isNotEmpty ? event.imageUrls.first : event.imageUrl,
+                eventId: event.id,
+                width: double.infinity,
+                height: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      gradient: AppColors.sunsetGradient,
-                    ),
-                    child: const Icon(
-                      LucideIcons.calendar,
-                      size: 60,
-                      color: Colors.white,
-                    ),
-                  );
-                },
+                errorWidget: Container(
+                  decoration: const BoxDecoration(
+                    gradient: AppColors.sunsetGradient,
+                  ),
+                  child: const Icon(
+                    LucideIcons.calendar,
+                    size: 60,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
             

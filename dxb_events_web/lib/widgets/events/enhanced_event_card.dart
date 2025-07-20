@@ -90,11 +90,22 @@ class EnhancedEventCard extends StatelessWidget {
   Widget _buildImageSection(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 480;
-    final imageHeight = isMobile ? 140.0 : 180.0;
+    final imageHeight = isMobile ? 200.0 : 180.0;  // Increased mobile height from 140 to 200
+    
+    // Debug logging
+    if (isMobile && event.imageUrls.isNotEmpty) {
+      print('📱 MOBILE IMAGE: ${event.title}');
+      print('📱 Image URL: ${event.imageUrls.first}');
+      print('📱 Dimensions: ${screenWidth}w x ${imageHeight}h');
+    }
     
     return Container(
       height: imageHeight,
       width: double.infinity,
+      constraints: BoxConstraints(
+        minHeight: imageHeight,
+        minWidth: 100,
+      ),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         color: Colors.grey[200],
@@ -109,13 +120,17 @@ class EnhancedEventCard extends StatelessWidget {
                     builder: (context) {
                       final imageUrl = event.imageUrls.first;
                       // Debug logging removed
-                      return ImageUtils.buildNetworkImage(
-                        imageUrl: imageUrl,
-                        eventId: event.id,  // Add eventId for mobile cache-busting
+                      return SizedBox(
                         width: double.infinity,
                         height: imageHeight,
-                        fit: BoxFit.cover,
-                        errorWidget: _buildImagePlaceholder(),
+                        child: ImageUtils.buildNetworkImage(
+                          imageUrl: imageUrl,
+                          eventId: event.id,  // Add eventId for mobile cache-busting
+                          width: double.infinity,
+                          height: imageHeight,
+                          fit: BoxFit.cover,
+                          errorWidget: _buildImagePlaceholder(),
+                        ),
                       );
                     },
                   )
