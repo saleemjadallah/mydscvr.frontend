@@ -271,6 +271,46 @@
 
   <!-- Flutter App -->
   
+  <!-- HTML Renderer for Mobile Browsers -->
+  <script type="text/javascript">
+    // Detect mobile browsers and use HTML renderer for better image compatibility
+    function detectMobileBrowser() {
+      var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      
+      // Check for mobile devices
+      if (/android/i.test(userAgent)) return 'Android';
+      if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return 'iOS';
+      if (/windows phone/i.test(userAgent)) return 'Windows Phone';
+      if (/blackberry/i.test(userAgent)) return 'BlackBerry';
+      if (/opera mini/i.test(userAgent)) return 'Opera Mini';
+      if (/mobile/i.test(userAgent)) return 'Generic Mobile';
+      
+      // Check for tablets
+      if (/tablet/i.test(userAgent)) return 'Tablet';
+      if (/ipad/i.test(userAgent)) return 'iPad';
+      
+      return false;
+    }
+    
+    var mobileDevice = detectMobileBrowser();
+    
+    if (mobileDevice) {
+      console.log('📱 Mobile/Tablet detected:', mobileDevice);
+      console.log('🌐 Switching to HTML renderer for better S3 image compatibility');
+      window.flutterWebRenderer = "html";
+      
+      // Add a class to body for mobile-specific styling if needed
+      document.body.classList.add('mobile-renderer');
+    } else {
+      console.log('🖥️ Desktop browser detected - using CanvasKit renderer');
+      // Desktop can use the default CanvasKit renderer
+      // No need to set explicitly as it's the default
+    }
+    
+    // Log the chosen renderer and user agent for debugging
+    console.log('User Agent:', navigator.userAgent);
+    console.log('Flutter Web Renderer:', window.flutterWebRenderer || 'default (canvaskit)');
+  </script>
   
     <script src="flutter_bootstrap.js" async></script>
     
