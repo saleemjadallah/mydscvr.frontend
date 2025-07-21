@@ -83,10 +83,14 @@ class EnvironmentConfig {
     defaultValue: 'mydscvr.ai',
   );
 
-  static const String cdnUrl = String.fromEnvironment(
-    'CDN_URL',
-    defaultValue: 'https://d3qhu67mvl81qc.cloudfront.net',
-  );
+  // Temporarily hardcoded CloudFront URL to bypass build issues
+  static const String cdnUrl = 'https://d3qhu67mvl81qc.cloudfront.net';
+  
+  // Original implementation for reference:
+  // static const String cdnUrl = String.fromEnvironment(
+  //   'CDN_URL',
+  //   defaultValue: 'https://d3qhu67mvl81qc.cloudfront.net',
+  // );
 
   // Security Configuration
   static const String cspPolicy = String.fromEnvironment(
