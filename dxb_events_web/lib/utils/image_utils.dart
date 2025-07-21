@@ -42,14 +42,8 @@ class ImageUtils {
       url = url.replaceAll('mydscvr.xyz', 'mydscvr.ai');
     }
 
-    // Add cache-busting query parameter for mobile web ONLY for S3 URLs
-    // CloudFront handles caching properly, so we don't need it there
-    if (kIsWeb && _isMobileBrowser() && eventId != null && !url.contains('cloudfront.net')) {
-      final uri = Uri.parse(url);
-      final queryParameters = Map<String, String>.from(uri.queryParameters);
-      queryParameters['v'] = eventId;
-      url = uri.replace(queryParameters: queryParameters).toString();
-    }
+    // NO QUERY PARAMETERS - Keep URLs simple
+    // CloudFront already handles caching
     
     // Debug final URL on mobile
     if (kIsWeb && _isMobileBrowser()) {
@@ -78,71 +72,17 @@ class ImageUtils {
       return errorWidget ?? _buildDefaultErrorWidget(width, height);
     }
     
-    // Add headers for better mobile compatibility
-    final headers = <String, String>{};
-    if (kIsWeb) {
-      // Simplified headers for better compatibility
-      headers['Accept'] = 'image/*';
-      
-      // Only add Origin header for CORS
-      if (_isMobileBrowser()) {
-        headers['Origin'] = html.window.location.origin;
-      }
-    }
+    debugPrint('🖼️ Loading image: $safeUrl');
     
-    debugPrint('🖼️ Image.network called with URL: $safeUrl');
-    debugPrint('🖼️ Contains cloudfront.net: ${safeUrl.contains('cloudfront.net')}');
-    
-    // For mobile web with CloudFront, use simpler loading without headers
-    if (kIsWeb && _isMobileBrowser() && safeUrl.contains('cloudfront.net')) {
-      // Use Flutter's built-in image caching and optimization
-      return Image.network(
-        safeUrl,
-        width: width,
-        height: height,
-        fit: fit,
-        // Reduce quality for mobile to prevent encoding errors
-        filterQuality: FilterQuality.medium,
-        // Use lower cache dimensions for mobile
-        cacheWidth: width != null ? (width * 0.8).round() : 800,
-        cacheHeight: height != null ? (height * 0.8).round() : null,
-        // No headers for CloudFront on mobile
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint('🚨 Mobile CloudFront image error: $error');
-          debugPrint('🚨 URL: $safeUrl');
-          // Try fallback with even lower quality
-          return _buildMobileFallbackImage(safeUrl, width, height, errorWidget);
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return _buildLoadingWidget(width, height);
-        },
-      );
-    }
-    
-    // Standard loading for desktop or S3 URLs
+    // SIMPLE IMAGE LOADING - Just load the image, no complications
     return Image.network(
       safeUrl,
       width: width,
       height: height,
       fit: fit,
-      headers: headers,
       errorBuilder: (context, error, stackTrace) {
-        // Enhanced error logging for debugging
-        if (kIsWeb) {
-          final userAgent = _getUserAgent();
-          final isMobile = _isMobileBrowser();
-          debugPrint('===== Image Loading Error =====');
-          debugPrint('Platform: ${isMobile ? "Mobile" : "Desktop"} Browser');
-          debugPrint('User Agent: $userAgent');
-          debugPrint('Error: $error');
-          debugPrint('Original URL: $imageUrl');
-          debugPrint('Safe URL (actual used): $safeUrl');
-          debugPrint('CDN URL: ${EnvironmentConfig.cdnUrl}');
-          debugPrint('==============================');
-        } else {
-          debugPrint('Image loading error: $error for URL: $safeUrl');
-        }
+        debugPrint('❌ Image failed: $error');
+        debugPrint('❌ URL: $safeUrl');
         return errorWidget ?? _buildDefaultErrorWidget(width, height);
       },
       loadingBuilder: (context, child, loadingProgress) {
@@ -189,26 +129,6 @@ class ImageUtils {
     );
   }
   
-  static Widget _buildMobileFallbackImage(String url, double? width, double? height, Widget? errorWidget) {
-    debugPrint('🔄 Trying mobile fallback with very low quality');
-    
-    // Try one more time with very aggressive optimization
-    return Image.network(
-      url,
-      width: width,
-      height: height,
-      fit: BoxFit.cover,
-      // Use lowest quality settings
-      filterQuality: FilterQuality.low,
-      // Force small cache size
-      cacheWidth: 400,
-      cacheHeight: 300,
-      errorBuilder: (context, error, stackTrace) {
-        debugPrint('❌ Mobile fallback also failed: $error');
-        return errorWidget ?? _buildDefaultErrorWidget(width, height);
-      },
-    );
-  }
   
   /// Check if running on mobile browser
   static bool _isMobileBrowser() {
