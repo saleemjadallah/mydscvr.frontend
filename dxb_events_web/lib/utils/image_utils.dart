@@ -61,6 +61,8 @@ class ImageUtils {
       if (_isMobileBrowser()) {
         headers['Cache-Control'] = 'no-cache';
         headers['Pragma'] = 'no-cache';
+        // Add CORS headers for S3 images on mobile
+        headers['Origin'] = html.window.location.origin;
       }
     }
     

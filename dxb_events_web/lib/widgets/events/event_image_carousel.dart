@@ -3,9 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../utils/image_utils.dart';
 
 class EventImageCarousel extends StatefulWidget {
   final List<String> imageUrls;
+  final String? eventId;
   final Function(int)? onImageChanged;
   final double height;
   final bool showIndicators;
@@ -13,6 +15,7 @@ class EventImageCarousel extends StatefulWidget {
   const EventImageCarousel({
     super.key,
     required this.imageUrls,
+    this.eventId,
     this.onImageChanged,
     this.height = 350,
     this.showIndicators = true,
@@ -146,16 +149,13 @@ class _EventImageCarouselState extends State<EventImageCarousel> {
         fit: StackFit.expand,
         children: [
           // Image
-          Image.network(
-            imageUrl,
+          ImageUtils.buildNetworkImage(
+            imageUrl: imageUrl,
+            eventId: widget.eventId,
+            width: double.infinity,
+            height: widget.height,
             fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return _buildImagePlaceholder();
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return _buildImageError();
-            },
+            errorWidget: _buildImageError(),
           ),
           
           // Zoom button
@@ -314,6 +314,7 @@ class _EventImageCarouselState extends State<EventImageCarousel> {
       MaterialPageRoute(
         builder: (context) => FullScreenImageViewer(
           imageUrls: widget.imageUrls,
+          eventId: widget.eventId,
           initialIndex: _currentIndex,
         ),
       ),
@@ -323,11 +324,13 @@ class _EventImageCarouselState extends State<EventImageCarousel> {
 
 class FullScreenImageViewer extends StatefulWidget {
   final List<String> imageUrls;
+  final String? eventId;
   final int initialIndex;
 
   const FullScreenImageViewer({
     super.key,
     required this.imageUrls,
+    this.eventId,
     this.initialIndex = 0,
   });
 
@@ -370,18 +373,17 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
             itemBuilder: (context, index) {
               return InteractiveViewer(
                 child: Center(
-                  child: Image.network(
-                    widget.imageUrls[index],
+                  child: ImageUtils.buildNetworkImage(
+                    imageUrl: widget.imageUrls[index],
+                    eventId: widget.eventId,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(
-                          LucideIcons.imageOff,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
+                    errorWidget: const Center(
+                      child: Icon(
+                        LucideIcons.imageOff,
+                        size: 60,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               );

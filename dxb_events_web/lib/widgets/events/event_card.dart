@@ -322,6 +322,7 @@ class EventCard extends StatelessWidget {
             child: event.imageUrls.isNotEmpty
                 ? ImageUtils.buildNetworkImage(
                     imageUrl: event.imageUrls.first,
+                    eventId: event.id,
                     width: double.infinity,
                     height: 160,
                     fit: BoxFit.cover,
@@ -426,6 +427,7 @@ class EventCard extends StatelessWidget {
         child: event.imageUrls.isNotEmpty
             ? ImageUtils.buildNetworkImage(
                 imageUrl: event.imageUrls.first,
+                eventId: event.id,
                 width: 150,
                 height: double.infinity,
                 fit: BoxFit.cover,

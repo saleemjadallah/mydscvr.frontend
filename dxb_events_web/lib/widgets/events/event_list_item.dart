@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/event.dart';
+import '../../utils/image_utils.dart';
 
 class EventListItem extends StatelessWidget {
   final Event event;
@@ -234,18 +235,13 @@ class EventListItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: event.imageUrls.isNotEmpty
-                ? Image.network(
-                    event.imageUrls.first,
+                ? ImageUtils.buildNetworkImage(
+                    imageUrl: event.imageUrls.first,
+                    eventId: event.id,
                     width: 120,
                     height: 100,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return _buildImagePlaceholder();
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return _buildImagePlaceholder();
-                    },
+                    errorWidget: _buildImagePlaceholder(),
                   )
                 : _buildImagePlaceholder(),
           ),
