@@ -13,6 +13,7 @@ import '../../models/event.dart';
 import '../../services/events_service.dart';
 import '../../services/enhanced_events_service.dart';
 import '../../widgets/events/enhanced_event_card.dart';
+import '../../widgets/events/event_card.dart';
 import '../../widgets/events/search_bar_glassmorphic.dart';
 import '../../widgets/events/enhanced_events_search.dart';
 // import '../../widgets/events/event_list_item.dart';
@@ -1021,12 +1022,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
               return Container(
                 width: cardWidth,
                 margin: EdgeInsets.only(right: isMobile ? 16 : 24),
-                child: EnhancedEventCard(
-                  event: event,
-                  showQualityMetrics: !isMobile,
-                  showSocialMedia: screenWidth > 480,
-                  onTap: () => _navigateToEventDetail(event),
-                ).animate()
+                child: isMobile 
+                  ? EventCard(
+                      event: event,
+                      onTap: () => _navigateToEventDetail(event),
+                    )
+                  : EnhancedEventCard(
+                      event: event,
+                      showQualityMetrics: !isMobile,
+                      showSocialMedia: screenWidth > 480,
+                      onTap: () => _navigateToEventDetail(event),
+                    ).animate()
                   .fadeIn(
                     delay: Duration(milliseconds: index * 80),
                     duration: 500.ms,
@@ -2856,10 +2862,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   
   /// Build mobile-optimized event card for carousel
   Widget _buildMobileEventCard(Event event) {
-    return EnhancedEventCard(
+    return EventCard(
       event: event,
-      showQualityMetrics: false, // Hide quality metrics on mobile carousel
-      showSocialMedia: false, // Hide social media on mobile carousel
       onTap: () => _navigateToEventDetail(event),
     );
   }
