@@ -85,7 +85,7 @@ class EnvironmentConfig {
 
   static const String cdnUrl = String.fromEnvironment(
     'CDN_URL',
-    defaultValue: 'https://mydscvr.ai',
+    defaultValue: 'https://d3qhu67mvl81qc.cloudfront.net',
   );
 
   // Security Configuration
