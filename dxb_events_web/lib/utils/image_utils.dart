@@ -16,8 +16,8 @@ class ImageUtils {
     // Use CloudFront CDN for S3 images if available
     if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
       final cdnUrl = EnvironmentConfig.cdnUrl;
-      // Only use CDN if it's not the default mydscvr.ai domain
-      if (cdnUrl.isNotEmpty && cdnUrl != 'https://mydscvr.ai') {
+      // Use CDN if it's configured and contains cloudfront domain
+      if (cdnUrl.isNotEmpty && cdnUrl.contains('cloudfront.net')) {
         // Extract the path after the bucket URL
         final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
         final match = regex.firstMatch(url);
