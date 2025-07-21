@@ -64,7 +64,11 @@ class ImageUtils {
 
     // NO QUERY PARAMETERS - Keep URLs simple
     // CloudFront already handles caching
-    
+
+    // Add cache-busting parameter
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    url = '$url?t=$timestamp';
+
     // Debug final URL on mobile
     if (kIsWeb && _isMobileBrowser()) {
       if (url.contains('cloudfront.net')) {
