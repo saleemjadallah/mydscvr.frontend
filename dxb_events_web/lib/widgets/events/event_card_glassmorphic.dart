@@ -109,7 +109,7 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
                 ),
                 image: widget.event.imageUrls.isNotEmpty
                     ? DecorationImage(
-                        image: NetworkImage(widget.event.imageUrls.first),
+                        image: NetworkImage(_getImageUrl()),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -248,7 +248,7 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
               decoration: BoxDecoration(
                 image: widget.event.imageUrls.isNotEmpty
                     ? DecorationImage(
-                        image: NetworkImage(widget.event.imageUrls.first),
+                        image: NetworkImage(_getImageUrl()),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -392,5 +392,18 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
       ];
       return '${date.day} ${months[date.month - 1]}';
     }
+  }
+  
+  String _getImageUrl() {
+    String imageUrl = widget.event.imageUrls.first;
+    // Convert S3 URLs to CloudFront
+    if (imageUrl.contains('mydscvr-event-images.s3') && imageUrl.contains('amazonaws.com')) {
+      final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
+      final match = regex.firstMatch(imageUrl);
+      if (match != null) {
+        imageUrl = 'https://d3qhu67mvl81qc.cloudfront.net/${match.group(1)}';
+      }
+    }
+    return imageUrl;
   }
 } 

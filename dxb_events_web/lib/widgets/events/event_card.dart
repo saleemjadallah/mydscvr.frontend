@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
 import '../../models/event.dart';
 import '../../utils/duration_formatter.dart';
 import '../../utils/image_utils.dart';
+import '../../core/config/environment_config.dart';
 import 'event_actions.dart';
 
 enum EventCardLayout { vertical, horizontal }
@@ -316,18 +318,11 @@ class EventCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Image
+          // Image - Direct loading for mobile
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: event.imageUrls.isNotEmpty
-                ? ImageUtils.buildNetworkImage(
-                    imageUrl: event.imageUrls.first,
-                    eventId: event.id,
-                    width: double.infinity,
-                    height: 160,
-                    fit: BoxFit.cover,
-                    errorWidget: _buildImagePlaceholder(),
-                  )
+                ? _buildDirectImage()
                 : _buildImagePlaceholder(),
           ),
           
@@ -592,5 +587,48 @@ class EventCard extends StatelessWidget {
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
     return '$hour:$minute $period';
+  }
+  
+  Widget _buildDirectImage() {
+    // Get CloudFront URL for S3 images
+    String imageUrl = event.imageUrls.first;
+    if (imageUrl.contains('mydscvr-event-images.s3') && imageUrl.contains('amazonaws.com')) {
+      final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
+      final match = regex.firstMatch(imageUrl);
+      if (match != null) {
+        imageUrl = '${EnvironmentConfig.cdnUrl}/${match.group(1)}';
+      }
+    }
+    
+    // Direct Image.network for mobile - simplest possible approach
+    if (kIsWeb && _isMobileBrowser()) {
+      debugPrint('📱 MOBILE: Direct loading image: $imageUrl');
+      return Image.network(
+        imageUrl,
+        width: double.infinity,
+        height: isCompact ? 180 : 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('❌ Direct image load failed: $error');
+          return _buildImagePlaceholder();
+        },
+      );
+    }
+    
+    // Use ImageUtils for desktop
+    return ImageUtils.buildNetworkImage(
+      imageUrl: event.imageUrls.first,
+      eventId: event.id,
+      width: double.infinity,
+      height: isCompact ? 180 : 200,
+      fit: BoxFit.cover,
+      errorWidget: _buildImagePlaceholder(),
+    );
+  }
+  
+  bool _isMobileBrowser() {
+    if (!kIsWeb) return false;
+    // Simple mobile detection
+    return true; // For testing - always treat as mobile
   }
 } 

@@ -14,6 +14,7 @@ import '../../services/events_service.dart';
 import '../../services/enhanced_events_service.dart';
 import '../../widgets/events/enhanced_event_card.dart';
 import '../../widgets/events/event_card.dart';
+import '../../widgets/events/event_card_glassmorphic.dart';
 import '../../widgets/events/search_bar_glassmorphic.dart';
 import '../../widgets/events/enhanced_events_search.dart';
 // import '../../widgets/events/event_list_item.dart';
@@ -2862,7 +2863,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   
   /// Build mobile-optimized event card for carousel
   Widget _buildMobileEventCard(Event event) {
-    return EventCard(
+    return EventCardGlassmorphic(
       event: event,
       onTap: () => _navigateToEventDetail(event),
     );
