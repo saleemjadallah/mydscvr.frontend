@@ -396,14 +396,21 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
   
   String _getImageUrl() {
     String imageUrl = widget.event.imageUrls.first;
-    // Convert S3 URLs to CloudFront
-    if (imageUrl.contains('mydscvr-event-images.s3') && imageUrl.contains('amazonaws.com')) {
-      final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
-      final match = regex.firstMatch(imageUrl);
-      if (match != null) {
-        imageUrl = 'https://d3qhu67mvl81qc.cloudfront.net/${match.group(1)}';
-      }
+    // Use Cloudinary for automatic optimization
+    const cloudinaryCloudName = 'dikjgzjsq';
+    
+    // Convert S3 URLs to Cloudinary with automatic format and quality
+    if (imageUrl.contains('s3') && imageUrl.contains('amazonaws.com')) {
+      // Properly encode the URL for Cloudinary fetch
+      final encodedUrl = Uri.encodeComponent(imageUrl);
+      imageUrl = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_auto,w_800/$encodedUrl';
+      debugPrint('☁️ Using Cloudinary fetch URL: $imageUrl');
+    } else if (!imageUrl.contains('cloudinary')) {
+      // For any non-Cloudinary URL, use fetch API
+      final encodedUrl = Uri.encodeComponent(imageUrl);
+      imageUrl = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_auto,w_800/$encodedUrl';
     }
+    
     return imageUrl;
   }
 } 

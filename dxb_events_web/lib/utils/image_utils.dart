@@ -5,6 +5,7 @@ import '../core/config/environment_config.dart';
 
 /// Utility class for handling image URLs and loading
 class ImageUtils {
+  static const String cloudinaryCloudName = 'dikjgzjsq';
   /// Get a safe image URL that avoids HTTP/2 errors and cache issues
   static String getSafeImageUrl(String? originalUrl, {String? eventId, bool? isThumbnail}) {
     if (originalUrl == null || originalUrl.isEmpty) {
@@ -13,28 +14,47 @@ class ImageUtils {
     
     debugPrint('🔍 getSafeImageUrl called with: $originalUrl');
     var url = originalUrl;
-
-    // Use CloudFront CDN for S3 images if available
-    if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
-      final cdnUrl = EnvironmentConfig.cdnUrl;
-      debugPrint('🔍 CDN URL from config: $cdnUrl');
-      // Use CDN if it's configured and contains cloudfront domain
-      if (cdnUrl.isNotEmpty && cdnUrl.contains('cloudfront.net')) {
-        // Extract the path after the bucket URL
-        final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
-        final match = regex.firstMatch(url);
-        if (match != null) {
-          url = '$cdnUrl/${match.group(1)}';
-          debugPrint('🌐 Using CloudFront CDN: $url');
+    
+    // Check if this is already a Cloudinary URL
+    if (url.contains('res.cloudinary.com')) {
+      debugPrint('☁️ Already using Cloudinary: $url');
+      // Add mobile optimizations for Cloudinary
+      if (kIsWeb && _isMobileBrowser()) {
+        // Add automatic format and quality for mobile
+        if (!url.contains('/f_auto')) {
+          url = url.replaceFirst('/upload/', '/upload/f_auto,q_auto/');
         }
-      } else {
-        debugPrint('⚠️ Not using CloudFront - CDN URL check failed');
-        // Fallback to HTTPS for S3 URLs
-        url = url.replaceAll('http://', 'https://');
+        debugPrint('☁️ Optimized Cloudinary URL for mobile: $url');
+      }
+      return url;
+    }
+
+    // Convert S3 URLs to Cloudinary
+    if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
+      final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
+      final match = regex.firstMatch(url);
+      if (match != null) {
+        final s3Path = match.group(1)!;
+        // For mobile, use Cloudinary with automatic optimization
+        if (kIsWeb && _isMobileBrowser()) {
+          final encodedUrl = Uri.encodeComponent(originalUrl);
+          url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_auto,w_800/$encodedUrl';
+          debugPrint('☁️ Mobile: Converting S3 to Cloudinary with optimization: $url');
+        } else {
+          // For desktop, use higher quality
+          final encodedUrl = Uri.encodeComponent(originalUrl);
+          url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
+          debugPrint('☁️ Desktop: Converting S3 to Cloudinary: $url');
+        }
       }
     } else if (url.contains('s3') && url.contains('amazonaws.com')) {
-      // For other S3 URLs, ensure we're using HTTPS
-      url = url.replaceAll('http://', 'https://');
+      // For other S3 URLs, also use Cloudinary fetch
+      final encodedUrl = Uri.encodeComponent(url);
+      if (kIsWeb && _isMobileBrowser()) {
+        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_auto,w_800/$encodedUrl';
+      } else {
+        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
+      }
     }
     
     // If it's a mydscvr.xyz URL, use the mydscvr.ai domain instead
