@@ -16,6 +16,7 @@ class ImageUtils {
     // Use CloudFront CDN for S3 images if available
     if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
       final cdnUrl = EnvironmentConfig.cdnUrl;
+      debugPrint('🔍 CDN URL from config: $cdnUrl');
       // Use CDN if it's configured and contains cloudfront domain
       if (cdnUrl.isNotEmpty && cdnUrl.contains('cloudfront.net')) {
         // Extract the path after the bucket URL
@@ -26,6 +27,7 @@ class ImageUtils {
           debugPrint('🌐 Using CloudFront CDN: $url');
         }
       } else {
+        debugPrint('⚠️ Not using CloudFront - CDN URL check failed');
         // Fallback to HTTPS for S3 URLs
         url = url.replaceAll('http://', 'https://');
       }
@@ -47,9 +49,13 @@ class ImageUtils {
       url = uri.replace(queryParameters: queryParameters).toString();
     }
     
-    // Debug S3 URLs on mobile
-    if (kIsWeb && _isMobileBrowser() && url.contains('s3') && url.contains('amazonaws.com')) {
-      debugPrint('📱 MOBILE S3 IMAGE: $url');
+    // Debug final URL on mobile
+    if (kIsWeb && _isMobileBrowser()) {
+      if (url.contains('cloudfront.net')) {
+        debugPrint('🌐 MOBILE CLOUDFRONT IMAGE: $url');
+      } else if (url.contains('s3') && url.contains('amazonaws.com')) {
+        debugPrint('⚠️ MOBILE S3 IMAGE (not using CloudFront): $url');
+      }
     }
     
     return url;
