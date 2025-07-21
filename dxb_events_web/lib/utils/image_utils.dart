@@ -42,8 +42,9 @@ class ImageUtils {
       url = url.replaceAll('mydscvr.xyz', 'mydscvr.ai');
     }
 
-    // Add cache-busting query parameter for mobile web
-    if (kIsWeb && _isMobileBrowser() && eventId != null) {
+    // Add cache-busting query parameter for mobile web ONLY for S3 URLs
+    // CloudFront handles caching properly, so we don't need it there
+    if (kIsWeb && _isMobileBrowser() && eventId != null && !url.contains('cloudfront.net')) {
       final uri = Uri.parse(url);
       final queryParameters = Map<String, String>.from(uri.queryParameters);
       queryParameters['v'] = eventId;
@@ -80,12 +81,11 @@ class ImageUtils {
     // Add headers for better mobile compatibility
     final headers = <String, String>{};
     if (kIsWeb) {
-      headers['Accept'] = 'image/webp,image/apng,image/*,*/*;q=0.8';
-      // Add no-cache headers for mobile to avoid stale images
+      // Simplified headers for better compatibility
+      headers['Accept'] = 'image/*';
+      
+      // Only add Origin header for CORS
       if (_isMobileBrowser()) {
-        headers['Cache-Control'] = 'no-cache';
-        headers['Pragma'] = 'no-cache';
-        // Add CORS headers for S3 images on mobile
         headers['Origin'] = html.window.location.origin;
       }
     }
@@ -93,6 +93,27 @@ class ImageUtils {
     debugPrint('🖼️ Image.network called with URL: $safeUrl');
     debugPrint('🖼️ Contains cloudfront.net: ${safeUrl.contains('cloudfront.net')}');
     
+    // For mobile web with CloudFront, use simpler loading without headers
+    if (kIsWeb && _isMobileBrowser() && safeUrl.contains('cloudfront.net')) {
+      return Image.network(
+        safeUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        // No headers for CloudFront on mobile
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('🚨 Mobile CloudFront image error: $error');
+          debugPrint('🚨 URL: $safeUrl');
+          return errorWidget ?? _buildDefaultErrorWidget(width, height);
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildLoadingWidget(width, height);
+        },
+      );
+    }
+    
+    // Standard loading for desktop or S3 URLs
     return Image.network(
       safeUrl,
       width: width,
