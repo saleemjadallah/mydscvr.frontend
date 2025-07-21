@@ -1,0 +1,181 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFront distribution for mydscvr event images S3 bucket'
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: mydscvr-event-images
+    Description: Name of the S3 bucket containing event images
+  
+  S3BucketRegion:
+    Type: String
+    Default: me-central-1
+    Description: AWS Region where the S3 bucket is located
+  
+  AlternateDomainName:
+    Type: String
+    Default: ''
+    Description: Optional custom domain name (e.g., cdn.mydscvr.ai)
+  
+  ACMCertificateArn:
+    Type: String
+    Default: ''
+    Description: ARN of ACM certificate for custom domain (required if using custom domain)
+
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref AlternateDomainName, '']]
+
+Resources:
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub 'OAI for ${S3BucketName}'
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketName
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}'
+            Action: 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${S3BucketName}/*'
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub 'CloudFront CDN for ${S3BucketName}'
+        Enabled: true
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_All
+        
+        Origins:
+          - Id: S3Origin
+            DomainName: !Sub '${S3BucketName}.s3.${S3BucketRegion}.amazonaws.com'
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}'
+        
+        DefaultRootObject: ''
+        
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+          
+          # Managed cache policy - Caching Optimized
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          
+          # Managed origin request policy - CORS-S3Origin
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+          
+          # Managed response headers policy - CORS and Security Headers
+          ResponseHeadersPolicyId: 5cc3b908-e619-4b99-88e5-2cf7f45965bd
+        
+        # Custom error pages for better user experience
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: '/error-404.html'
+            ErrorCachingMinTTL: 300
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: '/error-404.html'
+            ErrorCachingMinTTL: 300
+        
+        # Custom domain configuration
+        Aliases: !If
+          - HasCustomDomain
+          - [!Ref AlternateDomainName]
+          - !Ref 'AWS::NoValue'
+        
+        ViewerCertificate: !If
+          - HasCustomDomain
+          - AcmCertificateArn: !Ref ACMCertificateArn
+            MinimumProtocolVersion: TLSv1.2_2021
+            SslSupportMethod: sni-only
+          - CloudFrontDefaultCertificate: true
+
+  # Response Headers Policy for additional CORS and security headers
+  ResponseHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub '${AWS::StackName}-cors-security-policy'
+        Comment: 'CORS and security headers for mydscvr event images'
+        CorsConfig:
+          AccessControlAllowCredentials: false
+          AccessControlAllowHeaders:
+            Items:
+              - '*'
+          AccessControlAllowMethods:
+            Items:
+              - GET
+              - HEAD
+              - OPTIONS
+          AccessControlAllowOrigins:
+            Items:
+              - 'https://mydscvr.ai'
+              - 'https://*.mydscvr.ai'
+              - 'http://localhost:*'
+              - 'https://localhost:*'
+          AccessControlExposeHeaders:
+            Items:
+              - 'ETag'
+              - 'Content-Type'
+              - 'Content-Length'
+          AccessControlMaxAgeSec: 86400
+          OriginOverride: true
+        SecurityHeadersConfig:
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 63072000
+            IncludeSubdomains: true
+            Override: true
+          ContentTypeOptions:
+            Override: true
+          FrameOptions:
+            FrameOption: DENY
+            Override: true
+          ReferrerPolicy:
+            ReferrerPolicy: strict-origin-when-cross-origin
+            Override: true
+        CustomHeadersConfig:
+          Items:
+            - Header: 'Cache-Control'
+              Value: 'public, max-age=31536000, immutable'
+              Override: false
+            - Header: 'X-Content-Type-Options'
+              Value: 'nosniff'
+              Override: true
+
+Outputs:
+  CloudFrontDomainName:
+    Description: CloudFront distribution domain name
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontDomain'
+  
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-DistributionId'
+  
+  CloudFrontURL:
+    Description: Full CloudFront URL
+    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontURL'

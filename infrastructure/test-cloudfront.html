@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudFront Image Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .test-case h3 {
+            margin-top: 0;
+        }
+        img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .config-info {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>CloudFront CDN Test for mydscvr Event Images</h1>
+    
+    <div class="config-info">
+        <h2>Configuration</h2>
+        <p><strong>S3 Bucket:</strong> mydscvr-event-images</p>
+        <p><strong>S3 Region:</strong> me-central-1</p>
+        <p><strong>CloudFront Domain:</strong> <span id="cloudfront-domain">Not configured yet</span></p>
+        <p><strong>Test Image Path:</strong> ai-images/685be5fe4009b338adca08ab_Cultural_Festival_at_Dubai_Mall_236bec39.jpg</p>
+    </div>
+
+    <div class="test-container">
+        <!-- Direct S3 Test -->
+        <div class="test-case">
+            <h3>Direct S3 Access</h3>
+            <img id="s3-image" 
+                 src="https://mydscvr-event-images.s3.me-central-1.amazonaws.com/ai-images/685be5fe4009b338adca08ab_Cultural_Festival_at_Dubai_Mall_236bec39.jpg"
+                 alt="S3 Test Image"
+                 onload="updateStatus('s3-status', 'success', 'Image loaded successfully')"
+                 onerror="updateStatus('s3-status', 'error', 'Failed to load image')">
+            <div id="s3-status" class="status loading">Loading...</div>
+            <pre id="s3-url"></pre>
+        </div>
+
+        <!-- CloudFront Test -->
+        <div class="test-case">
+            <h3>CloudFront CDN Access</h3>
+            <img id="cloudfront-image" 
+                 alt="CloudFront Test Image"
+                 style="display: none;">
+            <div id="cloudfront-status" class="status loading">Waiting for CloudFront URL...</div>
+            <pre id="cloudfront-url"></pre>
+        </div>
+    </div>
+
+    <h2>CORS Test</h2>
+    <div class="test-container">
+        <div class="test-case">
+            <h3>S3 CORS Test</h3>
+            <div id="s3-cors-status" class="status loading">Testing...</div>
+            <pre id="s3-cors-result"></pre>
+        </div>
+
+        <div class="test-case">
+            <h3>CloudFront CORS Test</h3>
+            <div id="cloudfront-cors-status" class="status loading">Waiting for CloudFront URL...</div>
+            <pre id="cloudfront-cors-result"></pre>
+        </div>
+    </div>
+
+    <h2>Mobile Browser Simulation</h2>
+    <div class="test-case">
+        <h3>Mobile Image Loading Test</h3>
+        <p>User Agent: <code id="user-agent"></code></p>
+        <div id="mobile-test-result" class="status loading">Testing mobile compatibility...</div>
+    </div>
+
+    <script>
+        // Display current user agent
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+
+        // Get CloudFront domain from query parameter or prompt
+        const urlParams = new URLSearchParams(window.location.search);
+        let cloudfrontDomain = urlParams.get('cloudfront') || '';
+        
+        if (!cloudfrontDomain) {
+            cloudfrontDomain = prompt('Enter your CloudFront domain (e.g., d1234567890.cloudfront.net):');
+        }
+
+        if (cloudfrontDomain) {
+            // Ensure HTTPS
+            if (!cloudfrontDomain.startsWith('http')) {
+                cloudfrontDomain = 'https://' + cloudfrontDomain;
+            }
+            
+            document.getElementById('cloudfront-domain').textContent = cloudfrontDomain;
+            
+            // Test CloudFront image
+            const cfImage = document.getElementById('cloudfront-image');
+            const cfUrl = `${cloudfrontDomain}/ai-images/685be5fe4009b338adca08ab_Cultural_Festival_at_Dubai_Mall_236bec39.jpg`;
+            cfImage.src = cfUrl;
+            cfImage.style.display = 'block';
+            cfImage.onload = () => updateStatus('cloudfront-status', 'success', 'Image loaded successfully');
+            cfImage.onerror = () => updateStatus('cloudfront-status', 'error', 'Failed to load image');
+            document.getElementById('cloudfront-url').textContent = cfUrl;
+
+            // Test CloudFront CORS
+            testCORS(cfUrl, 'cloudfront-cors-status', 'cloudfront-cors-result');
+        } else {
+            updateStatus('cloudfront-status', 'error', 'No CloudFront domain provided');
+            updateStatus('cloudfront-cors-status', 'error', 'No CloudFront domain provided');
+        }
+
+        // Display S3 URL
+        const s3Url = document.getElementById('s3-image').src;
+        document.getElementById('s3-url').textContent = s3Url;
+
+        // Test S3 CORS
+        testCORS(s3Url, 's3-cors-status', 's3-cors-result');
+
+        function updateStatus(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${type}`;
+            element.textContent = message;
+        }
+
+        async function testCORS(url, statusId, resultId) {
+            try {
+                const response = await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'cors',
+                    headers: {
+                        'Origin': window.location.origin
+                    }
+                });
+
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+
+                updateStatus(statusId, 'success', 'CORS test passed');
+                document.getElementById(resultId).textContent = JSON.stringify({
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers
+                }, null, 2);
+            } catch (error) {
+                updateStatus(statusId, 'error', 'CORS test failed: ' + error.message);
+                document.getElementById(resultId).textContent = error.stack;
+            }
+        }
+
+        // Mobile test
+        setTimeout(() => {
+            const isMobile = /mobile|android|iphone|ipad/i.test(navigator.userAgent);
+            const images = document.querySelectorAll('img');
+            let allLoaded = true;
+            
+            images.forEach(img => {
+                if (img.complete && img.naturalHeight === 0) {
+                    allLoaded = false;
+                }
+            });
+
+            if (allLoaded) {
+                updateStatus('mobile-test-result', 'success', 
+                    `${isMobile ? 'Mobile' : 'Desktop'} browser: All images loaded successfully`);
+            } else {
+                updateStatus('mobile-test-result', 'error', 
+                    `${isMobile ? 'Mobile' : 'Desktop'} browser: Some images failed to load`);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

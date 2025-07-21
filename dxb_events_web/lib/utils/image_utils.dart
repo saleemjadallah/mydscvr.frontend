@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html if (dart.library.io) 'dart:io';
+import '../core/config/environment_config.dart';
 
 /// Utility class for handling image URLs and loading
 class ImageUtils {
@@ -12,8 +13,24 @@ class ImageUtils {
     
     var url = originalUrl;
 
-    // For S3 URLs, ensure we're using HTTPS
-    if (url.contains('s3') && url.contains('amazonaws.com')) {
+    // Use CloudFront CDN for S3 images if available
+    if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
+      final cdnUrl = EnvironmentConfig.cdnUrl;
+      // Only use CDN if it's not the default mydscvr.ai domain
+      if (cdnUrl.isNotEmpty && cdnUrl != 'https://mydscvr.ai') {
+        // Extract the path after the bucket URL
+        final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
+        final match = regex.firstMatch(url);
+        if (match != null) {
+          url = '$cdnUrl/${match.group(1)}';
+          debugPrint('🌐 Using CloudFront CDN: $url');
+        }
+      } else {
+        // Fallback to HTTPS for S3 URLs
+        url = url.replaceAll('http://', 'https://');
+      }
+    } else if (url.contains('s3') && url.contains('amazonaws.com')) {
+      // For other S3 URLs, ensure we're using HTTPS
       url = url.replaceAll('http://', 'https://');
     }
     
