@@ -58,9 +58,9 @@ class ImageUtils {
     }
     
     // If it's a mydscvr.xyz URL, use the mydscvr.ai domain instead
-    if (url.contains('mydscvr.xyz')) {
-      url = url.replaceAll('mydscvr.xyz', 'mydscvr.ai');
-    }
+    // if (url.contains('mydscvr.xyz')) {
+    //   url = url.replaceAll('mydscvr.xyz', 'mydscvr.ai');
+    // }
 
     // NO QUERY PARAMETERS - Keep URLs simple
     // CloudFront already handles caching
