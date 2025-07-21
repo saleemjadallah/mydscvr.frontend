@@ -11,6 +11,7 @@ class ImageUtils {
       return '';
     }
     
+    debugPrint('🔍 getSafeImageUrl called with: $originalUrl');
     var url = originalUrl;
 
     // Use CloudFront CDN for S3 images if available
@@ -89,6 +90,9 @@ class ImageUtils {
       }
     }
     
+    debugPrint('🖼️ Image.network called with URL: $safeUrl');
+    debugPrint('🖼️ Contains cloudfront.net: ${safeUrl.contains('cloudfront.net')}');
+    
     return Image.network(
       safeUrl,
       width: width,
@@ -105,7 +109,8 @@ class ImageUtils {
           debugPrint('User Agent: $userAgent');
           debugPrint('Error: $error');
           debugPrint('Original URL: $imageUrl');
-          debugPrint('Safe URL: $safeUrl');
+          debugPrint('Safe URL (actual used): $safeUrl');
+          debugPrint('CDN URL: ${EnvironmentConfig.cdnUrl}');
           debugPrint('==============================');
         } else {
           debugPrint('Image loading error: $error for URL: $safeUrl');
