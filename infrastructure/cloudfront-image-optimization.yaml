@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFront configuration for image optimization using CloudFront Functions'
+
+Parameters:
+  CloudFrontDistributionId:
+    Type: String
+    Description: Existing CloudFront Distribution ID
+    Default: ''
+
+Resources:
+  # CloudFront Function for URL rewriting
+  ImageOptimizationFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: mydscvr-mobile-image-optimizer
+      FunctionCode: |
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri;
+            var querystring = request.querystring;
+            
+            // Check if this is an image request
+            if (uri.match(/\.(jpg|jpeg|png|webp)$/i)) {
+                var headers = request.headers;
+                var userAgent = headers['user-agent'] ? headers['user-agent'].value : '';
+                
+                // Detect mobile browsers
+                var isMobile = /mobile|android|iphone|ipad/i.test(userAgent);
+                
+                // If mobile and no resize parameters, add them
+                if (isMobile && !querystring.w && !querystring.h) {
+                    // For mobile, request smaller images
+                    querystring.w = { value: '800' };
+                    querystring.q = { value: '75' };
+                    querystring.f = { value: 'webp' };
+                }
+            }
+            
+            return request;
+        }
+      FunctionConfig:
+        Comment: 'Optimize images for mobile devices'
+        Runtime: cloudfront-js-1.0
+      AutoPublish: true
+
+Outputs:
+  FunctionArn:
+    Description: CloudFront Function ARN
+    Value: !GetAtt ImageOptimizationFunction.FunctionARN
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionArn'

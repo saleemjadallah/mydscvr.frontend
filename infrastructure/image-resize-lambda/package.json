@@ -1,0 +1,13 @@
+{
+  "name": "mydscvr-image-resize",
+  "version": "1.0.0",
+  "description": "Lambda@Edge function for resizing images on the fly",
+  "main": "index.js",
+  "dependencies": {
+    "sharp": "^0.32.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "npm install --production && zip -r function.zip ."
+  }
+}

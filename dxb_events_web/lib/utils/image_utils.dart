@@ -6,7 +6,7 @@ import '../core/config/environment_config.dart';
 /// Utility class for handling image URLs and loading
 class ImageUtils {
   /// Get a safe image URL that avoids HTTP/2 errors and cache issues
-  static String getSafeImageUrl(String? originalUrl, {String? eventId}) {
+  static String getSafeImageUrl(String? originalUrl, {String? eventId, bool? isThumbnail}) {
     if (originalUrl == null || originalUrl.isEmpty) {
       return '';
     }
@@ -95,16 +95,23 @@ class ImageUtils {
     
     // For mobile web with CloudFront, use simpler loading without headers
     if (kIsWeb && _isMobileBrowser() && safeUrl.contains('cloudfront.net')) {
+      // Use Flutter's built-in image caching and optimization
       return Image.network(
         safeUrl,
         width: width,
         height: height,
         fit: fit,
+        // Reduce quality for mobile to prevent encoding errors
+        filterQuality: FilterQuality.medium,
+        // Use lower cache dimensions for mobile
+        cacheWidth: width != null ? (width * 0.8).round() : 800,
+        cacheHeight: height != null ? (height * 0.8).round() : null,
         // No headers for CloudFront on mobile
         errorBuilder: (context, error, stackTrace) {
           debugPrint('🚨 Mobile CloudFront image error: $error');
           debugPrint('🚨 URL: $safeUrl');
-          return errorWidget ?? _buildDefaultErrorWidget(width, height);
+          // Try fallback with even lower quality
+          return _buildMobileFallbackImage(safeUrl, width, height, errorWidget);
         },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
@@ -179,6 +186,27 @@ class ImageUtils {
           strokeWidth: 2,
         ),
       ),
+    );
+  }
+  
+  static Widget _buildMobileFallbackImage(String url, double? width, double? height, Widget? errorWidget) {
+    debugPrint('🔄 Trying mobile fallback with very low quality');
+    
+    // Try one more time with very aggressive optimization
+    return Image.network(
+      url,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      // Use lowest quality settings
+      filterQuality: FilterQuality.low,
+      // Force small cache size
+      cacheWidth: 400,
+      cacheHeight: 300,
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('❌ Mobile fallback also failed: $error');
+        return errorWidget ?? _buildDefaultErrorWidget(width, height);
+      },
     );
   }
   
