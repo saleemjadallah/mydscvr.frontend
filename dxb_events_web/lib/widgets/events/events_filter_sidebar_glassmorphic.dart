@@ -98,7 +98,6 @@ class _EventsFilterSidebarGlassmorphicState extends State<EventsFilterSidebarGla
                         ),
                       ),
                     ),
-                  ),
                 const Spacer(),
                 Material(
                   color: Colors.transparent,
