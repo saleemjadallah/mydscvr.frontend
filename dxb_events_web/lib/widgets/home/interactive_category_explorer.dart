@@ -367,35 +367,27 @@ class _InteractiveCategoryExplorerState extends State<InteractiveCategoryExplore
           
           const SizedBox(height: 24),
           
-          // Responsive Grid (show immediately with fallback data)
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isLarge = constraints.maxWidth > 1200;
-                final isMedium = constraints.maxWidth > 800;
-                final crossAxisCount = isLarge ? 3 : (isMedium ? 2 : 1);
-                
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    childAspectRatio: 1.2,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                  ),
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    final category = categories[index];
-                    final isHovered = _hoveredCategory == category['id'];
-                    
-                    return FadeInSlideUp(
-                      delay: Duration(milliseconds: 400 + (index * 100)),
-                      child: _buildCategoryBubble(category, isHovered),
-                    );
-                  },
-                );
-              },
+          // Desktop-only Grid with fixed 3 columns
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 1.2,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
             ),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              final isHovered = _hoveredCategory == category['id'];
+              
+              return FadeInSlideUp(
+                delay: Duration(milliseconds: 400 + (index * 100)),
+                child: _buildCategoryBubble(category, isHovered),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -970,7 +962,7 @@ class _EventsListScreenEnhancedState extends State<EventsListScreenEnhanced> {
                 ),
               ],
             ),
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Row(
               children: [
                 // Back button
@@ -981,7 +973,7 @@ class _EventsListScreenEnhancedState extends State<EventsListScreenEnhanced> {
                     borderRadius: BorderRadius.circular(12),
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       child: Icon(Icons.arrow_back, color: Colors.white, size: 20),
                     ),
                   ),
@@ -1023,7 +1015,7 @@ class _EventsListScreenEnhancedState extends State<EventsListScreenEnhanced> {
                     borderRadius: BorderRadius.circular(12),
                     onTap: _loadCategoryEvents,
                     child: Container(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       child: Icon(Icons.refresh, color: Colors.white.withOpacity(0.9)),
                     ),
                   ),
@@ -1115,12 +1107,11 @@ class _EventsListScreenEnhancedState extends State<EventsListScreenEnhanced> {
       );
     }
 
-    // Grid view of events
+    // Desktop-only Grid view of events with fixed 3 columns
     return GridView.builder(
-      padding: EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 3 : 
-                       MediaQuery.of(context).size.width > 800 ? 2 : 1,
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
         childAspectRatio: 0.75,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
@@ -1177,13 +1168,13 @@ class _EventsListScreenEnhancedState extends State<EventsListScreenEnhanced> {
           Expanded(
             flex: 2,
             child: Padding(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Category badge
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.dubaiTeal.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),

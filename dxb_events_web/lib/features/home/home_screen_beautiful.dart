@@ -182,11 +182,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
 
   /// Build the top app bar with gradient background and logo
   Widget _buildTopAppBar(BuildContext context, AuthState authState) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 600;
-    
-    // Responsive app bar height
-    final appBarHeight = isMobile ? 90.0 : 80.0;
+    // Fixed desktop app bar height
+    const appBarHeight = 80.0;
     
     return SliverAppBar(
       backgroundColor: Colors.transparent,
@@ -210,42 +207,30 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       ),
       title: GestureDetector(
         onTap: () => context.go('/'),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = MediaQuery.of(context).size.width;
-            final isMobile = screenWidth <= 600;
-            
-            // Responsive logo and text sizing
-            final logoHeight = isMobile ? 45.0 : 40.0;
-            final logoWidth = isMobile ? 45.0 : 40.0;
-            final fontSize = isMobile ? 24.0 : 26.0;
-            
-            return Row(
-              children: [
-                Image.asset(
-                  'assets/images/mydscvr-logo.png',
-                  height: logoHeight,
-                  width: logoWidth,
-                  fit: BoxFit.contain,
-                  // No errorBuilder - let the logo display properly
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'MyDscvr',
-                  style: GoogleFonts.comfortaa(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            );
-          },
+        child: Row(
+          children: [
+            Image.asset(
+              'assets/images/mydscvr-logo.png',
+              height: 40.0,
+              width: 40.0,
+              fit: BoxFit.contain,
+              // No errorBuilder - let the logo display properly
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'MyDscvr',
+              style: GoogleFonts.comfortaa(
+                fontSize: 26.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
       actions: [
-        // Super Search Button - only show on desktop
-        if (screenWidth > 600) ...[
+        // Super Search Button
+        ...[
           const SuperSearchButtonCompact(),
           const SizedBox(width: 8),
         ],
@@ -855,25 +840,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       return _buildAnimatedMyDscvrChoiceEmpty();
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final isMobile = screenWidth <= 600;
-        final isTablet = screenWidth > 600 && screenWidth <= 900;
-        
-        // Responsive dimensions
-        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
-        final verticalMargin = isMobile ? 16.0 : 32.0;
-        final borderRadius = isMobile ? 20.0 : 25.0;
-        final contentPadding = isMobile ? 20.0 : 30.0;
-        
-        // Responsive heights
-        final containerHeight = isMobile ? null : (isTablet ? 280.0 : 320.0);
-        
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
-          height: containerHeight,
-          constraints: isMobile ? const BoxConstraints(minHeight: 240) : null,
+    return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          height: 320.0,
           child: FadeInSlideUp(
             delay: const Duration(milliseconds: 200),
             child: TweenAnimationBuilder<double>(
@@ -887,11 +856,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     cursor: SystemMouseCursors.click,
                     child: InkWell(
                       onTap: () => _navigateToEventDetails(featuredEvent),
-                      borderRadius: BorderRadius.circular(borderRadius),
+                      borderRadius: BorderRadius.circular(25.0),
                       hoverColor: Colors.white.withOpacity(0.1),
                       child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(borderRadius),
+                        borderRadius: BorderRadius.circular(25.0),
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -903,21 +872,21 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF667eea).withOpacity(0.4),
-                            blurRadius: isMobile ? 15 : 25,
-                            offset: Offset(0, isMobile ? 8 : 12),
+                            blurRadius: 25,
+                            offset: const Offset(0, 12),
                           ),
                         ],
                       ),
                       child: Stack(
                       children: [
                         // Animated confetti background
-                        ...List.generate(15, (index) => _buildConfetti(index, isMobile)),
+                        ...List.generate(15, (index) => _buildConfetti(index)),
                         
                         // Animated fireworks - left side
-                        ...List.generate(3, (index) => _buildFirework(index, isMobile, isLeftSide: true)),
+                        ...List.generate(3, (index) => _buildFirework(index, isLeftSide: true)),
                         
                         // Animated fireworks - right side
-                        ...List.generate(3, (index) => _buildFirework(index, isMobile, isLeftSide: false)),
+                        ...List.generate(3, (index) => _buildFirework(index, isLeftSide: false)),
                         
                         // Diagonal shine effect
                         Positioned.fill(
@@ -928,7 +897,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                             builder: (context, value, child) {
                               return Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(borderRadius),
+                                  borderRadius: BorderRadius.circular(25.0),
                                   gradient: LinearGradient(
                                     begin: Alignment(-1.0 + value, -1.0),
                                     end: Alignment(1.0 + value, 1.0),
@@ -947,10 +916,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                         
                         // Main content - centered gameshow layout
                         Padding(
-                          padding: EdgeInsets.all(contentPadding),
-                          child: isMobile
-                              ? _buildMobileGameshowLayout(featuredEvent)
-                              : _buildDesktopGameshowLayout(featuredEvent, isTablet),
+                          padding: const EdgeInsets.all(30.0),
+                          child: _buildDesktopGameshowLayout(featuredEvent),
                         ),
                       ],
                       ),
@@ -962,12 +929,10 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
             ),
           ),
         );
-      },
-    );
   }
 
   // Confetti Animation Widget with Continuous Loop
-  Widget _buildConfetti(int index, bool isMobile) {
+  Widget _buildConfetti(int index) {
     final colors = [
       const Color(0xFFff6b6b), // Red
       const Color(0xFF4ecdc4), // Teal
@@ -990,13 +955,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
         size: size,
         duration: Duration(milliseconds: 3000 + (random % 2000)),
         delay: Duration(milliseconds: delay),
-        isMobile: isMobile,
       ),
     );
   }
 
   // Animated Fireworks Widget with Continuous Loop
-  Widget _buildFirework(int index, bool isMobile, {required bool isLeftSide}) {
+  Widget _buildFirework(int index, {required bool isLeftSide}) {
     final colors = [
       const Color(0xFFff6b6b), // Red
       const Color(0xFF4ecdc4), // Teal
@@ -1011,7 +975,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     // Position fireworks on left or right side
     final left = isLeftSide 
         ? 20.0 + (index * 40.0) + (random % 20) // Left side positioning
-        : (isMobile ? 200.0 : 400.0) + (index * 40.0) + (random % 20); // Right side positioning
+        : 400.0 + (index * 40.0) + (random % 20); // Right side positioning
     final top = 20.0 + (random % 60); // Vary vertical position
     
     return Positioned(
@@ -1025,7 +989,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Trophy Section with Bounce Animation
-  Widget _buildTrophySection(bool isMobile) {
+  Widget _buildTrophySection() {
     return TweenAnimationBuilder<double>(
       duration: const Duration(seconds: 2),
       tween: Tween(begin: 0, end: 1),
@@ -1036,8 +1000,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           child: Transform.rotate(
             angle: (value - 0.5) * 0.1,
             child: Container(
-              width: isMobile ? 60 : 80,
-              height: isMobile ? 60 : 80,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: const Color(0xFFffd700),
                 shape: BoxShape.circle,
@@ -1051,7 +1015,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               ),
               child: Icon(
                 Icons.emoji_events,
-                size: isMobile ? 30 : 40,
+                size: 40,
                 color: Colors.white,
               ),
             ),
@@ -1061,139 +1025,9 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
     );
   }
 
-  // Mobile Gameshow Layout - Centered and Spacious
-  Widget _buildMobileGameshowLayout(Event featuredEvent) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Top Row: Trophy and Brand Text
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildTrophySection(true),
-            const SizedBox(width: 16),
-            // Brand Text with Glow
-            TweenAnimationBuilder<double>(
-              duration: const Duration(seconds: 2),
-              tween: Tween(begin: 0, end: 1),
-              curve: Curves.easeInOut,
-              builder: (context, value, child) {
-                return Text(
-                  'MyDscvr\'s Choice',
-                  style: GoogleFonts.comfortaa(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: const Color(0xFFffd700).withOpacity(value),
-                        blurRadius: 10,
-                        offset: const Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Main Title - Centered and Large
-        Text(
-          'Event of the Day',
-          style: GoogleFonts.comfortaa(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-                offset: const Offset(2, 2),
-              ),
-            ],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        
-        const SizedBox(height: 12),
-        
-        // Event Name - Centered
-        Text(
-          featuredEvent.title.length > 35 
-              ? '${featuredEvent.title.substring(0, 32)}...'
-              : featuredEvent.title,
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 4,
-                offset: const Offset(2, 2),
-              ),
-            ],
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Details Row - Centered
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildDetailBadge('📅', 'This Week', true),
-            const SizedBox(width: 12),
-            _buildDetailBadge('📍', featuredEvent.venue?.area ?? 'Dubai', true),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Winner Badge - Centered
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFff6b6b), Color(0xFFee5a24)],
-            ),
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFff6b6b).withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🎉', style: TextStyle(fontSize: 16)),
-              const SizedBox(width: 8),
-              Text(
-                'Featured Winner',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   // Desktop Gameshow Layout - Expanded and Spectacular
-  Widget _buildDesktopGameshowLayout(Event featuredEvent, bool isTablet) {
+  Widget _buildDesktopGameshowLayout(Event featuredEvent) {
     return Row(
       children: [
         // Left Side - Large Trophy with Celebration
@@ -1202,7 +1036,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLargeTrophySection(isTablet),
+              _buildLargeTrophySection(),
               const SizedBox(height: 20),
               _buildCelebrationElements(),
             ],
@@ -1224,7 +1058,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                   return Text(
                     'MyDscvr\'s Choice',
                     style: GoogleFonts.comfortaa(
-                      fontSize: isTablet ? 22 : 28,
+                      fontSize: 28,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                       shadows: [
@@ -1240,13 +1074,13 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 },
               ),
               
-              SizedBox(height: isTablet ? 12 : 16),
+              const SizedBox(height: 16),
               
               // Main Title - Large and Centered
               Text(
                 'Event of the Day',
                 style: GoogleFonts.comfortaa(
-                  fontSize: isTablet ? 36 : 48,
+                  fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -1260,7 +1094,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 textAlign: TextAlign.center,
               ),
               
-              SizedBox(height: isTablet ? 16 : 20),
+              const SizedBox(height: 20),
               
               // Event Name - Large and Prominent
               Text(
@@ -1268,7 +1102,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                     ? '${featuredEvent.title.substring(0, 47)}...'
                     : featuredEvent.title,
                 style: GoogleFonts.inter(
-                  fontSize: isTablet ? 24 : 32,
+                  fontSize: 32,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                   shadows: [
@@ -1284,25 +1118,25 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 textAlign: TextAlign.center,
               ),
               
-              SizedBox(height: isTablet ? 20 : 24),
+              const SizedBox(height: 24),
               
               // Details Row - Larger and Centered
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildLargeDetailBadge('📅', 'This Week', isTablet),
-                  SizedBox(width: isTablet ? 16 : 20),
-                  _buildLargeDetailBadge('📍', featuredEvent.venue?.area ?? 'Dubai', isTablet),
+                  _buildLargeDetailBadge('📅', 'This Week'),
+                  const SizedBox(width: 20),
+                  _buildLargeDetailBadge('📍', featuredEvent.venue?.area ?? 'Dubai'),
                 ],
               ),
               
-              SizedBox(height: isTablet ? 20 : 24),
+              const SizedBox(height: 24),
               
               // Winner Badge - Large and Impressive
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 24 : 32,
-                  vertical: isTablet ? 12 : 16,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
                 ),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -1320,12 +1154,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('🎉', style: TextStyle(fontSize: isTablet ? 18 : 22)),
-                    SizedBox(width: isTablet ? 8 : 12),
+                    const Text('🎉', style: TextStyle(fontSize: 22)),
+                    const SizedBox(width: 12),
                     Text(
                       'Featured Winner',
                       style: GoogleFonts.inter(
-                        fontSize: isTablet ? 16 : 20,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -1352,11 +1186,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Detail Badge Helper
-  Widget _buildDetailBadge(String emoji, String text, bool isMobile) {
+  Widget _buildDetailBadge(String emoji, String text) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8 : 10,
-        vertical: isMobile ? 4 : 6,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
@@ -1369,12 +1203,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: TextStyle(fontSize: isMobile ? 10 : 12)),
-          SizedBox(width: isMobile ? 3 : 4),
+          Text(emoji, style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
           Text(
             text,
             style: GoogleFonts.inter(
-              fontSize: isMobile ? 10 : 12,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
               color: Colors.white,
             ),
@@ -1385,7 +1219,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Large Trophy Section for Desktop
-  Widget _buildLargeTrophySection(bool isTablet) {
+  Widget _buildLargeTrophySection() {
     return TweenAnimationBuilder<double>(
       duration: const Duration(seconds: 2),
       tween: Tween(begin: 0, end: 1),
@@ -1396,8 +1230,8 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
           child: Transform.rotate(
             angle: (value - 0.5) * 0.1,
             child: Container(
-              width: isTablet ? 100 : 120,
-              height: isTablet ? 100 : 120,
+              width: 120,
+              height: 120,
               decoration: BoxDecoration(
                 color: const Color(0xFFffd700),
                 shape: BoxShape.circle,
@@ -1411,7 +1245,7 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
               ),
               child: Icon(
                 Icons.emoji_events,
-                size: isTablet ? 50 : 60,
+                size: 60,
                 color: Colors.white,
               ),
             ),
@@ -1422,11 +1256,11 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
   }
 
   // Large Detail Badge for Desktop
-  Widget _buildLargeDetailBadge(String emoji, String text, bool isTablet) {
+  Widget _buildLargeDetailBadge(String emoji, String text) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? 16 : 20,
-        vertical: isTablet ? 10 : 12,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 12,
       ),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
@@ -1446,12 +1280,12 @@ class _BeautifulHomeScreenState extends ConsumerState<BeautifulHomeScreen> with 
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: TextStyle(fontSize: isTablet ? 16 : 20)),
-          SizedBox(width: isTablet ? 6 : 8),
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 8),
           Text(
             text,
             style: GoogleFonts.inter(
-              fontSize: isTablet ? 14 : 16,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
@@ -1575,14 +1409,12 @@ class _ContinuousConfetti extends StatefulWidget {
   final double size;
   final Duration duration;
   final Duration delay;
-  final bool isMobile;
 
   const _ContinuousConfetti({
     required this.color,
     required this.size,
     required this.duration,
     required this.delay,
-    required this.isMobile,
   });
 
   @override
@@ -1603,7 +1435,7 @@ class _ContinuousConfettiState extends State<_ContinuousConfetti>
     );
     _animation = Tween<double>(
       begin: -20,
-      end: widget.isMobile ? 280 : 360,
+      end: 360,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.linear,
@@ -1763,376 +1595,13 @@ class _ContinuousFireworkState extends State<_ContinuousFirework>
 
 // Back to the main class
 extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
-  // Mobile-optimized layout
-  Widget _buildMobileContent(Event placeholderEvent) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with gold accent
-          Text(
-            'MyDscvr\'s Choice',
-            style: GoogleFonts.comfortaa(
-              fontSize: 16,
-              color: const Color(0xFFD4AF37),
-              letterSpacing: 1.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Event content - mobile row layout
-          Expanded(
-            child: Row(
-              children: [
-                // Compact event image
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white.withOpacity(0.1),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: placeholderEvent.imageUrls.isNotEmpty
-                      ? ImageUtils.buildNetworkImage(
-                          imageUrl: placeholderEvent.imageUrls.first,
-                          eventId: placeholderEvent.id, // Add event ID for cache-busting on mobile
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          errorWidget: Container(
-                            color: Colors.white.withOpacity(0.2),
-                            child: const Icon(Icons.event, color: Colors.white, size: 30),
-                          ),
-                        )
-                      : Container(
-                          color: Colors.white.withOpacity(0.2),
-                          child: Icon(
-                            LucideIcons.sparkles,
-                            color: Colors.white.withOpacity(0.9),
-                            size: 30,
-                          ),
-                        ),
-                  ),
-                ),
-                
-                const SizedBox(width: 16),
-                
-                // Event details - clean and elegant
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Title with single clean animation
-                      Text(
-                        placeholderEvent.title,
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.3,
-                          letterSpacing: 0.2,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ).animate().fadeIn(duration: 600.ms),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Date and location - clean icons
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.calendar,
-                            size: 12,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              _formatEventTime(placeholderEvent.startDate),
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 4),
-                      
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.mapPin,
-                            size: 12,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              placeholderEvent.venue.area,
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // AI insight badge - mobile version
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              LucideIcons.zap,
-                              size: 10,
-                              color: const Color(0xFFD4AF37),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              'AI Curated',
-                              style: GoogleFonts.inter(
-                                fontSize: 9,
-                                color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Desktop/tablet content (existing layout with responsive adjustments)
-  Widget _buildDesktopContent(Event placeholderEvent, bool isTablet) {
-    final imageWidth = isTablet ? 140.0 : 160.0;
-    final imageHeight = isTablet ? 240.0 : 320.0;
-    final contentPadding = isTablet ? 24.0 : 30.0;
-    
-    return Row(
-      children: [
-        // Image section - simplified but elegant
-        Container(
-          width: imageWidth,
-          height: imageHeight,
-          margin: EdgeInsets.all(contentPadding),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: Colors.white.withOpacity(0.1),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 2,
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(21),
-            child: placeholderEvent.imageUrls.isNotEmpty
-              ? ImageUtils.buildNetworkImage(
-                  imageUrl: placeholderEvent.imageUrls.first,
-                  eventId: placeholderEvent.id, // Add event ID for cache-busting on mobile
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  errorWidget: Container(
-                    color: Colors.white.withOpacity(0.2),
-                    child: Icon(Icons.event, color: Colors.white, size: isTablet ? 50 : 60),
-                  ),
-                )
-              : Container(
-                  color: Colors.white.withOpacity(0.2),
-                  child: Icon(
-                    LucideIcons.sparkles,
-                    color: Colors.white.withOpacity(0.9),
-                    size: isTablet ? 40 : 50,
-                  ).animate(onPlay: (controller) => controller.repeat())
-                    .shimmer(duration: 3000.ms, color: const Color(0xFFD4AF37).withOpacity(0.6)),
-                ),
-          ),
-        ),
-        
-        // Event details - clean and elegant
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(contentPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Header with gold accent
-                Text(
-                  'MyDscvr\'s Choice',
-                  style: GoogleFonts.comfortaa(
-                    fontSize: isTablet ? 16 : 18,
-                    color: const Color(0xFFD4AF37),
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                
-                SizedBox(height: isTablet ? 8 : 12),
-                
-                // Title with single clean animation
-                Text(
-                  placeholderEvent.title,
-                  style: GoogleFonts.inter(
-                    fontSize: isTablet ? 18 : 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    height: 1.3,
-                    letterSpacing: 0.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ).animate().fadeIn(duration: 600.ms),
-                
-                SizedBox(height: isTablet ? 12 : 16),
-                
-                // Date and location - clean icons
-                Row(
-                  children: [
-                    Icon(
-                      LucideIcons.calendar,
-                      size: isTablet ? 12 : 14,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                    SizedBox(width: isTablet ? 4 : 6),
-                    Text(
-                      _formatEventTime(placeholderEvent.startDate),
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 11 : 13,
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                SizedBox(height: isTablet ? 6 : 8),
-                
-                Row(
-                  children: [
-                    Icon(
-                      LucideIcons.mapPin,
-                      size: isTablet ? 12 : 14,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                    SizedBox(width: isTablet ? 4 : 6),
-                    Expanded(
-                      child: Text(
-                        placeholderEvent.venue.area,
-                        style: GoogleFonts.inter(
-                          fontSize: isTablet ? 11 : 13,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                
-                SizedBox(height: isTablet ? 12 : 16),
-                
-                // AI insight badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isTablet ? 10 : 12,
-                    vertical: isTablet ? 6 : 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        LucideIcons.zap,
-                        size: isTablet ? 10 : 12,
-                        color: const Color(0xFFD4AF37),
-                      ),
-                      SizedBox(width: isTablet ? 3 : 4),
-                      Text(
-                        'AI Curated',
-                        style: GoogleFonts.inter(
-                          fontSize: isTablet ? 10 : 11,
-                          color: Colors.white.withOpacity(0.9),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildAnimatedMyDscvrChoiceLoading() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final isMobile = screenWidth <= 600;
-        final isTablet = screenWidth > 600 && screenWidth <= 900;
-        
-        // Responsive dimensions
-        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
-        final verticalMargin = isMobile ? 16.0 : 32.0;
-        final borderRadius = isMobile ? 20.0 : 32.0;
-        
-        // Responsive heights
-        final containerHeight = isMobile ? 180.0 : (isTablet ? 260.0 : 380.0);
-        
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
-          height: containerHeight,
+          margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          height: 380.0,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
+            borderRadius: BorderRadius.circular(32.0),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -2151,11 +1620,11 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.dubaiTeal),
                   strokeWidth: 2,
                 ),
-                SizedBox(height: isMobile ? 12 : 16),
+                const SizedBox(height: 16),
                 Text(
                   'Curating today\'s perfect choice...',
                   style: GoogleFonts.inter(
-                    fontSize: isMobile ? 12 : 14,
+                    fontSize: 14,
                     color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
@@ -2164,30 +1633,14 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
             ),
           ),
         );
-      },
-    );
   }
 
   Widget _buildAnimatedMyDscvrChoiceEmpty() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final isMobile = screenWidth <= 600;
-        final isTablet = screenWidth > 600 && screenWidth <= 900;
-        
-        // Responsive dimensions
-        final horizontalMargin = isMobile ? 16.0 : (isTablet ? 20.0 : 24.0);
-        final verticalMargin = isMobile ? 16.0 : 32.0;
-        final borderRadius = isMobile ? 20.0 : 32.0;
-        
-        // Responsive heights
-        final containerHeight = isMobile ? 180.0 : (isTablet ? 260.0 : 380.0);
-        
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
-          height: containerHeight,
+          margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          height: 380.0,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
+            borderRadius: BorderRadius.circular(32.0),
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -2205,22 +1658,22 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
                 Icon(
                   LucideIcons.sparkles,
                   color: Colors.white.withOpacity(0.7),
-                  size: isMobile ? 32 : 48,
+                  size: 48,
                 ),
-                SizedBox(height: isMobile ? 12 : 16),
+                const SizedBox(height: 16),
                 Text(
                   'MyDscvr\'s Choice',
                   style: GoogleFonts.comfortaa(
-                    fontSize: isMobile ? 18 : 24,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: isMobile ? 6 : 8),
+                const SizedBox(height: 8),
                 Text(
                   'Coming Soon',
                   style: GoogleFonts.inter(
-                    fontSize: isMobile ? 12 : 16,
+                    fontSize: 16,
                     color: Colors.white.withOpacity(0.8),
                   ),
                 ),
@@ -2228,8 +1681,6 @@ extension BeautifulHomeScreenExtension on _BeautifulHomeScreenState {
             ),
           ),
         );
-      },
-    );
   }
 
   String _formatEventTime(DateTime date) {

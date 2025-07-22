@@ -36,13 +36,9 @@ class FeaturedEventsSection extends ConsumerStatefulWidget {
 }
 
 class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
-  late PageController _pageController;
-  int _currentIndex = 0;
-
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     // Load featured events when widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(featuredEventsProvider.notifier).loadFeaturedEvents();
@@ -50,17 +46,11 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Consumer<FeaturedEventsProvider>(
       builder: (context, provider, child) {
         return Container(
-          padding: widget.padding ?? const EdgeInsets.symmetric(vertical: 24.0),
+          padding: widget.padding ?? const EdgeInsets.symmetric(vertical: 32.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,7 +66,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
 
   Widget _buildHeader(BuildContext context, FeaturedEventsProvider provider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
         children: [
           Expanded(
@@ -254,9 +244,6 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
 
   Widget _buildEventsGrid(BuildContext context, FeaturedEventsProvider provider) {
     final events = provider.featuredEvents.take(widget.maxEventsToShow).toList();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 768; // Increased from 600 to 768 to include mobile browsers
-    final isTablet = screenWidth <= 1200 && screenWidth > 768; // Adjusted range
 
     return Column(
       children: [
@@ -264,8 +251,23 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
         _buildQuickFilters(provider),
         const SizedBox(height: 16),
         
-        // Events display - universal carousel for all screen sizes
-        _buildUniversalCarousel(context, events, screenWidth),
+        // Desktop grid with fixed 4 columns
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            childAspectRatio: 0.85,
+            crossAxisSpacing: 24,
+            mainAxisSpacing: 24,
+          ),
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            final event = events[index];
+            return _buildEventCard(event, index);
+          },
+        ),
         
         // Load more button if there are more events
         if (provider.featuredEvents.length > widget.maxEventsToShow) ...[
@@ -276,356 +278,13 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
     );
   }
 
-  Widget _buildUniversalCarousel(BuildContext context, List<Event> events, double screenWidth) {
-    if (events.isEmpty) return const SizedBox.shrink();
-    
-    // Determine optimal height and viewport fraction based on screen size
-    double carouselHeight;
-    EdgeInsets cardMargin;
-    double viewportFraction;
-    
-    if (screenWidth <= 480) {
-      // Mobile phones - show 1 card
-      carouselHeight = 500;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 8);
-      viewportFraction = 0.9;
-    } else if (screenWidth <= 768) {
-      // Tablets and small screens - show 1.5 cards
-      carouselHeight = 550;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 12);
-      viewportFraction = 0.7;
-    } else if (screenWidth <= 1200) {
-      // Medium screens - show 2 cards
-      carouselHeight = 600;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
-      viewportFraction = 0.5;
-    } else {
-      // Large screens - show 2.5 to 3 cards
-      carouselHeight = 650;
-      cardMargin = const EdgeInsets.symmetric(horizontal: 16);
-      viewportFraction = 0.35; // Shows about 2.5-3 cards
-    }
-    
-    // Create PageController with viewport fraction
-    _pageController = PageController(
-      viewportFraction: viewportFraction,
-      initialPage: _currentIndex,
-    );
-    
-    return Container(
-      height: carouselHeight,
-      child: Column(
-        children: [
-          // Main carousel
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              padEnds: false, // Prevent padding at the beginning and end
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: cardMargin,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: EnhancedEventCard(
-                      event: events[index],
-                      showQualityMetrics: screenWidth > 768, // Hide quality metrics on small screens
-                      showSocialMedia: screenWidth > 480, // Hide social media on very small screens
-                      onTap: () => widget.onEventTap?.call(events[index]),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Navigation controls and progress indicator
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Previous button
-              IconButton(
-                onPressed: _currentIndex > 0 
-                    ? () => _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      )
-                    : null,
-                icon: Icon(
-                  Icons.arrow_back_ios_rounded,
-                  color: _currentIndex > 0 
-                      ? AppColors.dubaiTeal 
-                      : AppColors.textTertiary,
-                ),
-              ),
-              
-              // Progress indicators
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    events.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: index == _currentIndex ? 24 : 8,
-                      decoration: BoxDecoration(
-                        color: index == _currentIndex 
-                            ? AppColors.dubaiTeal 
-                            : AppColors.textTertiary.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ).take(10).toList(), // Limit to 10 indicators
-                ),
-              ),
-              
-              // Next button
-              IconButton(
-                onPressed: _currentIndex < events.length - 1 
-                    ? () => _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      )
-                    : null,
-                icon: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: _currentIndex < events.length - 1 
-                      ? AppColors.dubaiTeal 
-                      : AppColors.textTertiary,
-                ),
-              ),
-            ],
-          ),
-          
-          // Counter
-          Text(
-            '${_currentIndex + 1} of ${events.length}',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileCarousel(BuildContext context, List<Event> events) {
-    if (events.isEmpty) return const SizedBox.shrink();
-    
-    return Container(
-      height: 480, // Optimized height for mobile
-      child: Column(
-        children: [
-          // Main carousel
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  child: EnhancedEventCard(
-                    event: events[index],
-                    showQualityMetrics: false,
-                    showSocialMedia: false,
-                  ),
-                );
-              },
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Navigation controls and progress indicator
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Previous button
-              IconButton(
-                onPressed: _currentIndex > 0 
-                    ? () => _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      )
-                    : null,
-                icon: Icon(
-                  Icons.arrow_back_ios_rounded,
-                  color: _currentIndex > 0 
-                      ? AppColors.dubaiTeal 
-                      : AppColors.textTertiary,
-                ),
-              ),
-              
-              // Progress indicators
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    events.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: index == _currentIndex ? 24 : 8,
-                      decoration: BoxDecoration(
-                        color: index == _currentIndex 
-                            ? AppColors.dubaiTeal 
-                            : AppColors.textTertiary.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              
-              // Next button
-              IconButton(
-                onPressed: _currentIndex < events.length - 1 
-                    ? () => _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      )
-                    : null,
-                icon: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: _currentIndex < events.length - 1 
-                      ? AppColors.dubaiTeal 
-                      : AppColors.textTertiary,
-                ),
-              ),
-            ],
-          ),
-          
-          // Counter
-          Text(
-            '${_currentIndex + 1} of ${events.length}',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 
-  Widget _buildTabletGrid(BuildContext context, List<Event> events) {
-    // Use responsive logic aligned with main events list: carousel for 800px and below
-    final screenWidth = MediaQuery.of(context).size.width;
-    
-    // Switch to carousel for tablets and mobile (800px and below)
-    if (screenWidth <= 800) {
-      return _buildMobileCarousel(context, events);
-    }
-    
-    // Grid only for desktop
-    int crossAxisCount;
-    if (screenWidth > 1200) {
-      crossAxisCount = 3; // Only use 3 columns on very wide displays
-    } else {
-      crossAxisCount = 2; // 2 columns for smaller desktop
-    }
-    
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        return _buildEventCard(event, index);
-      },
-    );
-  }
-
-  Widget _buildDesktopGrid(BuildContext context, List<Event> events) {
-    // Use improved responsive logic for desktop
-    final screenWidth = MediaQuery.of(context).size.width;
-    int crossAxisCount = screenWidth > 1400 ? 4 : 3; // 4 columns only on very large screens
-    
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        return _buildEventCard(event, index);
-      },
-    );
-  }
-
-  String _formatEventDateTime(Event event) {
-    // Format the date and time for mobile display
-    final now = DateTime.now();
-    final eventDate = event.startDate;
-    
-    if (eventDate.year == now.year && 
-        eventDate.month == now.month && 
-        eventDate.day == now.day) {
-      return 'Today at ${_formatTime(eventDate)}';
-    } else if (eventDate.year == now.year && 
-               eventDate.month == now.month && 
-               eventDate.day == now.day + 1) {
-      return 'Tomorrow at ${_formatTime(eventDate)}';
-    } else {
-      return '${_formatDate(eventDate)} at ${_formatTime(eventDate)}';
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${date.day} ${months[date.month - 1]}';
-  }
-
-  String _formatTime(DateTime date) {
-    final hour = date.hour;
-    final minute = date.minute;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
-  }
-
-  String _formatCategory(String category) {
-    return category.replaceAll('_', ' ').split(' ').map((word) => 
-      word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : ''
-    ).join(' ');
-  }
 
   Widget _buildQuickFilters(FeaturedEventsProvider provider) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 768;
-    
     return Container(
-      height: isMobile ? 36 : 40, // Slightly smaller height on mobile
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      height: 40,
+      margin: const EdgeInsets.symmetric(horizontal: 24),
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
@@ -669,20 +328,17 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
   }
 
   Widget _buildFilterChip(String label, int count, IconData icon, VoidCallback onTap) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 768;
-    
     return InkWell(
       onTap: count > 0 ? onTap : null,
-      borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 10 : 12, 
-          vertical: isMobile ? 6 : 8
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12, 
+          vertical: 8
         ),
         decoration: BoxDecoration(
           color: count > 0 ? AppColors.dubaiTeal.withOpacity(0.1) : AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: count > 0 ? AppColors.dubaiTeal : AppColors.borderLight,
             width: 1,
@@ -693,7 +349,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
           children: [
             Icon(
               icon,
-              size: isMobile ? 14 : 16,
+              size: 16,
               color: count > 0 ? AppColors.dubaiTeal : AppColors.textTertiary,
             ),
             const SizedBox(width: 4),
@@ -702,7 +358,7 @@ class _FeaturedEventsSectionState extends ConsumerState<FeaturedEventsSection> {
               style: AppTextStyles.bodySmall.copyWith(
                 color: count > 0 ? AppColors.dubaiTeal : AppColors.textTertiary,
                 fontWeight: count > 0 ? FontWeight.w600 : FontWeight.normal,
-                fontSize: isMobile ? 11 : 12, // Smaller text on mobile
+                fontSize: 12,
               ),
             ),
           ],

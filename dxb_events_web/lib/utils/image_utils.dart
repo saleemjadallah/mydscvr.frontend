@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html if (dart.library.io) 'dart:io';
 import '../core/config/environment_config.dart';
 
 /// Utility class for handling image URLs and loading
 class ImageUtils {
   static const String cloudinaryCloudName = 'dikjgzjsq';
   /// Get a safe image URL that avoids HTTP/2 errors and cache issues
-  static String getSafeImageUrl(String? originalUrl, {String? eventId, bool? isThumbnail}) {
+  static String getSafeImageUrl(String? originalUrl, {String? eventId}) {
     if (originalUrl == null || originalUrl.isEmpty) {
       return '';
     }
@@ -18,67 +16,31 @@ class ImageUtils {
     // Check if this is already a Cloudinary URL
     if (url.contains('res.cloudinary.com')) {
       debugPrint('☁️ Already using Cloudinary: $url');
-      // Add mobile optimizations for Cloudinary
-      if (kIsWeb && _isMobileBrowser()) {
-        // Add automatic format and quality for mobile
-        if (!url.contains('/f_auto')) {
-          url = url.replaceFirst('/upload/', '/upload/f_auto,q_auto/');
-        }
-        debugPrint('☁️ Optimized Cloudinary URL for mobile: $url');
-      }
       return url;
     }
 
-    // Convert S3 URLs to Cloudinary
+    // Convert S3 URLs to Cloudinary with desktop quality settings
     if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
       final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
       final match = regex.firstMatch(url);
       if (match != null) {
         final s3Path = match.group(1)!;
-        // For mobile, use Cloudinary with automatic optimization
-        if (kIsWeb && _isMobileBrowser()) {
-          final encodedUrl = Uri.encodeComponent(originalUrl);
-          url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_auto,w_800/$encodedUrl';
-          debugPrint('☁️ Mobile: Converting S3 to Cloudinary with optimization: $url');
-        } else {
-          // For desktop, use higher quality
-          final encodedUrl = Uri.encodeComponent(originalUrl);
-          url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
-          debugPrint('☁️ Desktop: Converting S3 to Cloudinary: $url');
-        }
+        // Use consistent high quality for desktop
+        final encodedUrl = Uri.encodeComponent(originalUrl);
+        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
+        debugPrint('☁️ Converting S3 to Cloudinary: $url');
       }
     } else if (url.contains('s3') && url.contains('amazonaws.com')) {
-      // For other S3 URLs, also use Cloudinary fetch
+      // For other S3 URLs, also use Cloudinary fetch with desktop quality
       final encodedUrl = Uri.encodeComponent(url);
-      if (kIsWeb && _isMobileBrowser()) {
-        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_auto,w_800/$encodedUrl';
-      } else {
-        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
-      }
+      url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
     }
-    
-    // If it's a mydscvr.xyz URL, use the mydscvr.ai domain instead
-    // if (url.contains('mydscvr.xyz')) {
-    //   url = url.replaceAll('mydscvr.xyz', 'mydscvr.ai');
-    // }
-
-    // NO QUERY PARAMETERS - Keep URLs simple
-    // CloudFront already handles caching
     
     // Don't add timestamp to Cloudinary URLs as it breaks their fetch functionality
     if (!url.contains('res.cloudinary.com')) {
       // Add cache-busting parameter only for non-Cloudinary URLs
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       url = '$url?t=$timestamp';
-    }
-
-    // Debug final URL on mobile
-    if (kIsWeb && _isMobileBrowser()) {
-      if (url.contains('cloudfront.net')) {
-        debugPrint('🌐 MOBILE CLOUDFRONT IMAGE: $url');
-      } else if (url.contains('s3') && url.contains('amazonaws.com')) {
-        debugPrint('⚠️ MOBILE S3 IMAGE (not using CloudFront): $url');
-      }
     }
     
     return url;
@@ -154,28 +116,5 @@ class ImageUtils {
         ),
       ),
     );
-  }
-  
-  
-  /// Check if running on mobile browser
-  static bool _isMobileBrowser() {
-    if (!kIsWeb) return false;
-    
-    final userAgent = _getUserAgent().toLowerCase();
-    return userAgent.contains('mobile') || 
-           userAgent.contains('android') || 
-           userAgent.contains('iphone') ||
-           userAgent.contains('ipad');
-  }
-  
-  /// Get user agent string
-  static String _getUserAgent() {
-    if (!kIsWeb) return '';
-    
-    try {
-      return html.window.navigator.userAgent;
-    } catch (e) {
-      return '';
-    }
   }
 }

@@ -249,10 +249,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth > 1200;
-    final isMobile = screenWidth <= 800;
-
     return Scaffold(
       floatingActionButton: const SuperSearchFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -285,8 +281,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                 // Main header
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 16 : 24, 
-                    vertical: isMobile ? 12 : 16
+                    horizontal: 24, 
+                    vertical: 16
                   ),
                   child: Row(
                     children: [
@@ -336,18 +332,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                           Text(
                             _getPageTitle(),
                             style: GoogleFonts.comfortaa(
-                              fontSize: isMobile ? 16 : 20,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          if (!isMobile || _getPageSubtitle().length < 30)
-                            Text(
-                              _getPageSubtitle(),
-                              style: TextStyle(
-                                fontSize: isMobile ? 10 : 12,
+                          Text(
+                            _getPageSubtitle(),
+                            style: TextStyle(
+                              fontSize: 12,
                                 color: Colors.white.withOpacity(0.8),
                               ),
                               maxLines: 1,
@@ -371,7 +366,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(isMobile ? 2 : 3),
+                        padding: EdgeInsets.all(3),
                         child: Row(
                           children: [
                             Material(
@@ -400,15 +395,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: isMobile ? 8 : 12, 
-                                      vertical: isMobile ? 6 : 8
+                                      horizontal: 12, 
+                                      vertical: 8
                                     ),
                                     child: Icon(
                                       Icons.view_list,
                                       color: _currentViewMode == ViewMode.list 
                                           ? Colors.white 
                                           : Colors.white.withOpacity(0.7),
-                                      size: isMobile ? 18 : 20,
+                                      size: 20,
                                     ),
                                   ),
                                 ),
@@ -440,15 +435,15 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                                   },
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: isMobile ? 8 : 12, 
-                                      vertical: isMobile ? 6 : 8
+                                      horizontal: 12, 
+                                      vertical: 8
                                     ),
                                     child: Icon(
                                       Icons.grid_view,
                                       color: _currentViewMode == ViewMode.grid 
                                           ? Colors.white 
                                           : Colors.white.withOpacity(0.7),
-                                      size: isMobile ? 18 : 20,
+                                      size: 20,
                                     ),
                                   ),
                                 ),
@@ -458,7 +453,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                         ),
                       ),
                       
-                      SizedBox(width: isMobile ? 8 : 12),
+                      SizedBox(width: 12),
                       
                       // Super Search Button
                       const SizedBox(width: 12),
@@ -487,13 +482,13 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             borderRadius: BorderRadius.circular(12),
                             onTap: () => _showAdvancedFilterPanel(),
                             child: Container(
-                              padding: EdgeInsets.all(isMobile ? 8 : 10),
+                              padding: EdgeInsets.all(10),
                               child: Stack(
                                 children: [
                                   Icon(
                                     LucideIcons.filter,
                                     color: Colors.white.withOpacity(0.9),
-                                    size: isMobile ? 18 : 20,
+                                    size: 20,
                                   ),
                                   if (_activeFilters.isNotEmpty)
                                     Positioned(
@@ -515,7 +510,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                         ),
                       ),
                       
-                      SizedBox(width: isMobile ? 8 : 12),
+                      SizedBox(width: 12),
                       
                       // Calendar Date Filter
                       Material(
@@ -539,13 +534,13 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             borderRadius: BorderRadius.circular(12),
                             onTap: () => _showDateFilterDialog(),
                             child: Container(
-                              padding: EdgeInsets.all(isMobile ? 8 : 10),
+                              padding: EdgeInsets.all(10),
                               child: Stack(
                                 children: [
                                   Icon(
                                     LucideIcons.calendar,
                                     color: Colors.white.withOpacity(0.9),
-                                    size: isMobile ? 18 : 20,
+                                    size: 20,
                                   ),
                                   if (_currentFilters.customDateStart != null || _currentFilters.customDateEnd != null)
                                     Positioned(
@@ -590,11 +585,11 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                               _loadEvents();
                             },
                             child: Container(
-                              padding: EdgeInsets.all(isMobile ? 8 : 10),
+                              padding: EdgeInsets.all(10),
                               child: Icon(
                                 Icons.refresh,
                                 color: Colors.white.withOpacity(0.9),
-                                size: isMobile ? 18 : 20,
+                                size: 20,
                               ),
                             ),
                           ),
@@ -614,7 +609,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
               child: Column(
                 children: [
                   Container(
-                    child: isLargeScreen ? _buildDesktopLayout() : _buildMobileLayout(),
+                    child: _buildDesktopLayout(), // Desktop-only layout
                   ),
                   
                   // Footer as part of scrollable content
@@ -686,58 +681,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     );
   }
 
-  Widget _buildMobileLayout() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFFF6B6B), // Coral
-            Color(0xFFFFB347), // Orange
-          ],
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Mobile filter toggle
-          Container(
-            margin: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFFFF6B6B).withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: EventsFilterSidebarGlassmorphic(
-              filters: _currentFilters,
-              onFiltersChanged: (filters) {
-                setState(() {
-                  _currentFilters = filters;
-                });
-                // No need to reload events - we filter on frontend
-              },
-              isExpanded: _isFilterExpanded,
-              onToggle: () {
-                setState(() {
-                  _isFilterExpanded = !_isFilterExpanded;
-                });
-              },
-            ),
-          ),
-          
-          // Main content - no Expanded here since we're inside SingleChildScrollView
-          _buildMainContent(),
-        ],
-      ),
-    );
-  }
 
   Widget _buildMainContent() {
     final filteredEvents = _getFilteredEvents();
@@ -942,64 +885,34 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
   Widget _buildGridView(List<Event> filteredEvents) {
-    // Always use carousel format for all screen sizes
-    return _buildUniversalCarousel(filteredEvents);
+    // Desktop-only grid view with 3 columns
+    return _buildDesktopGrid(filteredEvents);
   }
   
-  Widget _buildUniversalCarousel(List<Event> filteredEvents) {
+  Widget _buildDesktopGrid(List<Event> filteredEvents) {
     if (filteredEvents.isEmpty) return const SizedBox.shrink();
-    
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 800;
-    
-    // Determine optimal card dimensions based on screen size
-    double carouselHeight;
-    double cardWidth;
-    EdgeInsets cardPadding;
-    
-    if (screenWidth <= 480) {
-      // Mobile phones
-      carouselHeight = 480;
-      cardWidth = screenWidth * 0.85;
-      cardPadding = const EdgeInsets.symmetric(horizontal: 16);
-    } else if (screenWidth <= 768) {
-      // Tablets and small screens
-      carouselHeight = 520;
-      cardWidth = 380;
-      cardPadding = const EdgeInsets.symmetric(horizontal: 20);
-    } else if (screenWidth <= 1200) {
-      // Medium screens
-      carouselHeight = 580;
-      cardWidth = 420;
-      cardPadding = const EdgeInsets.symmetric(horizontal: 24);
-    } else {
-      // Large desktop screens
-      carouselHeight = 620;
-      cardWidth = 460;
-      cardPadding = const EdgeInsets.symmetric(horizontal: 32);
-    }
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Carousel header
+        // Grid header
         Padding(
-          padding: cardPadding,
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'All Events (${filteredEvents.length})',
                 style: GoogleFonts.comfortaa(
-                  fontSize: isMobile ? 20 : 24,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
               Text(
-                'Swipe to browse →',
+                '${filteredEvents.length} events found',
                 style: GoogleFonts.inter(
-                  fontSize: isMobile ? 12 : 14,
+                  fontSize: 14,
                   color: AppColors.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
@@ -1010,131 +923,46 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         
         const SizedBox(height: 16),
         
-        // Horizontal carousel
-        SizedBox(
-          height: carouselHeight,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const ClampingScrollPhysics(),
-            padding: cardPadding,
+        // Desktop grid with 3 columns
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.75,
+              crossAxisSpacing: 24,
+              mainAxisSpacing: 24,
+            ),
             itemCount: filteredEvents.length,
             itemBuilder: (context, index) {
               final event = filteredEvents[index];
-              return Container(
-                width: cardWidth,
-                margin: EdgeInsets.only(right: isMobile ? 16 : 24),
-                child: isMobile 
-                  ? EventCard(
-                      event: event,
-                      onTap: () => _navigateToEventDetail(event),
-                    )
-                  : EnhancedEventCard(
-                      event: event,
-                      showQualityMetrics: !isMobile,
-                      showSocialMedia: screenWidth > 480,
-                      onTap: () => _navigateToEventDetail(event),
-                    ).animate()
-                  .fadeIn(
-                    delay: Duration(milliseconds: index * 80),
-                    duration: 500.ms,
-                    curve: Curves.easeOutQuart,
-                  )
-                  .slideX(
-                    begin: 0.3,
-                    end: 0,
-                    delay: Duration(milliseconds: index * 80),
-                    duration: 500.ms,
-                    curve: Curves.easeOutQuart,
-                  ),
-              );
+              return EnhancedEventCard(
+                event: event,
+                showQualityMetrics: true,
+                showSocialMedia: true,
+                onTap: () => _navigateToEventDetail(event),
+              ).animate()
+                .fadeIn(
+                  delay: Duration(milliseconds: index * 80),
+                  duration: 500.ms,
+                  curve: Curves.easeOutQuart,
+                )
+                .slideY(
+                  begin: 0.1,
+                  end: 0,
+                  delay: Duration(milliseconds: index * 80),
+                  duration: 500.ms,
+                  curve: Curves.easeOutQuart,
+                );
             },
           ),
         ),
-        
-        // Note about viewing all events
-        if (filteredEvents.length > 10)
-          Padding(
-            padding: EdgeInsets.only(
-              left: cardPadding.left,
-              right: cardPadding.right,
-              top: 16,
-            ),
-            child: Text(
-              'Showing all ${filteredEvents.length} events. Swipe to see more.',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
       ],
     );
   }
   
-  Widget _buildMobileCarousel(List<Event> filteredEvents) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Carousel section header
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Events (${filteredEvents.length})',
-                style: GoogleFonts.comfortaa(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                'Swipe to browse →',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        // Horizontal carousel - Much bigger height for better mobile experience
-        SizedBox(
-          height: 480, // Increased from 360 to 480 for much bigger cards
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const ClampingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: filteredEvents.length,
-            itemBuilder: (context, index) {
-              final event = filteredEvents[index];
-              return Container(
-                width: 320, // Increased width from 280 to 320 for more content space
-                margin: const EdgeInsets.only(right: 16),
-                child: _buildMobileEventCard(event)
-                    .animate()
-                    .fadeIn(
-                      delay: Duration(milliseconds: index * 80),
-                      duration: 500.ms,
-                      curve: Curves.easeOutQuart,
-                    )
-                    .slideX(
-                      begin: 0.3,
-                      end: 0,
-                      delay: Duration(milliseconds: index * 80),
-                      duration: 500.ms,
-                      curve: Curves.easeOutQuart,
-                    ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildListView(List<Event> filteredEvents) {
     return ListView.builder(
@@ -1492,13 +1320,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
   int _getGridCrossAxisCount(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth > 1200) {
-      return 3;
-    } else if (screenWidth > 800) {
-      return 2;
-    }
-    return 1;
+    return 3; // Fixed 3 columns for desktop
   }
 
   /// Show the advanced filter panel
@@ -1510,8 +1332,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.all(16),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          height: MediaQuery.of(context).size.height * 0.9,
+          width: 1200,
+          height: 800,
           constraints: BoxConstraints(
             maxWidth: 800,
             maxHeight: 700,
@@ -1587,21 +1409,19 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
   Widget _buildEventCard(Event event) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    
     return Container(
       margin: _currentViewMode == ViewMode.list ? EdgeInsets.only(bottom: 16) : EdgeInsets.zero,
       child: EnhancedEventCard(
         event: event,
-        showQualityMetrics: screenWidth > 768, // Hide quality metrics on small screens
-        showSocialMedia: screenWidth > 480, // Hide social media on very small screens
+        showQualityMetrics: true, // Always show for desktop
+        showSocialMedia: true, // Always show for desktop
         onTap: () => _navigateToEventDetail(event),
       ),
     );
   }
 
   // Helper methods for formatting event information
-  String _formatEventDateTime(Event event, bool isMobile) {
+  String _formatEventDateTime(Event event) {
     final startDate = event.startDate;
     final now = DateTime.now();
     final isToday = startDate.day == now.day && 
@@ -1622,30 +1442,21 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     
     final startTime = '${startDate.hour.toString().padLeft(2, '0')}:${startDate.minute.toString().padLeft(2, '0')}';
     
-    if (isMobile) {
-      return '$dayName, $month ${startDate.day} • $startTime';
-    } else {
-      final endDate = event.endDate ?? startDate.add(event.duration);
-      final endTime = '${endDate.hour.toString().padLeft(2, '0')}:${endDate.minute.toString().padLeft(2, '0')}';
-      return '$dayName, $month ${startDate.day} • $startTime - $endTime';
-    }
+    final endDate = event.endDate ?? startDate.add(event.duration);
+    final endTime = '${endDate.hour.toString().padLeft(2, '0')}:${endDate.minute.toString().padLeft(2, '0')}';
+    return '$dayName, $month ${startDate.day} • $startTime - $endTime';
   }
 
-  String _formatAgeSuitability(Event event, bool isMobile) {
+  String _formatAgeSuitability(Event event) {
     final suitability = event.familySuitability;
     String ageText = event.ageRange;
     
-    if (isMobile) {
-      if (suitability.isAllAges) return 'All ages';
-      return ageText;
+    if (suitability.isAllAges) {
+      return 'All ages welcome | Perfect for families';
+    } else if (suitability.isBabyFriendly) {
+      return '$ageText | Toddler-friendly';
     } else {
-      if (suitability.isAllAges) {
-        return 'All ages welcome | Perfect for families';
-      } else if (suitability.isBabyFriendly) {
-        return '$ageText | Toddler-friendly';
-      } else {
-        return '$ageText | Perfect for families';
-      }
+      return '$ageText | Perfect for families';
     }
   }
 
@@ -1820,11 +1631,11 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     return features;
   }
 
-  Widget _buildFeatureTag(String feature, bool isMobile) {
+  Widget _buildFeatureTag(String feature) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 6 : 8,
-        vertical: isMobile ? 3 : 4,
+        horizontal: 8,
+        vertical: 4,
       ),
       decoration: BoxDecoration(
         color: Color(0xFF0D7377).withOpacity(0.1),
@@ -1837,7 +1648,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       child: Text(
         feature,
         style: GoogleFonts.inter(
-          fontSize: isMobile ? 9 : 11,
+          fontSize: 11,
           fontWeight: FontWeight.w500,
           color: Color(0xFF0D7377),
         ),
@@ -1845,7 +1656,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     );
   }
 
-  String _getEnticingDescription(Event event, bool isMobile) {
+  String _getEnticingDescription(Event event) {
     // Use shortDescription if available, otherwise create one from the event data
     if (event.shortDescription != null && event.shortDescription!.isNotEmpty) {
       return event.shortDescription!;
@@ -1853,38 +1664,22 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
     
     // Generate enticing descriptions based on category and features
     if (event.category.toLowerCase().contains('miracle') || event.title.toLowerCase().contains('garden')) {
-      return isMobile 
-          ? "45 million flowers in stunning themed gardens with..."
-          : "45 million flowers in stunning themed gardens with interactive displays and cultural performances";
+      return "45 million flowers in stunning themed gardens with interactive displays and cultural performances";
     } else if (event.category.toLowerCase().contains('mall') || event.venue.name.toLowerCase().contains('mall')) {
-      return isMobile
-          ? "Hands-on activities, mini-golf, face painting and..."
-          : "Hands-on activities, mini-golf, face painting and exclusive family discounts at 200+ stores";
+      return "Hands-on activities, mini-golf, face painting and exclusive family discounts at 200+ stores";
     } else if (event.category.toLowerCase().contains('cultural')) {
-      return isMobile
-          ? "Traditional crafts, storytelling, and cultural..."
-          : "Traditional crafts, storytelling, and cultural performances in historic setting";
+      return "Traditional crafts, storytelling, and cultural performances in historic setting";
     } else if (event.category.toLowerCase().contains('outdoor') || event.tags.contains('outdoor')) {
-      return isMobile
-          ? "Guided family adventure with breakfast and..."
-          : "Guided family hike with breakfast and stunning mountain photography opportunities";
+      return "Guided family hike with breakfast and stunning mountain photography opportunities";
     } else if (event.category.toLowerCase().contains('water') || event.tags.contains('water')) {
-      return isMobile
-          ? "Interactive marine workshop with feeding sessions..."
-          : "Interactive marine workshop with feeding sessions and behind-the-scenes tours";
+      return "Interactive marine workshop with feeding sessions and behind-the-scenes tours";
     } else if (event.category.toLowerCase().contains('arts')) {
-      return isMobile
-          ? "Creative workshops with professional artists and..."
-          : "Creative workshops with professional artists and take-home masterpieces for the family";
+      return "Creative workshops with professional artists and take-home masterpieces for the family";
     } else if (event.category.toLowerCase().contains('entertainment')) {
-      return isMobile
-          ? "Live performances, games, and interactive..."
-          : "Live performances, games, and interactive entertainment for all ages with special family packages";
+      return "Live performances, games, and interactive entertainment for all ages with special family packages";
     } else {
       // Fallback description
-      return isMobile
-          ? "Exciting family activity with interactive experiences..."
-          : "Exciting family activity with interactive experiences and memories to last a lifetime";
+      return "Exciting family activity with interactive experiences and memories to last a lifetime";
     }
   }
 
@@ -1923,9 +1718,6 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
   }
 
   Widget _buildLoadingCard() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
-    
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       child: Card(
@@ -1946,13 +1738,13 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             ],
           ),
           child: Container(
-            height: isMobile ? 380 : 450,
+            height: 450,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image skeleton
                 Container(
-                  height: isMobile ? 140 : 160,
+                  height: 160,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Color(0xFF0D7377).withOpacity(0.2),
@@ -1965,7 +1757,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                 // Skeleton content
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.all(isMobile ? 12 : 16),
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -2063,7 +1855,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                             )
                                 .animate(onPlay: (controller) => controller.repeat())
                                 .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
-                            if (!isMobile) ...[
+                            // Always show for desktop
                               SizedBox(width: 8),
                               Container(
                                 width: 90,
@@ -2075,7 +1867,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                               )
                                   .animate(onPlay: (controller) => controller.repeat())
                                   .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
-                            ],
+                              SizedBox(width: 8),
+                              Container(
+                                width: 90,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF0D7377).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              )
+                                  .animate(onPlay: (controller) => controller.repeat())
+                                  .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
                           ],
                         ),
                         
@@ -2098,7 +1900,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                                   .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
                               SizedBox(height: 4),
                               Container(
-                                width: isMobile ? double.infinity : 200,
+                                width: 200,
                                 height: 13,
                                 decoration: BoxDecoration(
                                   color: Color(0xFF0D7377).withOpacity(0.2),
@@ -2107,7 +1909,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                               )
                                   .animate(onPlay: (controller) => controller.repeat())
                                   .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
-                              if (!isMobile) ...[
+                              // Always show for desktop
                                 SizedBox(height: 4),
                                 Container(
                                   width: 150,
@@ -2119,7 +1921,17 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
                                 )
                                     .animate(onPlay: (controller) => controller.repeat())
                                     .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
-                              ],
+                                SizedBox(height: 4),
+                                Container(
+                                  width: 150,
+                                  height: 13,
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF0D7377).withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                )
+                                    .animate(onPlay: (controller) => controller.repeat())
+                                    .shimmer(duration: 1200.ms, color: Color(0xFF329D9C).withOpacity(0.6)),
                             ],
                           ),
                         ),
@@ -2571,7 +2383,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
             ],
           ),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
+            width: 800,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2859,13 +2671,5 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen>
       default:
         return 'Exciting event experience in $area.';
     }
-  }
-  
-  /// Build mobile-optimized event card for carousel
-  Widget _buildMobileEventCard(Event event) {
-    return EventCardGlassmorphic(
-      event: event,
-      onTap: () => _navigateToEventDetail(event),
-    );
   }
 }

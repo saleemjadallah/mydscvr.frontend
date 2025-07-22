@@ -32,77 +32,59 @@ class Footer extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: AppColors.textPrimary,
-      padding: const EdgeInsets.only(top: 32, left: 16, right: 16, bottom: 32),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Column(
-          children: [
-            // Main footer content
-            LayoutBuilder(
-              builder: (context, constraints) {
-                // Use responsive layout
-                final isWideScreen = constraints.maxWidth > 768;
-                
-                if (isWideScreen) {
-                  // Three-column layout for desktop
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Company Info
-                      Expanded(
-                        flex: 2,
-                        child: _buildCompanySection(companyName, currentYear),
-                      ),
-                      const SizedBox(width: 32),
-                      
-                      // Useful Links
-                      Expanded(
-                        child: _buildLinksSection("Useful Links", usefulLinks, context),
-                      ),
-                      const SizedBox(width: 32),
-                      
-                      // Legal Links
-                      Expanded(
-                        child: _buildLinksSection("Legal", legalLinks, context),
-                      ),
-                    ],
-                  );
-                } else {
-                  // Single column layout for mobile
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildCompanySection(companyName, currentYear),
-                      const SizedBox(height: 32),
-                      _buildLinksSection("Useful Links", usefulLinks, context),
-                      const SizedBox(height: 24),
-                      _buildLinksSection("Legal", legalLinks, context),
-                    ],
-                  );
-                }
-              },
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Separator line
-            Container(
-              height: 1,
-              color: Colors.white.withOpacity(0.2),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Bottom copyright row
-            Text(
-              "© $currentYear $companyName. All rights reserved.",
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
+      padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
+      child: Center(
+        child: Container(
+          width: 1200,
+          child: Column(
+            children: [
+              // Main footer content - Three-column layout
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Company Info
+                  SizedBox(
+                    width: 500,
+                    child: _buildCompanySection(companyName, currentYear),
+                  ),
+                  const SizedBox(width: 64),
+                  
+                  // Useful Links
+                  SizedBox(
+                    width: 250,
+                    child: _buildLinksSection("Useful Links", usefulLinks, context),
+                  ),
+                  const SizedBox(width: 64),
+                  
+                  // Legal Links
+                  SizedBox(
+                    width: 250,
+                    child: _buildLinksSection("Legal", legalLinks, context),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              
+              const SizedBox(height: 48),
+              
+              // Separator line
+              Container(
+                height: 1,
+                color: Colors.white.withOpacity(0.2),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Bottom copyright row
+              Text(
+                "© $currentYear $companyName. All rights reserved.",
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
