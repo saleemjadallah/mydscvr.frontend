@@ -10,13 +10,11 @@ import '../../models/event.dart';
 class EventCardGlassmorphic extends StatefulWidget {
   final Event event;
   final VoidCallback? onTap;
-  final bool isListMode;
 
   const EventCardGlassmorphic({
     super.key,
     required this.event,
     this.onTap,
-    this.isListMode = false,
   });
 
   @override
@@ -66,8 +64,8 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
           transform: Matrix4.identity()
             ..translate(0.0, _isHovered ? -4.0 : 0.0, 0.0),
           child: Container(
-            width: widget.isListMode ? double.infinity : 320,
-            height: widget.isListMode ? 120 : 400,
+            width: 320, // Fixed desktop width
+            height: 400, // Fixed desktop height
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -82,9 +80,7 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
                 ),
               ],
             ),
-            child: widget.isListMode 
-                ? _buildListContent() 
-                : _buildGridContent(),
+            child: _buildGridContent(), // Always use grid content for desktop
           ),
         ),
       ),
@@ -234,115 +230,11 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
     );
   }
 
-  Widget _buildListContent() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                image: widget.event.imageUrls.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(_getImageUrl()),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-            ),
-          ),
-          
-          const SizedBox(width: 16),
-          
-          // Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title and category
-                Text(
-                  widget.event.title,
-                  style: GoogleFonts.comfortaa(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF333333),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF6B6B).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    widget.event.category,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: const Color(0xFFFF6B6B),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                
-                const Spacer(),
-                
-                // Date and location
-                Row(
-                  children: [
-                    Icon(
-                      LucideIcons.calendar,
-                      size: 12,
-                      color: const Color(0xFFFF6B6B),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDate(widget.event.startDate),
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: const Color(0xFF666666),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(
-                      LucideIcons.mapPin,
-                      size: 12,
-                      color: const Color(0xFFFFB347),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        widget.event.venue.area,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: const Color(0xFF666666),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          
-          // Price
-          _buildPriceTag(),
-        ],
-      ),
-    );
-  }
 
   Widget _buildPriceTag() {
     return Container(
-      width: widget.isListMode ? 60 : 80,
-      height: widget.isListMode ? 28 : 32,
+      width: 80, // Fixed desktop width
+      height: 32, // Fixed desktop height
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -367,7 +259,7 @@ class _EventCardGlassmorphicState extends State<EventCardGlassmorphic>
               ? 'FREE' 
               : 'AED ${widget.event.pricing.basePrice.toInt()}',
           style: GoogleFonts.inter(
-            fontSize: widget.isListMode ? 10 : 12,
+            fontSize: 12, // Fixed desktop font size
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
