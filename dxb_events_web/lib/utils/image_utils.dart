@@ -64,10 +64,13 @@ class ImageUtils {
 
     // NO QUERY PARAMETERS - Keep URLs simple
     // CloudFront already handles caching
-
-    // Add cache-busting parameter
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    url = '$url?t=$timestamp';
+    
+    // Don't add timestamp to Cloudinary URLs as it breaks their fetch functionality
+    if (!url.contains('res.cloudinary.com')) {
+      // Add cache-busting parameter only for non-Cloudinary URLs
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      url = '$url?t=$timestamp';
+    }
 
     // Debug final URL on mobile
     if (kIsWeb && _isMobileBrowser()) {
