@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 import '../core/config/environment_config.dart';
 
 /// Utility class for handling image URLs and loading
 class ImageUtils {
   static const String cloudinaryCloudName = 'dikjgzjsq';
+  
+  /// Check if running on mobile browser
+  static bool _isMobileBrowser() {
+    if (!kIsWeb) return false;
+    
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('mobile') || 
+           userAgent.contains('android') || 
+           userAgent.contains('iphone') ||
+           userAgent.contains('ipad') ||
+           userAgent.contains('ipod') ||
+           userAgent.contains('opera mini') ||
+           userAgent.contains('webos') ||
+           userAgent.contains('windows phone');
+  }
+  
   /// Get a safe image URL that avoids HTTP/2 errors and cache issues
   static String getSafeImageUrl(String? originalUrl, {String? eventId}) {
     if (originalUrl == null || originalUrl.isEmpty) {
@@ -19,21 +37,29 @@ class ImageUtils {
       return url;
     }
 
-    // Convert S3 URLs to Cloudinary with desktop quality settings
+    // Determine quality based on device
+    final isMobile = _isMobileBrowser();
+    final quality = isMobile ? 'q_auto:low' : 'q_90';
+    final format = isMobile ? 'f_auto' : 'f_auto';
+    final width = isMobile ? ',w_800' : ''; // Limit width on mobile
+    
+    debugPrint('📱 Device type: ${isMobile ? "Mobile" : "Desktop"}, Quality: $quality');
+    
+    // Convert S3 URLs to Cloudinary with appropriate quality settings
     if (url.contains('mydscvr-event-images.s3') && url.contains('amazonaws.com')) {
       final regex = RegExp(r'https://mydscvr-event-images\.s3\.[^/]+\.amazonaws\.com/(.+)');
       final match = regex.firstMatch(url);
       if (match != null) {
         final s3Path = match.group(1)!;
-        // Use consistent high quality for desktop
+        // Use device-appropriate quality
         final encodedUrl = Uri.encodeComponent(originalUrl);
-        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
+        url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/$format,$quality$width/$encodedUrl';
         debugPrint('☁️ Converting S3 to Cloudinary: $url');
       }
     } else if (url.contains('s3') && url.contains('amazonaws.com')) {
-      // For other S3 URLs, also use Cloudinary fetch with desktop quality
+      // For other S3 URLs, also use Cloudinary fetch with device-appropriate quality
       final encodedUrl = Uri.encodeComponent(url);
-      url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/f_auto,q_90/$encodedUrl';
+      url = 'https://res.cloudinary.com/$cloudinaryCloudName/image/fetch/$format,$quality$width/$encodedUrl';
     }
     
     // Don't add timestamp to Cloudinary URLs as it breaks their fetch functionality

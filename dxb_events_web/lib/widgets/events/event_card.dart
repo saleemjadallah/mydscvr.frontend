@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/glass_morphism.dart';
@@ -628,7 +629,18 @@ class EventCard extends StatelessWidget {
   
   bool _isMobileBrowser() {
     if (!kIsWeb) return false;
-    // Simple mobile detection
-    return true; // For testing - always treat as mobile
+    
+    // Get user agent using dart:html
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    
+    // Comprehensive mobile detection
+    return userAgent.contains('mobile') || 
+           userAgent.contains('android') || 
+           userAgent.contains('iphone') ||
+           userAgent.contains('ipad') ||
+           userAgent.contains('ipod') ||
+           userAgent.contains('opera mini') ||
+           userAgent.contains('webos') ||
+           userAgent.contains('windows phone');
   }
 } 

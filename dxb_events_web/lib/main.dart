@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 // Web-specific imports
 import 'dart:html' as html;
+import 'package:flutter/foundation.dart';
 
 // Analytics service
 import 'services/analytics_service.dart';
@@ -237,6 +238,25 @@ void main() {
   // Configure URL strategy for clean URLs (remove # from URLs)
   usePathUrlStrategy();
   
+  // Set up error handlers
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // Log error to console
+    if (kDebugMode) {
+      print('Flutter Error: ${details.exceptionAsString()}');
+      print('Stack trace: ${details.stack}');
+    }
+  };
+  
+  // Catch async errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print('Async Error: $error');
+      print('Stack trace: $stack');
+    }
+    return true;
+  };
+  
   runApp(
     ProviderScope(
       child: const DXBEventsApp(),
@@ -321,6 +341,74 @@ class _DXBEventsAppState extends ConsumerState<DXBEventsApp> {
       
       // Localization settings
       locale: const Locale('en', 'US'),
+      
+      // Custom error widget
+      builder: (context, widget) {
+        ErrorWidget.builder = (FlutterErrorDetails details) {
+          return MaterialApp(
+            home: Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Oops! Something went wrong',
+                        style: GoogleFonts.inter(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        kDebugMode 
+                          ? details.exceptionAsString()
+                          : 'Please refresh the page to try again',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          html.window.location.reload();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0D7377),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                        ),
+                        child: Text(
+                          'Refresh Page',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        };
+        
+        return widget!;
+      },
     );
   }
 }

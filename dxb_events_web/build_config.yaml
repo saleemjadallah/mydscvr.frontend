@@ -78,7 +78,7 @@ environments:
       - "--no-source-maps"
       - "--tree-shake-icons"
       - "--release"
-      - "--web-renderer=canvaskit"
+      - "--web-renderer=auto"
     optimization:
       minify_js: true
       compress_assets: true

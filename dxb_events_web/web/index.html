@@ -136,6 +136,14 @@
       document.getElementById('loading-logo-img').style.display = 'none';
       document.getElementById('loading-logo-fallback').style.display = 'flex';
     }
+    
+    // Show error message if Flutter fails to load after 15 seconds
+    setTimeout(function() {
+      if (document.getElementById('loading').style.display !== 'none') {
+        console.log('⚠️ Flutter is taking longer than expected to load');
+        document.getElementById('loading-error').style.display = 'block';
+      }
+    }, 15000);
   </script>
 
 
@@ -265,51 +273,49 @@
     <div class="loading-text">mydscvr.ai</div>
     <div class="loading-subtitle">Discovering amazing family events in Dubai...</div>
     <div class="loading-spinner"></div>
+    
+    <!-- Error message (hidden by default) -->
+    <div id="loading-error" style="display: none; margin-top: 20px; text-align: center;">
+      <p style="color: #ff6b6b; margin-bottom: 10px;">Having trouble loading?</p>
+      <button onclick="location.reload()" style="
+        background: #17A2B8;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      ">Refresh Page</button>
+    </div>
   </div>
 
 
 
   <!-- Flutter App -->
   
-  <!-- HTML Renderer for Mobile Browsers -->
+  <!-- Auto Renderer Selection -->
   <script type="text/javascript">
-    // Detect mobile browsers and use HTML renderer for better image compatibility
-    function detectMobileBrowser() {
+    // Let Flutter auto-select the best renderer for the device
+    // The auto renderer will choose HTML for mobile and CanvasKit for desktop
+    console.log('🎯 Using auto renderer selection for optimal performance');
+    console.log('User Agent:', navigator.userAgent);
+    
+    // Add device type class for styling
+    function detectDeviceType() {
       var userAgent = navigator.userAgent || navigator.vendor || window.opera;
       
-      // Check for mobile devices
-      if (/android/i.test(userAgent)) return 'Android';
-      if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return 'iOS';
-      if (/windows phone/i.test(userAgent)) return 'Windows Phone';
-      if (/blackberry/i.test(userAgent)) return 'BlackBerry';
-      if (/opera mini/i.test(userAgent)) return 'Opera Mini';
-      if (/mobile/i.test(userAgent)) return 'Generic Mobile';
-      
-      // Check for tablets
-      if (/tablet/i.test(userAgent)) return 'Tablet';
-      if (/ipad/i.test(userAgent)) return 'iPad';
-      
-      return false;
+      if (/android|iphone|ipad|ipod|blackberry|opera mini|mobile|tablet/i.test(userAgent)) {
+        document.body.classList.add('mobile-device');
+        console.log('📱 Mobile/Tablet device detected');
+        return 'mobile';
+      } else {
+        document.body.classList.add('desktop-device');
+        console.log('🖥️ Desktop device detected');
+        return 'desktop';
+      }
     }
     
-    var mobileDevice = detectMobileBrowser();
-    
-    if (mobileDevice) {
-      console.log('📱 Mobile/Tablet detected:', mobileDevice);
-      console.log('🌐 Switching to HTML renderer for better S3 image compatibility');
-      window.flutterWebRenderer = "html";
-      
-      // Add a class to body for mobile-specific styling if needed
-      document.body.classList.add('mobile-renderer');
-    } else {
-      console.log('🖥️ Desktop browser detected - using CanvasKit renderer');
-      // Desktop can use the default CanvasKit renderer
-      // No need to set explicitly as it's the default
-    }
-    
-    // Log the chosen renderer and user agent for debugging
-    console.log('User Agent:', navigator.userAgent);
-    console.log('Flutter Web Renderer:', window.flutterWebRenderer || 'default (canvaskit)');
+    detectDeviceType();
   </script>
   
     <script src="flutter_bootstrap.js" async></script>
