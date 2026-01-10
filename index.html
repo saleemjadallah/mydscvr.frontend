@@ -195,16 +195,10 @@
             color: var(--text-primary);
         }
 
-        .logo-icon {
+        .logo-img {
             width: 44px;
             height: 44px;
-            background: var(--gradient-sunset);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: var(--shadow-soft);
+            object-fit: contain;
         }
 
         .nav-links {
@@ -974,8 +968,9 @@
             margin-bottom: var(--space-md);
         }
 
-        .footer-logo .logo-icon {
-            background: var(--coral-orange);
+        .footer-logo .logo-img {
+            width: 40px;
+            height: 40px;
         }
 
         .footer-brand p {
@@ -1146,7 +1141,7 @@
     <nav id="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <div class="logo-icon">🚗</div>
+                <img src="/logo.png" alt="Yalla Traffic" class="logo-img">
                 <span>Yalla Traffic</span>
             </a>
             <div class="nav-links">
@@ -1385,7 +1380,7 @@
             <div class="footer-top">
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <div class="logo-icon">🚗</div>
+                        <img src="/logo.png" alt="Yalla Traffic" class="logo-img">
                         <span>Yalla Traffic</span>
                     </div>
                     <p>

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Landing page for Yalla Traffic app",
   "scripts": {
-    "build": "mkdir -p dist && cp -r index.html 404.html _headers _redirects privacy terms support dist/"
+    "build": "mkdir -p dist && cp -r index.html 404.html logo.png _headers _redirects privacy terms support dist/"
   },
   "private": true
 }
