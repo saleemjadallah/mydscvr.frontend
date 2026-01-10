@@ -1,0 +1,9 @@
+{
+  "name": "yalla-traffic-landing",
+  "version": "1.0.0",
+  "description": "Landing page for Yalla Traffic app",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'"
+  },
+  "private": true
+}
