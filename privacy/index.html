@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Yalla Traffic</title>
+    <meta name="description" content="Privacy Policy for Yalla Traffic app. Learn how we collect, use, and protect your data.">
+    <link rel="canonical" href="https://mydscvr.ai/privacy">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --coral-orange: #FF6B6B;
+            --coral-dark: #E85555;
+            --soft-teal: #10B981;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --surface-white: #FEFEFE;
+            --surface-cream: #FAF7F2;
+            --shadow-card: 0 8px 32px rgba(31, 41, 55, 0.08);
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            background: var(--surface-cream);
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 107, 0.1);
+            box-shadow: var(--shadow-card);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #FFE4D6 0%, #FFB088 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--coral-orange);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header .last-updated {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .content-card {
+            background: var(--surface-white);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 2rem 0 1rem;
+            padding-top: 1rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #FEF3E2 0%, #FAD6A5 100%);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th {
+            background: var(--surface-cream);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        a {
+            color: var(--coral-orange);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-container p {
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--coral-orange);
+            text-decoration: none;
+        }
+
+        @media (max-width: 640px) {
+            main {
+                padding: 100px 1rem 3rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">🚗</div>
+                <span>Yalla Traffic</span>
+            </a>
+            <a href="/" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="page-header">
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last Updated: January 10, 2025</p>
+        </div>
+
+        <div class="content-card">
+            <h2>Introduction</h2>
+            <p>
+                Welcome to Yalla Traffic ("we," "our," or "us"). We are committed to protecting your privacy
+                and ensuring the security of your personal information. This Privacy Policy explains how we
+                collect, use, disclose, and safeguard your information when you use our mobile application
+                ("Yalla Traffic" or the "App").
+            </p>
+            <p>
+                By using Yalla Traffic, you agree to the collection and use of information in accordance
+                with this policy. If you do not agree with our policies and practices, please do not use the App.
+            </p>
+
+            <div class="highlight-box">
+                <p>
+                    <strong>Our Commitment:</strong> Yalla Traffic is designed to help you plan your trips,
+                    not to track or monitor you. We only collect location data when necessary to provide
+                    traffic and routing services, and we never sell your personal data to third parties.
+                </p>
+            </div>
+
+            <h2>Information We Collect</h2>
+
+            <h3>1. Location Data</h3>
+            <p>
+                Yalla Traffic requires access to your device's location to provide traffic information
+                and route planning services. We collect:
+            </p>
+            <ul>
+                <li><strong>Current Location:</strong> Your device's GPS coordinates to show nearby traffic conditions and calculate routes from your current position.</li>
+                <li><strong>Saved Locations:</strong> Addresses you save as "Home," "Work," or other favorites are stored locally on your device.</li>
+            </ul>
+            <p>
+                <strong>Important:</strong> Location data is only collected when you are actively using
+                the App. We do not track your location in the background unless you explicitly enable
+                background location for departure time notifications (optional feature).
+            </p>
+
+            <h3>2. Usage Data</h3>
+            <p>We may automatically collect certain information when you use the App, including:</p>
+            <ul>
+                <li>Device type and operating system version</li>
+                <li>App usage statistics (which features you use)</li>
+                <li>Crash reports and performance data</li>
+                <li>Time zone and general region (for time-based features)</li>
+            </ul>
+
+            <h3>3. Saved Places</h3>
+            <p>
+                When you save locations (Home, Work, favorites), this data is stored locally on your
+                device using secure encrypted storage. We do not upload your saved places to our servers.
+            </p>
+
+            <h2>How We Use Your Information</h2>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data Type</th>
+                        <th>Purpose</th>
+                        <th>Storage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Current Location</td>
+                        <td>Calculate routes, show live traffic, provide ETAs</td>
+                        <td>Processed in real-time, not stored on servers</td>
+                    </tr>
+                    <tr>
+                        <td>Saved Places</td>
+                        <td>Quick access to frequent destinations</td>
+                        <td>Stored locally on your device only</td>
+                    </tr>
+                    <tr>
+                        <td>Usage Analytics</td>
+                        <td>Improve app performance and features</td>
+                        <td>Aggregated, anonymized data</td>
+                    </tr>
+                    <tr>
+                        <td>Crash Reports</td>
+                        <td>Fix bugs and improve stability</td>
+                        <td>Anonymized technical data</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Third-Party Services</h2>
+            <p>Yalla Traffic uses the following third-party services to provide our features:</p>
+
+            <h3>TomTom</h3>
+            <p>
+                We use TomTom APIs for traffic data, routing, and place search. When you request
+                traffic information or routes, your location data is sent to TomTom's servers to
+                process the request. TomTom processes this data according to their
+                <a href="https://www.tomtom.com/privacy/" target="_blank" rel="noopener">Privacy Policy</a>.
+            </p>
+
+            <h3>Analytics</h3>
+            <p>
+                We may use analytics services to understand how users interact with our App. This data
+                is anonymized and aggregated to help us improve the user experience.
+            </p>
+
+            <h2>Data Retention</h2>
+            <ul>
+                <li><strong>Location Data:</strong> Not stored on our servers. Processed in real-time and discarded.</li>
+                <li><strong>Saved Places:</strong> Stored on your device until you delete them or uninstall the App.</li>
+                <li><strong>Analytics Data:</strong> Retained for up to 24 months in aggregated, anonymized form.</li>
+            </ul>
+
+            <h2>Data Security</h2>
+            <p>
+                We implement appropriate technical and organizational measures to protect your personal
+                information, including:
+            </p>
+            <ul>
+                <li>Encrypted data transmission (HTTPS/TLS)</li>
+                <li>Secure local storage on your device</li>
+                <li>Regular security assessments</li>
+                <li>Limited data collection (privacy by design)</li>
+            </ul>
+
+            <h2>Your Rights and Choices</h2>
+
+            <h3>Location Permissions</h3>
+            <p>
+                You can control location access through your device settings at any time:
+            </p>
+            <ul>
+                <li><strong>iOS:</strong> Settings → Privacy → Location Services → Yalla Traffic</li>
+                <li><strong>Android:</strong> Settings → Apps → Yalla Traffic → Permissions → Location</li>
+            </ul>
+            <p>
+                Note: Denying location access will limit the App's functionality, as we cannot provide
+                traffic information or routing without knowing your location.
+            </p>
+
+            <h3>Deleting Your Data</h3>
+            <p>
+                Since most data is stored locally on your device, you can delete it by:
+            </p>
+            <ul>
+                <li>Clearing saved places within the App settings</li>
+                <li>Uninstalling the App (removes all local data)</li>
+            </ul>
+
+            <h2>UAE Data Protection</h2>
+            <p>
+                We are committed to complying with UAE data protection requirements. Your data is
+                processed in accordance with:
+            </p>
+            <ul>
+                <li>UAE Federal Decree-Law No. 45 of 2021 on Personal Data Protection</li>
+                <li>Relevant regulations issued by the UAE Data Office</li>
+            </ul>
+            <p>
+                For users in the UAE, you have the right to access, correct, or request deletion of
+                your personal data by contacting us at the email address below.
+            </p>
+
+            <h2>Children's Privacy</h2>
+            <p>
+                Yalla Traffic is not intended for use by children under the age of 13. We do not
+                knowingly collect personal information from children under 13. If you are a parent
+                or guardian and believe your child has provided us with personal information, please
+                contact us.
+            </p>
+
+            <h2>Changes to This Policy</h2>
+            <p>
+                We may update this Privacy Policy from time to time. We will notify you of any changes
+                by posting the new Privacy Policy on this page and updating the "Last Updated" date.
+                We encourage you to review this Privacy Policy periodically.
+            </p>
+
+            <h2>Contact Us</h2>
+            <p>
+                If you have any questions about this Privacy Policy or our data practices, please contact us:
+            </p>
+            <ul>
+                <li><strong>Email:</strong> <a href="mailto:support@mydscvr.ai">support@mydscvr.ai</a></li>
+                <li><strong>Website:</strong> <a href="https://mydscvr.ai/support">mydscvr.ai/support</a></li>
+            </ul>
+
+            <div class="highlight-box">
+                <p>
+                    <strong>Questions?</strong> We're happy to help. Reach out to us anytime at
+                    <a href="mailto:support@mydscvr.ai">support@mydscvr.ai</a>.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2025 Yalla Traffic. Made with ❤️ in Dubai.</p>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="/support">Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

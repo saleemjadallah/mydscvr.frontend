@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - Yalla Traffic</title>
+    <meta name="description" content="Get help with Yalla Traffic. Find answers to common questions or contact our support team.">
+    <link rel="canonical" href="https://mydscvr.ai/support">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --coral-orange: #FF6B6B;
+            --coral-light: #FF8A8A;
+            --coral-dark: #E85555;
+            --soft-teal: #10B981;
+            --teal-light: #34D399;
+            --warm-yellow: #F59E0B;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --surface-white: #FEFEFE;
+            --surface-cream: #FAF7F2;
+            --shadow-card: 0 8px 32px rgba(31, 41, 55, 0.08);
+            --shadow-soft: 0 4px 20px rgba(255, 107, 107, 0.1);
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 9999px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            background: var(--surface-cream);
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 107, 0.1);
+            box-shadow: var(--shadow-card);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #FFE4D6 0%, #FFB088 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--coral-orange);
+        }
+
+        /* Hero Section */
+        .support-hero {
+            background: linear-gradient(180deg, #FEF3E2 0%, #FFECD2 100%);
+            padding: 140px 2rem 80px;
+            text-align: center;
+        }
+
+        .support-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .support-hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Contact Card */
+        .contact-card {
+            background: var(--surface-white);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .contact-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--coral-orange), var(--coral-dark));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .contact-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-info p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-email {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--coral-orange);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .contact-email:hover {
+            color: var(--coral-dark);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--coral-orange);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* FAQ Section */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .faq-item {
+            background: var(--surface-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-family: inherit;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: background 0.2s ease;
+        }
+
+        .faq-question:hover {
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .faq-question svg {
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            color: var(--coral-orange);
+        }
+
+        .faq-item.open .faq-question svg {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 500px;
+        }
+
+        .faq-answer-content {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .faq-answer-content a {
+            color: var(--coral-orange);
+            text-decoration: none;
+        }
+
+        .faq-answer-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Quick Links */
+        .quick-links {
+            margin-top: 4rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .quick-link {
+            background: var(--surface-white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .quick-link:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .quick-link-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--surface-cream);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .quick-link h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .quick-link p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Response Time */
+        .response-info {
+            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .response-info p {
+            color: #065F46;
+            font-weight: 500;
+        }
+
+        .response-info strong {
+            color: #047857;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-container p {
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--coral-orange);
+        }
+
+        @media (max-width: 640px) {
+            .support-hero {
+                padding: 120px 1rem 60px;
+            }
+
+            .support-hero h1 {
+                font-size: 2rem;
+            }
+
+            .contact-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            main {
+                padding: 3rem 1rem;
+            }
+
+            .faq-question {
+                font-size: 1rem;
+                padding: 1.25rem;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">🚗</div>
+                <span>Yalla Traffic</span>
+            </a>
+            <a href="/" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="support-hero">
+        <h1>How Can We Help?</h1>
+        <p>Find answers to common questions or reach out to our friendly support team.</p>
+
+        <div class="contact-card">
+            <div class="contact-icon">📧</div>
+            <div class="contact-info">
+                <h3>Email Support</h3>
+                <p>We typically respond within 24 hours</p>
+                <a href="mailto:support@mydscvr.ai" class="contact-email">
+                    support@mydscvr.ai
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main>
+        <div class="section-header">
+            <span class="section-label">FAQ</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item">
+                <button class="faq-question">
+                    How does Yalla Traffic get traffic information?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Yalla Traffic uses real-time traffic data from TomTom, one of the world's leading
+                        traffic data providers. This data comes from millions of connected devices, traffic
+                        sensors, and official sources to give you accurate, up-to-the-minute traffic conditions
+                        across Dubai and the UAE.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Does the app work without an internet connection?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Yalla Traffic requires an internet connection to provide real-time traffic data
+                        and route calculations. However, your saved places and recent destinations are
+                        stored locally on your device for quick access. We're working on enhanced offline
+                        features for a future update.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Why is location permission required?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Location permission allows us to show traffic conditions around your current
+                        location and calculate accurate routes from where you are. We only access your
+                        location when you're using the app—we don't track you in the background.
+                        You can read more in our <a href="/privacy">Privacy Policy</a>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    How do I save my Home and Work locations?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        From the home screen, tap on the "Home" or "Work" card when it shows "Set location."
+                        You can search for an address, select a recent destination, or use your current location.
+                        Once saved, you'll see live ETAs for these locations right on your dashboard.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    What is the Trip Score?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        The Trip Score is a gamification feature that rates your route choice from 0-100.
+                        You earn points for choosing routes with lighter traffic, leaving at optimal times,
+                        and making smart commute decisions. High scores (80+) trigger a celebration!
+                        It's our way of making traffic planning a little more fun.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Who is the friendly companion character?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        That's your Yalla Companion! Instead of showing boring traffic stats, we created
+                        a friendly character that expresses traffic conditions through emotions. When roads
+                        are clear, it's happy 😊. When traffic is building, it looks a bit concerned 😅.
+                        It makes checking traffic feel more human and less stressful.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Is Yalla Traffic free to use?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Yes! Yalla Traffic is free to download and use. All core features including
+                        live traffic, route comparison, departure time suggestions, and saved places
+                        are available at no cost. We may introduce optional premium features in the
+                        future, but the essential traffic planning tools will always be free.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Does Yalla Traffic provide turn-by-turn navigation?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        No, Yalla Traffic is a trip <em>planning</em> app, not a navigation app.
+                        We help you decide the best time to leave and which route to take before
+                        you start driving. For turn-by-turn directions, you can use Apple Maps,
+                        Google Maps, or Waze. Think of Yalla as your pre-trip assistant!
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    How do I report a bug or suggest a feature?
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        We'd love to hear from you! Email us at
+                        <a href="mailto:support@mydscvr.ai">support@mydscvr.ai</a> with:
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>A description of the bug or feature idea</li>
+                            <li>Your device type and iOS version</li>
+                            <li>Screenshots if applicable</li>
+                        </ul>
+                        We read every message and use your feedback to improve the app.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <a href="/privacy" class="quick-link">
+                <div class="quick-link-icon">🔒</div>
+                <h3>Privacy Policy</h3>
+                <p>How we protect your data</p>
+            </a>
+            <a href="/terms" class="quick-link">
+                <div class="quick-link-icon">📄</div>
+                <h3>Terms of Service</h3>
+                <p>Usage terms and conditions</p>
+            </a>
+            <a href="mailto:support@mydscvr.ai" class="quick-link">
+                <div class="quick-link-icon">💬</div>
+                <h3>Contact Us</h3>
+                <p>Get in touch directly</p>
+            </a>
+        </div>
+
+        <!-- Response Time -->
+        <div class="response-info">
+            <p>
+                📬 Our support team typically responds within <strong>24 hours</strong>.
+                For urgent issues, please include "URGENT" in your email subject.
+            </p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2025 Yalla Traffic. Made with ❤️ in Dubai.</p>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="/support">Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const faqItem = button.parentElement;
+                const isOpen = faqItem.classList.contains('open');
+
+                // Close all other items
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('open');
+                });
+
+                // Toggle current item
+                if (!isOpen) {
+                    faqItem.classList.add('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Yalla Traffic</title>
+    <meta name="description" content="Terms of Service for Yalla Traffic app. Read our terms and conditions for using the app.">
+    <link rel="canonical" href="https://mydscvr.ai/terms">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --coral-orange: #FF6B6B;
+            --coral-dark: #E85555;
+            --soft-teal: #10B981;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --surface-white: #FEFEFE;
+            --surface-cream: #FAF7F2;
+            --shadow-card: 0 8px 32px rgba(31, 41, 55, 0.08);
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            background: var(--surface-cream);
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 107, 0.1);
+            box-shadow: var(--shadow-card);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #FFE4D6 0%, #FFB088 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--coral-orange);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header .last-updated {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .content-card {
+            background: var(--surface-white);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 2rem 0 1rem;
+            padding-top: 1rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #FEF3E2 0%, #FAD6A5 100%);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+
+        .warning-box {
+            background: #FEF2F2;
+            border-left: 4px solid var(--coral-orange);
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .warning-box p {
+            margin-bottom: 0;
+        }
+
+        a {
+            color: var(--coral-orange);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-container p {
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--coral-orange);
+            text-decoration: none;
+        }
+
+        @media (max-width: 640px) {
+            main {
+                padding: 100px 1rem 3rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">🚗</div>
+                <span>Yalla Traffic</span>
+            </a>
+            <a href="/" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="page-header">
+            <h1>Terms of Service</h1>
+            <p class="last-updated">Last Updated: January 10, 2025</p>
+        </div>
+
+        <div class="content-card">
+            <h2>1. Agreement to Terms</h2>
+            <p>
+                By downloading, installing, or using the Yalla Traffic mobile application ("App"),
+                you agree to be bound by these Terms of Service ("Terms"). If you do not agree to
+                these Terms, please do not use the App.
+            </p>
+            <p>
+                These Terms constitute a legally binding agreement between you and Yalla Traffic
+                ("we," "us," or "our") regarding your use of the App.
+            </p>
+
+            <h2>2. Description of Service</h2>
+            <p>
+                Yalla Traffic is a GPS traffic assistant application that provides:
+            </p>
+            <ul>
+                <li>Real-time traffic information for Dubai and the UAE</li>
+                <li>Route planning and comparison</li>
+                <li>Estimated travel times and departure time suggestions</li>
+                <li>Traffic incident notifications</li>
+                <li>Saved destinations and trip planning features</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p>
+                    <strong>Important:</strong> Yalla Traffic is a trip planning tool, not a turn-by-turn
+                    navigation app. The App helps you decide when to leave and which route to take,
+                    but you are responsible for safe driving and following all traffic laws.
+                </p>
+            </div>
+
+            <h2>3. Eligibility</h2>
+            <p>
+                To use Yalla Traffic, you must:
+            </p>
+            <ul>
+                <li>Be at least 13 years of age</li>
+                <li>Have the legal capacity to enter into these Terms</li>
+                <li>Not be prohibited from using the App under applicable law</li>
+            </ul>
+
+            <h2>4. User Responsibilities</h2>
+
+            <h3>4.1 Safe Driving</h3>
+            <div class="warning-box">
+                <p>
+                    <strong>Safety First:</strong> Do not use Yalla Traffic while driving. Set your
+                    destination and check traffic conditions before you start your journey. Always
+                    keep your eyes on the road and hands on the wheel.
+                </p>
+            </div>
+
+            <h3>4.2 Acceptable Use</h3>
+            <p>You agree to use Yalla Traffic only for lawful purposes. You must not:</p>
+            <ul>
+                <li>Use the App while operating a vehicle</li>
+                <li>Rely solely on the App for critical navigation decisions</li>
+                <li>Attempt to reverse engineer, modify, or interfere with the App</li>
+                <li>Use the App to violate any traffic laws or regulations</li>
+                <li>Collect data from other users or the App without authorization</li>
+                <li>Use the App for any commercial purpose without our written consent</li>
+            </ul>
+
+            <h3>4.3 Account Security</h3>
+            <p>
+                If you create an account or save personal preferences, you are responsible for
+                maintaining the security of your device and account credentials.
+            </p>
+
+            <h2>5. Accuracy of Information</h2>
+            <p>
+                While we strive to provide accurate and up-to-date traffic information, we cannot
+                guarantee the accuracy, completeness, or timeliness of any information provided
+                through the App. Traffic conditions change rapidly, and delays in data transmission
+                may occur.
+            </p>
+            <p>
+                <strong>You acknowledge that:</strong>
+            </p>
+            <ul>
+                <li>Traffic data is provided by third-party sources and may contain errors</li>
+                <li>Estimated travel times are approximations and may vary</li>
+                <li>Road conditions, accidents, and other factors may not be immediately reflected</li>
+                <li>You should always use your judgment and observe actual road conditions</li>
+            </ul>
+
+            <h2>6. Intellectual Property</h2>
+            <p>
+                The App and its original content, features, and functionality are owned by Yalla
+                Traffic and are protected by international copyright, trademark, patent, trade
+                secret, and other intellectual property laws.
+            </p>
+            <p>
+                You are granted a limited, non-exclusive, non-transferable license to use the App
+                for personal, non-commercial purposes in accordance with these Terms.
+            </p>
+
+            <h2>7. Third-Party Services</h2>
+            <p>
+                Yalla Traffic uses third-party services including:
+            </p>
+            <ul>
+                <li><strong>TomTom:</strong> For traffic data, routing, and mapping services</li>
+                <li><strong>Apple App Store:</strong> For app distribution and in-app purchases</li>
+            </ul>
+            <p>
+                Your use of these third-party services is subject to their respective terms of
+                service and privacy policies.
+            </p>
+
+            <h2>8. Disclaimer of Warranties</h2>
+            <p>
+                THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
+                EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF
+                MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+            </p>
+            <p>
+                We do not warrant that:
+            </p>
+            <ul>
+                <li>The App will be uninterrupted, secure, or error-free</li>
+                <li>The results obtained from using the App will be accurate or reliable</li>
+                <li>The App will meet your specific requirements</li>
+                <li>Any errors in the App will be corrected</li>
+            </ul>
+
+            <h2>9. Limitation of Liability</h2>
+            <p>
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, YALLA TRAFFIC SHALL NOT BE LIABLE FOR
+                ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING
+                BUT NOT LIMITED TO:
+            </p>
+            <ul>
+                <li>Loss of profits, data, or other intangibles</li>
+                <li>Damages resulting from delays, missed appointments, or travel disruptions</li>
+                <li>Accidents or incidents occurring while using or relying on the App</li>
+                <li>Damages from unauthorized access to your data</li>
+            </ul>
+            <p>
+                Our total liability shall not exceed the amount you paid for the App (if any)
+                in the twelve (12) months preceding the claim.
+            </p>
+
+            <h2>10. Indemnification</h2>
+            <p>
+                You agree to indemnify and hold harmless Yalla Traffic, its officers, directors,
+                employees, and agents from any claims, damages, losses, or expenses arising from:
+            </p>
+            <ul>
+                <li>Your use of the App</li>
+                <li>Your violation of these Terms</li>
+                <li>Your violation of any rights of another party</li>
+                <li>Any content you submit or transmit through the App</li>
+            </ul>
+
+            <h2>11. Modifications to Terms</h2>
+            <p>
+                We reserve the right to modify these Terms at any time. We will notify you of
+                significant changes by:
+            </p>
+            <ul>
+                <li>Posting the updated Terms on our website</li>
+                <li>Updating the "Last Updated" date</li>
+                <li>Sending a notification through the App (for material changes)</li>
+            </ul>
+            <p>
+                Your continued use of the App after changes become effective constitutes your
+                acceptance of the revised Terms.
+            </p>
+
+            <h2>12. Termination</h2>
+            <p>
+                We may terminate or suspend your access to the App at any time, without prior
+                notice, for any reason, including if we believe you have violated these Terms.
+            </p>
+            <p>
+                You may stop using the App at any time by uninstalling it from your device.
+            </p>
+
+            <h2>13. Governing Law</h2>
+            <p>
+                These Terms shall be governed by and construed in accordance with the laws of
+                the United Arab Emirates, without regard to its conflict of law provisions.
+            </p>
+            <p>
+                Any disputes arising from these Terms or the App shall be subject to the
+                exclusive jurisdiction of the courts of Dubai, UAE.
+            </p>
+
+            <h2>14. Severability</h2>
+            <p>
+                If any provision of these Terms is found to be unenforceable or invalid, that
+                provision shall be limited or eliminated to the minimum extent necessary, and
+                the remaining provisions shall remain in full force and effect.
+            </p>
+
+            <h2>15. Contact Information</h2>
+            <p>
+                If you have any questions about these Terms, please contact us:
+            </p>
+            <ul>
+                <li><strong>Email:</strong> <a href="mailto:support@mydscvr.ai">support@mydscvr.ai</a></li>
+                <li><strong>Website:</strong> <a href="https://mydscvr.ai/support">mydscvr.ai/support</a></li>
+            </ul>
+
+            <div class="highlight-box">
+                <p>
+                    By using Yalla Traffic, you acknowledge that you have read, understood, and
+                    agree to be bound by these Terms of Service.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2025 Yalla Traffic. Made with ❤️ in Dubai.</p>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="/support">Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

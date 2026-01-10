@@ -1,0 +1,10 @@
+# Cloudflare Pages Redirects
+# https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Ensure trailing slashes for directory-style URLs
+/privacy    /privacy/    301
+/terms      /terms/      301
+/support    /support/    301
+
+# Legacy redirects (if you had old URLs)
+# /old-page  /new-page   301
