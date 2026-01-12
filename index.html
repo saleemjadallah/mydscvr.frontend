@@ -436,141 +436,17 @@
         }
 
         .phone-screen {
-            background: var(--gradient-morning);
             border-radius: 40px;
             overflow: hidden;
-            aspect-ratio: 9/19;
+            aspect-ratio: 9/19.5;
             position: relative;
         }
 
-        .phone-notch {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 28px;
-            background: #1A1A1A;
-            border-radius: 20px;
-            z-index: 10;
-        }
-
-        .phone-content {
-            padding: 60px 20px 20px;
+        .phone-screen img {
+            width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .phone-greeting {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .phone-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: var(--space-lg);
-        }
-
-        .companion-bubble {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: var(--space-md);
-            box-shadow: var(--shadow-card);
-            display: flex;
-            gap: var(--space-md);
-            align-items: center;
-            margin-bottom: var(--space-md);
-            animation: slideIn 0.5s ease-out 0.5s both;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .companion-avatar {
-            width: 48px;
-            height: 48px;
-            background: var(--gradient-sunset);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .companion-text {
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .companion-mood {
-            font-size: 0.75rem;
-            color: var(--soft-teal);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .companion-mood::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--soft-teal);
-            border-radius: 50%;
-        }
-
-        .destination-cards {
-            display: flex;
-            gap: var(--space-sm);
-            margin-top: auto;
-        }
-
-        .dest-card {
-            flex: 1;
-            background: white;
-            border-radius: var(--radius-md);
-            padding: var(--space-md);
-            box-shadow: var(--shadow-soft);
-            animation: slideIn 0.5s ease-out calc(0.7s + var(--delay, 0s)) both;
-        }
-
-        .dest-card:nth-child(2) {
-            --delay: 0.1s;
-        }
-
-        .dest-emoji {
-            font-size: 1.25rem;
-            margin-bottom: var(--space-xs);
-        }
-
-        .dest-name {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .dest-eta {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--soft-teal);
-        }
-
-        .dest-status {
-            font-size: 0.625rem;
-            color: var(--text-muted);
+            object-fit: cover;
+            object-position: top;
         }
 
         /* Floating elements around phone */
@@ -1199,34 +1075,7 @@
                     </div>
                     <div class="phone-frame">
                         <div class="phone-screen">
-                            <div class="phone-notch"></div>
-                            <div class="phone-content">
-                                <p class="phone-greeting">Good morning, Sarah 👋</p>
-                                <h3 class="phone-title">Your Commute Today</h3>
-
-                                <div class="companion-bubble">
-                                    <div class="companion-avatar">😊</div>
-                                    <div>
-                                        <p class="companion-text">Roads are smooth today!</p>
-                                        <p class="companion-mood">Traffic is light</p>
-                                    </div>
-                                </div>
-
-                                <div class="destination-cards">
-                                    <div class="dest-card">
-                                        <div class="dest-emoji">💼</div>
-                                        <p class="dest-name">Work</p>
-                                        <p class="dest-eta">18 min</p>
-                                        <p class="dest-status">5 min faster ↓</p>
-                                    </div>
-                                    <div class="dest-card">
-                                        <div class="dest-emoji">🏠</div>
-                                        <p class="dest-name">Home</p>
-                                        <p class="dest-eta">22 min</p>
-                                        <p class="dest-status">As usual</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <img src="/app-screenshot.jpg" alt="Yalla Traffic App Screenshot">
                         </div>
                     </div>
                 </div>
